@@ -64,7 +64,13 @@ export function BeeLogo({ className = "", width = 32, height = 32 }) {
       src="/logo.png" 
       alt="HiveFive Logo" 
       className={className}
-      style={{ width: `${width}px`, height: `${height}px`, objectFit: 'contain' }}
+      style={{ 
+        width: `${width}px`, 
+        height: `${height}px`, 
+        objectFit: 'contain',
+        backgroundColor: 'transparent',
+        background: 'transparent'
+      }}
     />
   );
 }
