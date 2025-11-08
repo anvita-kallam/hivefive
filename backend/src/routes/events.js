@@ -110,7 +110,7 @@ router.post('/:id/swipe', authenticateToken, async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    const { swipeDirection, responseTime, emotionData, gpsData } = req.body;
+    const { swipeDirection, responseTime, emotionData, reactionMediaId, gpsData } = req.body;
 
     // Validate swipeDirection
     if (!swipeDirection || (swipeDirection !== 'left' && swipeDirection !== 'right')) {

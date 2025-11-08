@@ -5,19 +5,71 @@ import api from '../config/api';
 import { format } from 'date-fns';
 import { Calendar, MapPin, X, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import ReactionRecorder from './ReactionRecorder';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { storage } from '../config/firebase';
+import { useAuthStore } from '../store/authStore';
 
 function EventSwipe({ event, onSwiped, fullScreen = false }) {
   const [swiped, setSwiped] = useState(false);
   const [startTime] = useState(Date.now());
+  const [showReaction, setShowReaction] = useState(false);
+  const [reactionData, setReactionData] = useState(null);
   const swipeRef = useRef(null);
   const queryClient = useQueryClient();
+  const { user } = useAuthStore();
 
   const swipeMutation = useMutation({
-    mutationFn: async ({ direction, responseTime }) => {
+    mutationFn: async ({ direction, responseTime, emotionData, reactionFile }) => {
+      // If we have a reaction file, upload it first
+      let reactionMediaId = null;
+      if (reactionFile && emotionData) {
+        try {
+          // Upload reaction video to Firebase Storage
+          const { auth } = await import('../config/firebase');
+          const currentUser = auth.currentUser;
+          if (!currentUser) throw new Error('Not authenticated');
+
+          const token = await currentUser.getIdToken(true);
+          const sanitizedFileName = reactionFile.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+          const fileRef = ref(storage, `reactions/${event.hiveID}/${event._id}/${Date.now()}_${sanitizedFileName}`);
+          
+          const metadata = {
+            contentType: reactionFile.type || 'video/webm',
+            customMetadata: {
+              uploadedBy: currentUser.uid,
+              hiveId: event.hiveID,
+              eventId: event._id,
+              swipeDirection: direction,
+              uploadedAt: new Date().toISOString()
+            }
+          };
+
+          await uploadBytes(fileRef, reactionFile, metadata);
+          const fileURL = await getDownloadURL(fileRef);
+
+          // Upload reaction metadata to backend
+          const mediaResponse = await api.post('/media', {
+            eventID: event._id,
+            fileURL,
+            fileType: 'video',
+            caption: `Reaction: ${direction === 'right' ? 'Accepted' : 'Declined'}`,
+            facialSentiment: emotionData,
+            isReaction: true
+          });
+
+          reactionMediaId = mediaResponse.data._id;
+        } catch (error) {
+          console.error('Error uploading reaction:', error);
+          // Continue with swipe even if reaction upload fails
+        }
+      }
+
       return api.post(`/events/${event._id}/swipe`, {
         swipeDirection: direction,
         responseTime,
-        emotionData: null, // TODO: Add emotion detection from camera
+        emotionData: emotionData || null,
+        reactionMediaId: reactionMediaId || null,
         gpsData: null // TODO: Add GPS data
       });
     },
@@ -26,7 +78,9 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
       queryClient.invalidateQueries(['allEvents']);
       queryClient.invalidateQueries(['hive', event.hiveID]);
       queryClient.invalidateQueries(['hives']);
+      queryClient.invalidateQueries(['media']);
       setSwiped(true);
+      setShowReaction(false);
       // Call onSwiped callback if provided (for full screen mode)
       if (onSwiped) {
         // Wait a bit to show the success state
@@ -37,15 +91,36 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
     }
   });
 
+  const handleReactionRecorded = (reaction) => {
+    setReactionData(reaction);
+    // Auto-submit swipe after reaction is recorded
+    const responseTime = Date.now() - startTime;
+    swipeMutation.mutate({
+      direction: reaction.swipeDirection,
+      responseTime,
+      emotionData: reaction.emotion,
+      reactionFile: reaction.file
+    });
+  };
+
   const handleSwipe = (direction) => {
     if (swiped) return;
     
+    // For full screen mode, show reaction recorder
+    if (fullScreen) {
+      setShowReaction(true);
+      return;
+    }
+    
+    // For non-full screen, proceed without reaction
     const responseTime = Date.now() - startTime;
     const swipeDirection = direction === 'right' ? 'right' : 'left';
     
     swipeMutation.mutate({
       direction: swipeDirection,
-      responseTime
+      responseTime,
+      emotionData: null,
+      reactionFile: null
     });
   };
 
@@ -77,6 +152,19 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
   const descriptionClass = fullScreen
     ? "text-xl md:text-2xl text-[#6B4E00] mb-6"
     : "text-[#6B4E00]";
+
+  // Show reaction recorder overlay in full screen mode
+  if (showReaction && fullScreen && reactionData?.swipeDirection) {
+    return (
+      <div className={containerClass}>
+        <ReactionRecorder
+          onReactionRecorded={handleReactionRecorded}
+          eventId={event._id}
+          swipeDirection={reactionData.swipeDirection}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className={containerClass}>
@@ -125,14 +213,28 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
               {/* Action Buttons */}
               <div className={`flex gap-4 md:gap-6 mt-auto ${fullScreen ? 'mt-8' : ''}`}>
                 <button
-                  onClick={() => handleSwipe('left')}
+                  onClick={() => {
+                    if (fullScreen) {
+                      setReactionData({ swipeDirection: 'left' });
+                      setShowReaction(true);
+                    } else {
+                      handleSwipe('left');
+                    }
+                  }}
                   className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 md:px-8 md:py-4 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 font-medium transition-colors border border-red-300 ${fullScreen ? 'text-xl md:text-2xl' : ''}`}
                 >
                   <X className={fullScreen ? 'w-6 h-6 md:w-8 md:h-8' : 'w-5 h-5'} />
                   Decline
                 </button>
                 <button
-                  onClick={() => handleSwipe('right')}
+                  onClick={() => {
+                    if (fullScreen) {
+                      setReactionData({ swipeDirection: 'right' });
+                      setShowReaction(true);
+                    } else {
+                      handleSwipe('right');
+                    }
+                  }}
                   className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 md:px-8 md:py-4 bg-[rgba(193,125,58,0.8)] hover:bg-[rgba(193,125,58,0.9)] text-[#2D1B00] rounded-lg font-medium transition-colors border border-[#2D1B00]/20 backdrop-blur-sm ${fullScreen ? 'text-xl md:text-2xl' : ''}`}
                 >
                   <Check className={fullScreen ? 'w-6 h-6 md:w-8 md:h-8' : 'w-5 h-5'} />

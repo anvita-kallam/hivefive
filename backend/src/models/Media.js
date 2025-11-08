@@ -26,7 +26,16 @@ const mediaSchema = new mongoose.Schema({
     required: true
   },
   facialSentiment: {
-    type: Object, // Results from Vertex AI Vision analysis
+    type: Object, // Results from Vertex AI Vision analysis or face-api.js
+    default: null
+  },
+  isReaction: {
+    type: Boolean,
+    default: false
+  },
+  swipeDirection: {
+    type: String,
+    enum: ['left', 'right'],
     default: null
   },
   caption: {

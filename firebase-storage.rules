@@ -31,6 +31,20 @@ service firebase.storage {
       allow delete: if request.auth != null;
     }
     
+    // Reaction videos - users can upload reactions to events
+    match /reactions/{hiveId}/{eventId}/{fileName} {
+      // Allow read access to all authenticated users
+      allow read: if request.auth != null;
+      
+      // Allow write access to authenticated users (hive membership checked in backend)
+      allow write: if request.auth != null
+                   && request.resource.size < 10 * 1024 * 1024 // 10MB limit for reaction videos
+                   && request.resource.contentType.matches('video/.*');
+      
+      // Allow delete only by uploader (checked in backend)
+      allow delete: if request.auth != null;
+    }
+    
     // Default deny all other paths
     match /{allPaths=**} {
       allow read, write: if false;

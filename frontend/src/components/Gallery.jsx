@@ -209,34 +209,59 @@ function Gallery({ hiveId, eventId, onClose }) {
                 </div>
               ) : (
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {media.map((item) => (
-                    <motion.div
-                      key={item._id}
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      className="relative group cursor-pointer"
-                      onClick={() => setSelectedMedia(item)}
-                    >
-                      {item.fileType === 'image' || item.fileType === 'livephoto' ? (
-                        <img
-                          src={item.fileURL}
-                          alt={item.caption || 'Gallery item'}
-                          className="w-full h-48 object-cover rounded-lg"
-                        />
-                      ) : (
-                        <video
-                          src={item.fileURL}
-                          className="w-full h-48 object-cover rounded-lg"
-                          controls
-                        />
-                      )}
-                      <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 rounded-lg transition-opacity flex items-center justify-center">
-                        <p className="text-white opacity-0 group-hover:opacity-100 text-sm px-2 text-center">
-                          {item.caption || 'No caption'}
-                        </p>
-                      </div>
-                    </motion.div>
-                  ))}
+                  {media.map((item) => {
+                    const emotion = item.facialSentiment;
+                    const emotionEmoji = emotion?.dominant === 'happy' ? '😊' : 
+                                        emotion?.dominant === 'sad' ? '😢' : 
+                                        emotion?.dominant === 'angry' ? '😠' : 
+                                        emotion?.dominant === 'surprised' ? '😲' : 
+                                        emotion?.dominant === 'fearful' ? '😨' : 
+                                        emotion?.dominant === 'disgusted' ? '🤢' : '😐';
+                    
+                    return (
+                      <motion.div
+                        key={item._id}
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="relative group cursor-pointer"
+                        onClick={() => setSelectedMedia(item)}
+                      >
+                        {item.fileType === 'image' || item.fileType === 'livephoto' ? (
+                          <img
+                            src={item.fileURL}
+                            alt={item.caption || 'Gallery item'}
+                            className="w-full h-48 object-cover rounded-lg"
+                          />
+                        ) : (
+                          <video
+                            src={item.fileURL}
+                            className="w-full h-48 object-cover rounded-lg"
+                            controls
+                          />
+                        )}
+                        
+                        {/* Reaction badge */}
+                        {item.isReaction && (
+                          <div className="absolute top-2 right-2 bg-yellow-400 text-black px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+                            {emotionEmoji} Reaction
+                          </div>
+                        )}
+                        
+                        {/* Emotion indicator */}
+                        {emotion && (
+                          <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 text-white px-2 py-1 rounded text-xs">
+                            {emotionEmoji} {emotion.dominant ? emotion.dominant.charAt(0).toUpperCase() + emotion.dominant.slice(1) : 'Neutral'}
+                          </div>
+                        )}
+                        
+                        <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 rounded-lg transition-opacity flex items-center justify-center">
+                          <p className="text-white opacity-0 group-hover:opacity-100 text-sm px-2 text-center">
+                            {item.caption || 'No caption'}
+                          </p>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -286,10 +311,49 @@ function Gallery({ hiveId, eventId, onClose }) {
               
               <div className="p-6">
                 <div className="mb-4">
-                  <p className="text-gray-900 font-medium">{selectedMedia.caption}</p>
+                  <div className="flex items-center gap-2 mb-2">
+                    <p className="text-gray-900 font-medium">{selectedMedia.caption}</p>
+                    {selectedMedia.isReaction && (
+                      <span className="bg-yellow-400 text-black px-2 py-1 rounded-full text-xs font-bold">
+                        🎬 Reaction Video
+                      </span>
+                    )}
+                  </div>
                   <p className="text-sm text-gray-500 mt-1">
                     By {selectedMedia.uploaderID?.name} • {format(new Date(selectedMedia.timestamp), 'MMM d, yyyy')}
                   </p>
+                  
+                  {/* Emotion display */}
+                  {selectedMedia.facialSentiment && (
+                    <div className="mt-3 p-3 bg-gray-50 rounded-lg">
+                      <p className="text-sm font-medium text-gray-900 mb-1">Detected Emotion:</p>
+                      <div className="flex items-center gap-2">
+                        <span className="text-2xl">
+                          {selectedMedia.facialSentiment.dominant === 'happy' ? '😊' : 
+                           selectedMedia.facialSentiment.dominant === 'sad' ? '😢' : 
+                           selectedMedia.facialSentiment.dominant === 'angry' ? '😠' : 
+                           selectedMedia.facialSentiment.dominant === 'surprised' ? '😲' : 
+                           selectedMedia.facialSentiment.dominant === 'fearful' ? '😨' : 
+                           selectedMedia.facialSentiment.dominant === 'disgusted' ? '🤢' : '😐'}
+                        </span>
+                        <span className="text-gray-700 capitalize">
+                          {selectedMedia.facialSentiment.dominant || 'Neutral'}
+                          {selectedMedia.facialSentiment.confidence && (
+                            <span className="text-gray-500 ml-1">
+                              ({Math.round(selectedMedia.facialSentiment.confidence * 100)}% confidence)
+                            </span>
+                          )}
+                        </span>
+                      </div>
+                      {selectedMedia.facialSentiment.sentiment !== undefined && (
+                        <p className="text-xs text-gray-600 mt-1">
+                          Sentiment: {selectedMedia.facialSentiment.sentiment > 0 ? 'Positive' : 
+                                     selectedMedia.facialSentiment.sentiment < 0 ? 'Negative' : 'Neutral'} 
+                          ({selectedMedia.facialSentiment.sentiment > 0 ? '+' : ''}{selectedMedia.facialSentiment.sentiment.toFixed(2)})
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 {/* Reviews */}

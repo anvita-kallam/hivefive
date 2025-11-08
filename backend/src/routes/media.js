@@ -39,15 +39,24 @@ router.get('/hive/:hiveId', authenticateToken, async (req, res) => {
 router.post('/', authenticateToken, async (req, res) => {
   try {
     const user = await User.findOne({ email: req.user.email });
-    const { eventID, fileURL, fileType, caption } = req.body;
+    const { eventID, fileURL, fileType, caption, facialSentiment, isReaction, swipeDirection } = req.body;
 
     const event = await Event.findById(eventID);
     if (!event) {
       return res.status(404).json({ error: 'Event not found' });
     }
 
-    // Analyze media sentiment using Vertex AI Vision
-    const facialSentiment = await analyzeMediaSentiment(fileURL, fileType);
+    // For reactions, use the provided facialSentiment from face-api.js
+    // For other media, analyze using Vertex AI Vision if no sentiment provided
+    let finalSentiment = facialSentiment;
+    if (!finalSentiment && !isReaction) {
+      try {
+        finalSentiment = await analyzeMediaSentiment(fileURL, fileType);
+      } catch (error) {
+        console.error('Error analyzing media sentiment:', error);
+        // Continue without sentiment analysis
+      }
+    }
 
     const media = new Media({
       eventID,
@@ -56,14 +65,17 @@ router.post('/', authenticateToken, async (req, res) => {
       fileURL,
       fileType,
       caption,
-      facialSentiment
+      facialSentiment: finalSentiment,
+      isReaction: isReaction || false,
+      swipeDirection: swipeDirection || null
     });
 
     await media.save();
 
     // Update event sentiment scores
-    if (facialSentiment && facialSentiment.overallSentiment) {
-      event.sentimentScores.set(user._id.toString(), facialSentiment.overallSentiment);
+    if (finalSentiment) {
+      const sentimentScore = finalSentiment.sentiment || finalSentiment.overallSentiment || 0;
+      event.sentimentScores.set(user._id.toString(), sentimentScore);
       await event.save();
     }
 
