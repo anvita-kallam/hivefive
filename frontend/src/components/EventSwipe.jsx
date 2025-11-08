@@ -111,6 +111,8 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
     },
     onSuccess: (data) => {
       console.log('✅ Swipe successful, invalidating queries...');
+      // Ensure swiped state is set
+      setSwiped(true);
       // Invalidate all related queries to refresh data
       queryClient.invalidateQueries(['events']);
       queryClient.invalidateQueries(['allEvents']);
@@ -122,8 +124,7 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
       queryClient.invalidateQueries(['media']);
       // Also invalidate the event query to get updated swipe logs
       queryClient.invalidateQueries(['event', event._id]);
-      setSwiped(true);
-      setShowReaction(false);
+      
       // Call onSwiped callback if provided (for full screen mode)
       if (onSwiped) {
         // Wait a bit to show the success state
@@ -138,7 +139,10 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
   });
 
   const handleReactionRecorded = (reaction) => {
+    console.log('✅ Reaction recorded, submitting swipe:', reaction);
     setReactionData(reaction);
+    // Mark as swiped immediately to prevent re-rendering the card
+    setSwiped(true);
     // Auto-submit swipe after reaction is recorded
     const responseTime = Date.now() - startTime;
     swipeMutation.mutate({
@@ -150,19 +154,34 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
   };
 
   const handleSwipe = async (direction) => {
-    if (swiped) return;
+    if (swiped) {
+      console.log('⚠️ Already swiped, ignoring');
+      return;
+    }
     
     // For full screen mode, stop recording and save with swipe direction
     if (fullScreen && recorderRef.current) {
       const swipeDirection = direction === 'right' ? 'right' : 'left';
       console.log('🛑 Swipe detected, stopping recording with direction:', swipeDirection);
       
+      // Mark as swiped immediately to prevent duplicate interactions
+      setSwiped(true);
+      
       // Stop recording with the swipe direction
       // The recording will process and call handleReactionRecorded when done
-      recorderRef.current.stopRecording(swipeDirection);
-      
-      // Mark as swiped to prevent duplicate swipes
-      setSwiped(true);
+      try {
+        recorderRef.current.stopRecording(swipeDirection);
+      } catch (error) {
+        console.error('Error stopping recording:', error);
+        // If recording fails, still submit the swipe
+        const responseTime = Date.now() - startTime;
+        swipeMutation.mutate({
+          direction: swipeDirection,
+          responseTime,
+          emotionData: null,
+          reactionFile: null
+        });
+      }
       return; // Don't proceed with swipe yet, wait for recording to complete
     }
     
@@ -170,6 +189,7 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
     const responseTime = Date.now() - startTime;
     const swipeDirection = direction === 'right' ? 'right' : 'left';
     
+    setSwiped(true);
     swipeMutation.mutate({
       direction: swipeDirection,
       responseTime,
@@ -299,7 +319,30 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
   );
 
   // For full screen mode, show recorder with card overlay
-  if (fullScreen && !swiped) {
+  if (fullScreen) {
+    // If swiped, show success message
+    if (swiped) {
+      return (
+        <div className={containerClass}>
+          <div className="w-full h-full flex items-center justify-center">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="honey-card p-8 md:p-12 rounded-3xl text-center max-w-md"
+            >
+              <h3 className="text-3xl md:text-4xl font-medium text-[#2D1B00] mb-4">
+                Thanks for your response! 🎉
+              </h3>
+              <p className="text-xl text-[#6B4E00]">
+                Your reaction has been recorded
+              </p>
+            </motion.div>
+          </div>
+        </div>
+      );
+    }
+    
+    // Show card with recording
     return (
       <div className={containerClass}>
         <ReactionRecorder
@@ -319,6 +362,9 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
                   onCardLeftScreen={(dir) => {
                     // Handle card leaving screen
                     console.log('Card left screen:', dir);
+                    if (!swiped) {
+                      handleSwipe(dir);
+                    }
                   }}
                 >
                   <div className="relative w-full h-full">
