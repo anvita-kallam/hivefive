@@ -75,9 +75,9 @@ try {
       } else {
         try {
           const genAI = new GoogleGenerativeAI(apiKey);
-          // Try gemini-1.5-flash first (most reliable via API key)
-          // Note: gemini-2.0-flash may not be available via API key yet
-          const modelName = 'gemini-1.5-flash';
+          // Use gemini-pro (most widely available via API key)
+          // The @google/generative-ai SDK handles the correct endpoint automatically
+          const modelName = 'gemini-pro';
           generativeModel = genAI.getGenerativeModel({
             model: modelName,
             generationConfig: {
@@ -97,7 +97,7 @@ try {
             console.log('✅ Gemini API test successful - ready to use!');
           }).catch((testError) => {
             console.warn('⚠️ Gemini API test failed:', testError.message);
-            console.warn('⚠️ API calls may fail, but will fall back to enhanced mock responses');
+            console.warn('⚠️ Will attempt to use API, but will fall back to enhanced mock responses on error');
           });
         } catch (initError) {
           console.error('❌ Failed to initialize Gemini API:', initError.message);
