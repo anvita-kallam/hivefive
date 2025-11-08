@@ -1,0 +1,13 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // If you plan to use Firestore in the future, add rules here
+    // For now, HiveFive uses MongoDB, so these rules are placeholders
+    
+    match /{document=**} {
+      allow read, write: if false; // Deny all by default
+    }
+  }
+}
+
