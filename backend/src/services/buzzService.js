@@ -73,20 +73,37 @@ try {
         generativeModel = null;
         useApiKey = false;
       } else {
-        const genAI = new GoogleGenerativeAI(apiKey);
-        const modelName = 'gemini-1.5-flash';
-        generativeModel = genAI.getGenerativeModel({
-          model: modelName,
-          generationConfig: {
-            maxOutputTokens: 1024,
-            temperature: 0.7,
-            topP: 0.95,
-            topK: 40,
-          },
-        });
-        useApiKey = true;
-        useVertexAI = false;
-        console.log(`✅ Gemini API initialized with API key (${modelName})`);
+        try {
+          const genAI = new GoogleGenerativeAI(apiKey);
+          // Try gemini-1.5-flash first (most reliable via API key)
+          // Note: gemini-2.0-flash may not be available via API key yet
+          const modelName = 'gemini-1.5-flash';
+          generativeModel = genAI.getGenerativeModel({
+            model: modelName,
+            generationConfig: {
+              maxOutputTokens: 1024,
+              temperature: 0.7,
+              topP: 0.95,
+              topK: 40,
+            },
+          });
+          useApiKey = true;
+          useVertexAI = false;
+          console.log(`✅ Gemini API initialized with API key (${modelName})`);
+          
+          // Test the API with a simple call to verify it works
+          console.log('🧪 Testing Gemini API connection...');
+          generativeModel.generateContent('Test').then(() => {
+            console.log('✅ Gemini API test successful - ready to use!');
+          }).catch((testError) => {
+            console.warn('⚠️ Gemini API test failed:', testError.message);
+            console.warn('⚠️ API calls may fail, but will fall back to enhanced mock responses');
+          });
+        } catch (initError) {
+          console.error('❌ Failed to initialize Gemini API:', initError.message);
+          generativeModel = null;
+          useApiKey = false;
+        }
       }
     } catch (initError) {
       console.error('❌ Failed to initialize Gemini API:', initError.message);
