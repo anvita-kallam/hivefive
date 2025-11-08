@@ -159,18 +159,18 @@ function FullScreenEventInvites() {
     setIsOpen(false);
   };
 
-  // Don't render if modal is closed
-  if (!isOpen) {
+  // Don't render if modal is closed or just closed
+  if (!isOpen || justClosed) {
     return null;
   }
   
-  // Don't render if no pending events (but allow modal to stay open briefly during state update)
-  if (pendingEvents.length === 0 && !justClosed) {
+  // Don't render if no pending events
+  if (!pendingEvents || pendingEvents.length === 0) {
     return null;
   }
   
-  // If we just closed but still have events (edge case), don't show
-  if (justClosed) {
+  // Safety check - don't render if current event doesn't exist
+  if (!pendingEvents[currentEventIndex]) {
     return null;
   }
 
@@ -179,12 +179,14 @@ function FullScreenEventInvites() {
   const totalEvents = pendingEvents.length;
 
   return (
-    <AnimatePresence>
-      {isOpen && (
+    <AnimatePresence mode="wait">
+      {isOpen && !justClosed && pendingEvents.length > 0 && (
             <motion.div
+              key={`modal-${currentEvent._id}`}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
               className="fixed inset-0 z-50 bg-[#2D1B00] bg-opacity-95 flex items-center justify-center"
             >
           <div className="w-full h-full flex flex-col items-center justify-center p-4 relative">
