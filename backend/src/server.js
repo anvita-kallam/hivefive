@@ -19,6 +19,11 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Health check (before routes)
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', message: 'HiveFive API is running' });
+});
+
 // Database connection
 connectDB();
 
@@ -29,11 +34,6 @@ app.use('/api/hives', hiveRoutes);
 app.use('/api/events', eventRoutes);
 app.use('/api/media', mediaRoutes);
 app.use('/api/calendar', calendarRoutes);
-
-// Health check
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', message: 'HiveFive API is running' });
-});
 
 // Error handling middleware
 app.use((err, req, res, next) => {
