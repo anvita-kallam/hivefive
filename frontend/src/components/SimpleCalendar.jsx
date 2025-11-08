@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../config/api';
-import { Calendar, Plus, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { Calendar, Plus, ChevronLeft, ChevronRight, X, Bee } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, startOfWeek, endOfWeek } from 'date-fns';
 
@@ -120,11 +120,12 @@ function SimpleCalendar() {
   const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
+    <div className="honey-card p-6">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
-          <Calendar className="w-6 h-6 text-primary-600" />
-          <h2 className="text-2xl font-bold text-gray-900">My Calendar</h2>
+          <Bee className="w-6 h-6 text-honey-brown bee-icon" />
+          <Calendar className="w-6 h-6 text-honey-amber" />
+          <h2 className="text-2xl font-bold honey-text text-honey-brown">My Calendar</h2>
         </div>
         <button
           onClick={() => {
@@ -132,9 +133,10 @@ function SimpleCalendar() {
             setEditingEvent(null);
             setShowAddModal(true);
           }}
-          className="flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+          className="honey-drop-button buzz-hover flex items-center gap-2"
         >
           <Plus className="w-5 h-5" />
+          <Bee className="w-4 h-4" />
           Add Event
         </button>
       </div>

@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../config/api';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
-import { ArrowLeft, Calendar, MapPin, Users, Plus, LogOut as LeaveIcon, Check, X } from 'lucide-react';
+import { ArrowLeft, Calendar, MapPin, Users, Plus, LogOut as LeaveIcon, Check, X, Bee } from 'lucide-react';
 import EventSwipe from '../components/EventSwipe';
 import Gallery from '../components/Gallery';
 import CreateEventModal from '../components/CreateEventModal';
@@ -143,27 +143,28 @@ function HiveDashboard() {
   }) || [];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-primary-100">
+    <div className="min-h-screen honey-gradient-bg honeycomb-pattern">
       {/* Header */}
-      <header className="bg-white shadow-sm">
+      <header className="bg-gradient-to-r from-honey-light via-honey-gold to-honey-amber shadow-lg border-b-4 border-honey-brown">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <button
                 onClick={() => navigate('/dashboard')}
-                className="p-2 hover:bg-gray-100 rounded-lg"
+                className="buzz-hover p-2 bg-honey-gold hover:bg-honey-amber rounded-lg border-2 border-honey-brown"
               >
-                <ArrowLeft className="w-5 h-5" />
+                <ArrowLeft className="w-5 h-5 text-honey-brown" />
               </button>
+              <Bee className="w-6 h-6 text-honey-brown bee-icon" />
               <div>
-                <h1 className="text-2xl font-bold text-primary-900">{hive.name}</h1>
-                <p className="text-sm text-gray-600">{hive.members?.length || 0} members</p>
+                <h1 className="text-2xl font-bold honey-text text-honey-brown">{hive.name}</h1>
+                <p className="text-sm text-honey-amber-dark font-semibold">{hive.members?.length || 0} members</p>
               </div>
             </div>
             <button
               onClick={handleLeaveHive}
               disabled={leaveHiveMutation.isLoading}
-              className="flex items-center gap-2 px-4 py-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+              className="buzz-hover flex items-center gap-2 px-4 py-2 bg-red-100 text-red-700 hover:bg-red-200 rounded-lg transition-colors disabled:opacity-50 border-2 border-red-300 font-semibold"
             >
               <LeaveIcon className="w-5 h-5" />
               Leave Hive
@@ -176,7 +177,10 @@ function HiveDashboard() {
         {/* Pending Events Swipe */}
         {pendingEvents.length > 0 && (
           <section className="mb-8">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Pending Events</h2>
+            <div className="flex items-center gap-3 mb-4">
+              <Bee className="w-6 h-6 text-honey-brown bee-icon" />
+              <h2 className="text-2xl font-bold honey-text text-honey-brown">Pending Events</h2>
+            </div>
             <div className="flex gap-4 overflow-x-auto pb-4">
               {pendingEvents.map((event) => (
                 <EventSwipe key={event._id} event={event} />
@@ -189,14 +193,15 @@ function HiveDashboard() {
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
             {/* Actions */}
-            <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="honey-card p-6">
               <button
                 onClick={() => setShowCreateEvent(true)}
-                className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+                className="wax-seal-button buzz-hover mx-auto flex items-center justify-center gap-2"
+                title="Create New Hive Event"
               >
-                <Plus className="w-5 h-5" />
-                Create New Hive Event
+                <Plus className="w-8 h-8" />
               </button>
+              <p className="text-center mt-4 text-honey-brown font-bold honey-text">Create New Hive Event</p>
             </div>
 
             {/* Event Timeline */}

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import api from '../config/api';
-import { Calendar, Check } from 'lucide-react';
+import { Calendar, Check, Bee } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 function CalendarSync() {
@@ -55,14 +55,15 @@ function CalendarSync() {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white rounded-lg shadow-md p-6"
+      className="honey-card p-6"
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Calendar className="w-6 h-6 text-primary-600" />
+          <Bee className="w-6 h-6 text-honey-brown bee-icon" />
+          <Calendar className="w-6 h-6 text-honey-amber" />
           <div>
-            <h3 className="font-semibold text-gray-900">Google Calendar Sync</h3>
-            <p className="text-sm text-gray-600">
+            <h3 className="font-bold honey-text text-honey-brown">Google Calendar Sync</h3>
+            <p className="text-sm text-honey-amber-dark font-medium">
               {isConnected 
                 ? 'Connected - Your availability will be used for event planning'
                 : 'Connect to sync your calendar. Note: Requires Google app verification. Use the calendar below to manage events in the meantime.'}
@@ -73,13 +74,13 @@ function CalendarSync() {
         {isConnected ? (
           <div className="flex items-center gap-2 text-green-600">
             <Check className="w-5 h-5" />
-            <span className="font-medium">Connected</span>
+            <span className="font-bold">Connected</span>
           </div>
         ) : (
           <button
             onClick={handleConnectCalendar}
             disabled={connecting}
-            className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+            className="buzz-hover px-4 py-2 bg-honey-gold text-honey-brown rounded-lg hover:bg-honey-amber disabled:bg-gray-400 disabled:cursor-not-allowed font-semibold shadow-honey border-2 border-honey-brown"
           >
             {connecting ? 'Connecting...' : 'Connect Calendar'}
           </button>

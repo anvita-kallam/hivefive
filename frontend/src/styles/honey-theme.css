@@ -1,0 +1,408 @@
+/* Honey and Hive Theme Styles */
+
+/* Color Variables */
+:root {
+  --honey-gold: #FFC30B;
+  --honey-amber: #FF8C00;
+  --honey-brown: #4A2C2A;
+  --honey-light: #FFF8DC;
+  --honey-dark: #8B4513;
+  --honey-gradient-start: #FFF8DC;
+  --honey-gradient-end: #FFD700;
+  --honey-amber-dark: #D2691E;
+}
+
+/* Honey Drip Text Animation */
+@keyframes honeyDrip {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(2px);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateY(4px);
+    opacity: 0.85;
+  }
+}
+
+@keyframes honeyDripForm {
+  0%, 100% {
+    transform: translateY(0) scaleY(1);
+  }
+  25% {
+    transform: translateY(1px) scaleY(1.05);
+  }
+  50% {
+    transform: translateY(2px) scaleY(1.1);
+  }
+  75% {
+    transform: translateY(1px) scaleY(1.05);
+  }
+}
+
+/* Buzzing Animation */
+@keyframes buzz {
+  0%, 100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  10% {
+    transform: translate(-2px, 1px) rotate(-0.5deg);
+  }
+  20% {
+    transform: translate(2px, -1px) rotate(0.5deg);
+  }
+  30% {
+    transform: translate(-1px, 2px) rotate(-0.5deg);
+  }
+  40% {
+    transform: translate(1px, -2px) rotate(0.5deg);
+  }
+  50% {
+    transform: translate(-2px, 1px) rotate(-0.5deg);
+  }
+  60% {
+    transform: translate(2px, -1px) rotate(0.5deg);
+  }
+  70% {
+    transform: translate(-1px, 2px) rotate(-0.5deg);
+  }
+  80% {
+    transform: translate(1px, -2px) rotate(0.5deg);
+  }
+  90% {
+    transform: translate(-2px, 1px) rotate(-0.5deg);
+  }
+}
+
+/* Pulsing Glow Animation */
+@keyframes honeyPulse {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(255, 195, 11, 0.5),
+                0 0 20px rgba(255, 195, 11, 0.3),
+                0 0 30px rgba(255, 195, 11, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(255, 195, 11, 0.8),
+                0 0 40px rgba(255, 195, 11, 0.5),
+                0 0 60px rgba(255, 195, 11, 0.3);
+  }
+}
+
+/* Honey Text Effect */
+.honey-text {
+  color: var(--honey-brown);
+  font-weight: 600;
+  text-shadow: 
+    0 1px 2px rgba(255, 195, 11, 0.3),
+    0 2px 4px rgba(255, 140, 0, 0.2);
+  position: relative;
+  display: inline-block;
+  background: linear-gradient(
+    135deg,
+    var(--honey-brown) 0%,
+    var(--honey-amber-dark) 50%,
+    var(--honey-brown) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: honeyDripForm 3s ease-in-out infinite;
+}
+
+.honey-text::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--honey-gold),
+    transparent
+  );
+  opacity: 0.6;
+  animation: honeyDrip 2s ease-in-out infinite;
+  transform-origin: bottom;
+}
+
+/* Honeycomb Container */
+.honeycomb-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+  padding: 1rem;
+}
+
+/* Hexagonal Shape */
+.hexagon {
+  position: relative;
+  width: 100%;
+  padding-bottom: 115.47%; /* Maintains hexagon aspect ratio */
+  clip-path: polygon(
+    30% 0%,
+    70% 0%,
+    100% 50%,
+    70% 100%,
+    30% 100%,
+    0% 50%
+  );
+  background: linear-gradient(
+    135deg,
+    rgba(255, 195, 11, 0.9) 0%,
+    rgba(255, 140, 0, 0.9) 100%
+  );
+  transition: all 0.3s ease;
+}
+
+.hexagon-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 248, 220, 0.95) 0%,
+    rgba(255, 215, 0, 0.95) 100%
+  );
+  clip-path: polygon(
+    30% 0%,
+    70% 0%,
+    100% 50%,
+    70% 100%,
+    30% 100%,
+    0% 50%
+  );
+}
+
+/* Buzz Hover Effect */
+.buzz-hover {
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.buzz-hover:hover {
+  animation: buzz 0.3s ease-in-out;
+  filter: drop-shadow(0 0 8px rgba(255, 195, 11, 0.6));
+  transform: scale(1.05);
+}
+
+/* Honey Drop Button */
+.honey-drop-button {
+  background: linear-gradient(
+    135deg,
+    var(--honey-gold) 0%,
+    var(--honey-amber) 100%
+  );
+  border: none;
+  border-radius: 50px;
+  padding: 1rem 2rem;
+  color: var(--honey-brown);
+  font-weight: 600;
+  font-size: 1.1rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 
+    0 4px 15px rgba(255, 195, 11, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  animation: honeyPulse 2s ease-in-out infinite;
+  transition: all 0.3s ease;
+}
+
+.honey-drop-button::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.3) 0%,
+    transparent 70%
+  );
+  animation: rotate 3s linear infinite;
+}
+
+.honey-drop-button:hover {
+  animation: honeyPulse 1s ease-in-out infinite, buzz 0.3s ease-in-out;
+  transform: scale(1.05);
+  box-shadow: 
+    0 6px 20px rgba(255, 195, 11, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+@keyframes rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Wax Seal Style */
+.wax-seal-button {
+  background: radial-gradient(
+    circle at 30% 30%,
+    rgba(255, 195, 11, 0.9) 0%,
+    rgba(139, 69, 19, 0.9) 100%
+  );
+  border: 3px solid var(--honey-brown);
+  border-radius: 50%;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  box-shadow: 
+    0 4px 15px rgba(74, 44, 42, 0.4),
+    inset 0 2px 5px rgba(255, 255, 255, 0.2);
+  animation: honeyPulse 2s ease-in-out infinite;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.wax-seal-button:hover {
+  animation: honeyPulse 1s ease-in-out infinite, buzz 0.3s ease-in-out;
+  transform: scale(1.1);
+}
+
+/* Honey Background Gradient */
+.honey-gradient-bg {
+  background: linear-gradient(
+    180deg,
+    var(--honey-gradient-start) 0%,
+    rgba(255, 215, 0, 0.8) 50%,
+    var(--honey-amber) 100%
+  );
+  min-height: 100vh;
+}
+
+/* Honeycomb Pattern Overlay */
+.honeycomb-pattern {
+  position: relative;
+}
+
+.honeycomb-pattern::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    repeating-linear-gradient(
+      30deg,
+      transparent,
+      transparent 50px,
+      rgba(255, 195, 11, 0.03) 50px,
+      rgba(255, 195, 11, 0.03) 51px
+    ),
+    repeating-linear-gradient(
+      -30deg,
+      transparent,
+      transparent 50px,
+      rgba(255, 195, 11, 0.03) 50px,
+      rgba(255, 195, 11, 0.03) 51px
+    );
+  pointer-events: none;
+  opacity: 0.3;
+}
+
+/* Card with Honey Glow */
+.honey-card {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 248, 220, 0.95) 0%,
+    rgba(255, 215, 0, 0.9) 100%
+  );
+  border: 2px solid rgba(255, 195, 11, 0.3);
+  border-radius: 15px;
+  box-shadow: 
+    0 4px 15px rgba(255, 195, 11, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  transition: all 0.3s ease;
+}
+
+.honey-card:hover {
+  border-color: var(--honey-gold);
+  box-shadow: 
+    0 6px 20px rgba(255, 195, 11, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  transform: translateY(-2px);
+}
+
+/* Swipe Card Honey Style */
+.honey-swipe-card {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 248, 220, 0.98) 0%,
+    rgba(255, 215, 0, 0.95) 100%
+  );
+  border: 3px solid rgba(255, 195, 11, 0.5);
+  box-shadow: 
+    0 8px 30px rgba(255, 195, 11, 0.3),
+    inset 0 2px 5px rgba(255, 255, 255, 0.4);
+  position: relative;
+}
+
+.honey-swipe-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(
+    circle at 20% 20%,
+    rgba(255, 255, 255, 0.2) 0%,
+    transparent 50%
+  );
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+/* Bee Icon Glow */
+.bee-icon {
+  filter: drop-shadow(0 0 4px rgba(255, 195, 11, 0.6));
+  transition: all 0.3s ease;
+}
+
+.bee-icon:hover {
+  filter: drop-shadow(0 0 8px rgba(255, 195, 11, 0.9));
+  animation: buzz 0.3s ease-in-out;
+}
+
+/* Honey Text Glow */
+.text-honey-glow {
+  text-shadow: 
+    0 0 10px rgba(255, 195, 11, 0.5),
+    0 0 20px rgba(255, 140, 0, 0.3),
+    0 2px 4px rgba(74, 44, 42, 0.2);
+}
+
+/* Responsive Hexagon */
+@media (max-width: 768px) {
+  .hexagon {
+    padding-bottom: 100%;
+  }
+  
+  .honeycomb-container {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 0.5rem;
+  }
+}
+

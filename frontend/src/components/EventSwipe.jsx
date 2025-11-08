@@ -54,9 +54,9 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
       <motion.div
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="w-80 h-96 bg-gray-100 rounded-2xl flex items-center justify-center"
+        className="w-80 h-96 honey-card rounded-2xl flex items-center justify-center"
       >
-        <p className="text-gray-500">Thanks for your response!</p>
+        <p className="text-honey-brown font-bold text-xl honey-text">Thanks for your response!</p>
       </motion.div>
     );
   }
@@ -67,16 +67,16 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
     : "w-80 h-96 relative";
   
   const cardClass = fullScreen
-    ? "w-full h-full bg-white rounded-3xl shadow-2xl p-8 md:p-12 flex flex-col cursor-grab active:cursor-grabbing"
-    : "w-full h-full bg-white rounded-2xl shadow-xl p-6 flex flex-col cursor-grab active:cursor-grabbing";
+    ? "honey-swipe-card w-full h-full rounded-3xl shadow-2xl p-8 md:p-12 flex flex-col cursor-grab active:cursor-grabbing"
+    : "honey-swipe-card w-full h-full rounded-2xl shadow-xl p-6 flex flex-col cursor-grab active:cursor-grabbing";
 
   const titleClass = fullScreen
-    ? "text-4xl md:text-5xl font-bold text-gray-900 mb-4"
-    : "text-2xl font-bold text-gray-900 mb-2";
+    ? "text-4xl md:text-5xl font-bold honey-text text-honey-brown mb-4"
+    : "text-2xl font-bold honey-text text-honey-brown mb-2";
 
   const descriptionClass = fullScreen
-    ? "text-xl md:text-2xl text-gray-600 mb-6"
-    : "text-gray-600";
+    ? "text-xl md:text-2xl text-honey-amber-dark mb-6"
+    : "text-honey-amber-dark";
 
   return (
     <div className={containerClass}>
@@ -101,13 +101,13 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
 
           {/* Proposed Times */}
           <div className="flex-1 space-y-4 md:space-y-6 mb-6 md:mb-8">
-            <h4 className={`font-semibold text-gray-900 ${fullScreen ? 'text-2xl md:text-3xl' : ''}`}>
+            <h4 className={`font-semibold honey-text text-honey-brown ${fullScreen ? 'text-2xl md:text-3xl' : ''}`}>
               Proposed Times:
             </h4>
             <div className="space-y-3">
               {event.proposedTimes && event.proposedTimes.map((time, index) => (
-                <div key={index} className={`flex items-center gap-3 text-gray-700 ${fullScreen ? 'text-xl md:text-2xl' : ''}`}>
-                  <Calendar className={`text-primary-600 ${fullScreen ? 'w-6 h-6 md:w-8 md:h-8' : 'w-4 h-4'}`} />
+                <div key={index} className={`flex items-center gap-3 text-honey-amber-dark font-medium ${fullScreen ? 'text-xl md:text-2xl' : ''}`}>
+                  <Calendar className={`text-honey-brown ${fullScreen ? 'w-6 h-6 md:w-8 md:h-8' : 'w-4 h-4'}`} />
                   <span>{format(new Date(time), 'MMM d, h:mm a')}</span>
                 </div>
               ))}
@@ -116,8 +116,8 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
 
           {/* Location */}
           {event.location && (
-            <div className={`flex items-center gap-3 text-gray-700 mb-6 md:mb-8 ${fullScreen ? 'text-xl md:text-2xl' : ''}`}>
-              <MapPin className={`text-primary-600 ${fullScreen ? 'w-6 h-6 md:w-8 md:h-8' : 'w-4 h-4'}`} />
+            <div className={`flex items-center gap-3 text-honey-amber-dark mb-6 md:mb-8 font-medium ${fullScreen ? 'text-xl md:text-2xl' : ''}`}>
+              <MapPin className={`text-honey-brown ${fullScreen ? 'w-6 h-6 md:w-8 md:h-8' : 'w-4 h-4'}`} />
               <span>{event.location.name || event.location.address}</span>
             </div>
           )}
@@ -126,14 +126,14 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
           <div className={`flex gap-4 md:gap-6 mt-auto ${fullScreen ? 'mt-8' : ''}`}>
             <button
               onClick={() => handleSwipe('left')}
-              className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 md:px-8 md:py-4 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 font-medium transition-colors ${fullScreen ? 'text-xl md:text-2xl' : ''}`}
+              className={`buzz-hover flex-1 flex items-center justify-center gap-2 px-6 py-3 md:px-8 md:py-4 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 font-bold transition-colors border-2 border-red-300 ${fullScreen ? 'text-xl md:text-2xl' : ''}`}
             >
               <X className={fullScreen ? 'w-6 h-6 md:w-8 md:h-8' : 'w-5 h-5'} />
               Decline
             </button>
             <button
               onClick={() => handleSwipe('right')}
-              className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 md:px-8 md:py-4 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 font-medium transition-colors ${fullScreen ? 'text-xl md:text-2xl' : ''}`}
+              className={`buzz-hover flex-1 flex items-center justify-center gap-2 px-6 py-3 md:px-8 md:py-4 bg-honey-gold text-honey-brown rounded-lg hover:bg-honey-amber font-bold transition-colors border-2 border-honey-brown shadow-honey ${fullScreen ? 'text-xl md:text-2xl' : ''}`}
             >
               <Check className={fullScreen ? 'w-6 h-6 md:w-8 md:h-8' : 'w-5 h-5'} />
               Accept
@@ -141,7 +141,7 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
           </div>
 
           {/* Swipe Hint */}
-          <p className={`text-center text-gray-500 mt-4 ${fullScreen ? 'text-lg md:text-xl' : 'text-xs'}`}>
+          <p className={`text-center text-honey-amber-dark mt-4 font-semibold ${fullScreen ? 'text-lg md:text-xl' : 'text-xs'}`}>
             Swipe right to accept, left to decline
           </p>
         </motion.div>
