@@ -46,11 +46,15 @@ credentials.json
 *-admin-sdk.json
 # Allow configuration JSON files
 !cors.json
-# Block other JSON files except package files
+# Block other JSON files except package files and deployment configs
 *.json
 !package.json
 !package-lock.json
 !cors.json
+!vercel.json
+!railway.json
+!tsconfig.json
+!jsconfig.json
 
 # Coverage
 coverage/
