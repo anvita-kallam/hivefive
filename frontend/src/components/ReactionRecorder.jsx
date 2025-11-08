@@ -23,6 +23,13 @@ const ReactionRecorder = forwardRef(({
   const emotionIntervalRef = useRef(null);
   const stopRecordingTimeoutRef = useRef(null);
   const swipeDirRef = useRef(swipeDirection); // Use ref for synchronous access
+  
+  // Update ref when prop changes
+  useEffect(() => {
+    if (swipeDirection) {
+      swipeDirRef.current = swipeDirection;
+    }
+  }, [swipeDirection]);
 
   // Expose methods to parent via ref
   useImperativeHandle(ref, () => ({
