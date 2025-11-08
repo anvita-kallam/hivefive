@@ -7,6 +7,7 @@ import { format } from 'date-fns';
 import { Calendar, Users, Plus, LogOut } from 'lucide-react';
 import CalendarSync from '../components/CalendarSync';
 import SimpleCalendar from '../components/SimpleCalendar';
+import FullScreenEventInvites from '../components/FullScreenEventInvites';
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -45,6 +46,9 @@ function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 to-primary-100">
+      {/* Full Screen Event Invites - Shows first when there are pending events */}
+      <FullScreenEventInvites />
+
       {/* Header */}
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">

@@ -6,9 +6,9 @@ import { format } from 'date-fns';
 import { Calendar, MapPin, X, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-function EventSwipe({ event }) {
+function EventSwipe({ event, onSwiped, fullScreen = false }) {
   const [swiped, setSwiped] = useState(false);
-  const [startTime, setStartTime] = useState(Date.now());
+  const [startTime] = useState(Date.now());
   const swipeRef = useRef(null);
   const queryClient = useQueryClient();
 
@@ -23,7 +23,17 @@ function EventSwipe({ event }) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['events']);
+      queryClient.invalidateQueries(['allEvents']);
       queryClient.invalidateQueries(['hive', event.hiveID]);
+      queryClient.invalidateQueries(['hives']);
+      setSwiped(true);
+      // Call onSwiped callback if provided (for full screen mode)
+      if (onSwiped) {
+        // Wait a bit to show the success state
+        setTimeout(() => {
+          onSwiped();
+        }, fullScreen ? 1500 : 500);
+      }
     }
   });
 
@@ -33,14 +43,13 @@ function EventSwipe({ event }) {
     const responseTime = Date.now() - startTime;
     const swipeDirection = direction === 'right' ? 'right' : 'left';
     
-    setSwiped(true);
     swipeMutation.mutate({
       direction: swipeDirection,
       responseTime
     });
   };
 
-  if (swiped) {
+  if (swiped && !fullScreen) {
     return (
       <motion.div
         initial={{ opacity: 0, scale: 0.8 }}
@@ -52,8 +61,25 @@ function EventSwipe({ event }) {
     );
   }
 
+  // Full screen styles
+  const containerClass = fullScreen 
+    ? "w-full h-full relative"
+    : "w-80 h-96 relative";
+  
+  const cardClass = fullScreen
+    ? "w-full h-full bg-white rounded-3xl shadow-2xl p-8 md:p-12 flex flex-col cursor-grab active:cursor-grabbing"
+    : "w-full h-full bg-white rounded-2xl shadow-xl p-6 flex flex-col cursor-grab active:cursor-grabbing";
+
+  const titleClass = fullScreen
+    ? "text-4xl md:text-5xl font-bold text-gray-900 mb-4"
+    : "text-2xl font-bold text-gray-900 mb-2";
+
+  const descriptionClass = fullScreen
+    ? "text-xl md:text-2xl text-gray-600 mb-6"
+    : "text-gray-600";
+
   return (
-    <div className="w-80 h-96 relative">
+    <div className={containerClass}>
       <TinderCard
         ref={swipeRef}
         className="absolute w-full h-full"
@@ -62,56 +88,60 @@ function EventSwipe({ event }) {
         swipeThreshold={50}
       >
         <motion.div
-          className="w-full h-full bg-white rounded-2xl shadow-xl p-6 flex flex-col cursor-grab active:cursor-grabbing"
-          whileHover={{ scale: 1.02 }}
+          className={cardClass}
+          whileHover={fullScreen ? {} : { scale: 1.02 }}
         >
           {/* Header */}
-          <div className="mb-4">
-            <h3 className="text-2xl font-bold text-gray-900 mb-2">{event.title}</h3>
+          <div className="mb-6 md:mb-8">
+            <h3 className={titleClass}>{event.title}</h3>
             {event.description && (
-              <p className="text-gray-600">{event.description}</p>
+              <p className={descriptionClass}>{event.description}</p>
             )}
           </div>
 
           {/* Proposed Times */}
-          <div className="flex-1 space-y-3 mb-4">
-            <h4 className="font-semibold text-gray-900">Proposed Times:</h4>
-            {event.proposedTimes && event.proposedTimes.map((time, index) => (
-              <div key={index} className="flex items-center gap-2 text-gray-700">
-                <Calendar className="w-4 h-4 text-primary-600" />
-                <span>{format(new Date(time), 'MMM d, h:mm a')}</span>
-              </div>
-            ))}
+          <div className="flex-1 space-y-4 md:space-y-6 mb-6 md:mb-8">
+            <h4 className={`font-semibold text-gray-900 ${fullScreen ? 'text-2xl md:text-3xl' : ''}`}>
+              Proposed Times:
+            </h4>
+            <div className="space-y-3">
+              {event.proposedTimes && event.proposedTimes.map((time, index) => (
+                <div key={index} className={`flex items-center gap-3 text-gray-700 ${fullScreen ? 'text-xl md:text-2xl' : ''}`}>
+                  <Calendar className={`text-primary-600 ${fullScreen ? 'w-6 h-6 md:w-8 md:h-8' : 'w-4 h-4'}`} />
+                  <span>{format(new Date(time), 'MMM d, h:mm a')}</span>
+                </div>
+              ))}
+            </div>
           </div>
 
           {/* Location */}
           {event.location && (
-            <div className="flex items-center gap-2 text-gray-700 mb-4">
-              <MapPin className="w-4 h-4 text-primary-600" />
+            <div className={`flex items-center gap-3 text-gray-700 mb-6 md:mb-8 ${fullScreen ? 'text-xl md:text-2xl' : ''}`}>
+              <MapPin className={`text-primary-600 ${fullScreen ? 'w-6 h-6 md:w-8 md:h-8' : 'w-4 h-4'}`} />
               <span>{event.location.name || event.location.address}</span>
             </div>
           )}
 
           {/* Action Buttons */}
-          <div className="flex gap-4 mt-auto">
+          <div className={`flex gap-4 md:gap-6 mt-auto ${fullScreen ? 'mt-8' : ''}`}>
             <button
               onClick={() => handleSwipe('left')}
-              className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 font-medium"
+              className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 md:px-8 md:py-4 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 font-medium transition-colors ${fullScreen ? 'text-xl md:text-2xl' : ''}`}
             >
-              <X className="w-5 h-5" />
+              <X className={fullScreen ? 'w-6 h-6 md:w-8 md:h-8' : 'w-5 h-5'} />
               Decline
             </button>
             <button
               onClick={() => handleSwipe('right')}
-              className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 font-medium"
+              className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 md:px-8 md:py-4 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 font-medium transition-colors ${fullScreen ? 'text-xl md:text-2xl' : ''}`}
             >
-              <Check className="w-5 h-5" />
+              <Check className={fullScreen ? 'w-6 h-6 md:w-8 md:h-8' : 'w-5 h-5'} />
               Accept
             </button>
           </div>
 
           {/* Swipe Hint */}
-          <p className="text-center text-xs text-gray-500 mt-2">
+          <p className={`text-center text-gray-500 mt-4 ${fullScreen ? 'text-lg md:text-xl' : 'text-xs'}`}>
             Swipe right to accept, left to decline
           </p>
         </motion.div>
