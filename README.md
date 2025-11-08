@@ -121,6 +121,10 @@ HiveFive/
 - **[FIREBASE_SETUP.md](./FIREBASE_SETUP.md)** - Complete Firebase configuration guide
 - **[PROJECT_STRUCTURE.md](./PROJECT_STRUCTURE.md)** - Codebase architecture overview
 
+## Repository
+
+🔗 **GitHub**: [https://github.com/anvita-kallam/hivefive](https://github.com/anvita-kallam/hivefive)
+
 ## License
 
 ISC
