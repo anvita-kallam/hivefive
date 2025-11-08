@@ -127,45 +127,37 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
       // Also invalidate the event query to get updated swipe logs
       queryClient.invalidateQueries(['event', event._id]);
       
-      // For full screen mode, close modal immediately
-      if (fullScreen) {
-        // Close modal immediately (don't wait for success message)
-        // Use setTimeout with 0 to ensure state updates are processed
+      // Modal is already closed for full screen mode
+      // Only call onSwiped for non-full screen mode
+      if (!fullScreen && onSwiped) {
         setTimeout(() => {
-          if (onSwiped) {
-            // Call immediately to close the modal
-            onSwiped();
-          }
-        }, 0);
-      } else {
-        // Call onSwiped callback if provided (for non-full screen mode)
-        if (onSwiped) {
-          setTimeout(() => {
-            onSwiped();
-          }, 500);
-        }
+          onSwiped();
+        }, 500);
       }
     },
     onError: (error) => {
-      console.error('❌ Swipe error:', error);
+      console.error('❌ Swipe error (non-blocking):', error);
+      // Don't show error to user - modal is already closed
+      // Still invalidate queries to refresh data
+      queryClient.invalidateQueries(['events']);
+      queryClient.invalidateQueries(['allEvents']);
+      queryClient.invalidateQueries(['hive', event.hiveID]);
+      queryClient.invalidateQueries(['hives']);
     }
   });
 
   const handleReactionRecorded = (reaction) => {
-    console.log('✅ Reaction recorded, submitting swipe:', reaction);
+    console.log('✅ Reaction recorded, submitting swipe in background:', reaction);
     setReactionData(reaction);
-    // Mark as swiped immediately to prevent re-rendering the card
+    // Mark as swiped (already set, but ensure it's set)
     setSwiped(true);
+    
     // Auto-submit swipe after reaction is recorded
+    // This happens in the background - modal is already closed
     const responseTime = Date.now() - startTime;
     
-    // For full screen mode, call onSwiped immediately to close modal
-    // before the mutation completes
-    if (fullScreen && onSwiped) {
-      // Close modal immediately, don't wait for API response
-      onSwiped();
-    }
-    
+    // Submit swipe mutation in background
+    // Modal is already closed, so we don't need to call onSwiped again
     swipeMutation.mutate({
       direction: reaction.swipeDirection,
       responseTime,
@@ -180,21 +172,38 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
       return;
     }
     
-    // For full screen mode, stop recording and save with swipe direction
-    if (fullScreen && recorderRef.current) {
+    // Mark as swiped immediately to prevent duplicate interactions
+    setSwiped(true);
+    
+    // For full screen mode, close modal immediately and handle recording/API in background
+    if (fullScreen) {
       const swipeDirection = direction === 'right' ? 'right' : 'left';
-      console.log('🛑 Swipe detected, stopping recording with direction:', swipeDirection);
+      console.log('🛑 Swipe detected, closing modal immediately, direction:', swipeDirection);
       
-      // Mark as swiped immediately to prevent duplicate interactions
-      setSwiped(true);
+      // Close modal immediately - don't wait for anything
+      if (onSwiped) {
+        onSwiped();
+      }
       
-      // Stop recording with the swipe direction
-      // The recording will process and call handleReactionRecorded when done
-      try {
-        recorderRef.current.stopRecording(swipeDirection);
-      } catch (error) {
-        console.error('Error stopping recording:', error);
-        // If recording fails, still submit the swipe
+      // Stop recording with the swipe direction (if recorder exists)
+      // This will process in the background and call handleReactionRecorded
+      if (recorderRef.current) {
+        try {
+          recorderRef.current.stopRecording(swipeDirection);
+        } catch (error) {
+          console.error('Error stopping recording:', error);
+          // If recording fails, still submit the swipe without video
+          const responseTime = Date.now() - startTime;
+          // Submit swipe in background - don't block UI
+          swipeMutation.mutate({
+            direction: swipeDirection,
+            responseTime,
+            emotionData: null,
+            reactionFile: null
+          });
+        }
+      } else {
+        // No recorder, submit swipe directly in background
         const responseTime = Date.now() - startTime;
         swipeMutation.mutate({
           direction: swipeDirection,
@@ -203,14 +212,13 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
           reactionFile: null
         });
       }
-      return; // Don't proceed with swipe yet, wait for recording to complete
+      return; // Modal is already closed, exit
     }
     
     // For non-full screen, proceed without reaction
     const responseTime = Date.now() - startTime;
     const swipeDirection = direction === 'right' ? 'right' : 'left';
     
-    setSwiped(true);
     swipeMutation.mutate({
       direction: swipeDirection,
       responseTime,
