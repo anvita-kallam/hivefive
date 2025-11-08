@@ -4,6 +4,7 @@
 
 - **Railway Project ID**: `acb41216-873e-4eaf-9d91-6db083a27bca`
 - **Railway Project URL**: https://railway.app/project/acb41216-873e-4eaf-9d91-6db083a27bca
+- **Backend URL**: https://hivefive-production.up.railway.app
 - **Frontend URL**: https://hivefiveconnect.vercel.app
 
 ## Deployment Steps
@@ -37,7 +38,7 @@ MONGODB_URI=mongodb+srv://kranvita007_db_user:Ga9tXmIA156MFaT2@hivefive.anukffg.
 FIREBASE_ADMIN_SDK=<paste entire JSON from DEPLOYMENT_ENV_VALUES.local.md>
 GOOGLE_CLIENT_ID=231258515997-3vequ4hjt1v8daoa7vu2hvikd971otmu.apps.googleusercontent.com
 GOOGLE_CLIENT_SECRET=<get from Google Cloud Console>
-GOOGLE_REDIRECT_URI=https://your-backend-url.railway.app/api/calendar/callback
+GOOGLE_REDIRECT_URI=https://hivefive-production.up.railway.app/api/calendar/callback
 VERTEX_AI_PROJECT_ID=hivefive-477603
 VERTEX_AI_LOCATION=us-central1
 JWT_SECRET=hhsgdsg663bbansjhcgsjskdhdhjs
@@ -113,7 +114,9 @@ After deployment, update:
 ## Railway Service URLs
 
 - **Project Dashboard**: https://railway.app/project/acb41216-873e-4eaf-9d91-6db083a27bca
-- **Backend URL**: Will be shown after deployment in Railway dashboard
+- **Backend URL**: https://hivefive-production.up.railway.app
+- **Health Check**: https://hivefive-production.up.railway.app/api/health
+- **API Base URL**: https://hivefive-production.up.railway.app/api
 
 ## Related Documentation
 
