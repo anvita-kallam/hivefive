@@ -22,6 +22,7 @@ const ReactionRecorder = forwardRef(({
   const chunksRef = useRef([]);
   const emotionIntervalRef = useRef(null);
   const stopRecordingTimeoutRef = useRef(null);
+  const swipeDirRef = useRef(swipeDirection); // Use ref for synchronous access
 
   // Expose methods to parent via ref
   useImperativeHandle(ref, () => ({
@@ -213,7 +214,7 @@ const ReactionRecorder = forwardRef(({
           console.warn('⚠️ No video chunks recorded - recording may not have started');
           // Still call callback with null file
           if (onReactionRecorded) {
-            const finalSwipeDirection = swipeDir || swipeDirection;
+            const finalSwipeDirection = swipeDirRef.current || swipeDir || swipeDirection;
             console.log('Calling onReactionRecorded with no file, direction:', finalSwipeDirection);
             onReactionRecorded({
               file: null,
@@ -261,20 +262,23 @@ const ReactionRecorder = forwardRef(({
         
         // Call callback
         if (onReactionRecorded) {
+          const finalSwipeDirectionForLog = swipeDirRef.current || swipeDir || swipeDirection;
           console.log('📞 Calling onReactionRecorded callback with:', {
             fileSize: file.size,
             fileName: file.name,
             fileType: file.type,
             hasEmotion: !!finalEmotion,
-            swipeDirection: swipeDir || swipeDirection,
+            swipeDirection: finalSwipeDirectionForLog,
+            swipeDirectionSource: swipeDirRef.current ? 'ref' : (swipeDir ? 'state' : 'prop'),
             callbackType: typeof onReactionRecorded
           });
           
           try {
-            // Use swipeDir (set by stopRecordingManually) or fallback to prop
-            const finalSwipeDirection = swipeDir || swipeDirection;
+            // Use ref first (most up-to-date, synchronous), then state, then prop
+            const finalSwipeDirection = swipeDirRef.current || swipeDir || swipeDirection;
             console.log('📤 Passing swipeDirection to callback:', {
-              swipeDir: swipeDir,
+              swipeDirRef: swipeDirRef.current,
+              swipeDirState: swipeDir,
               swipeDirectionProp: swipeDirection,
               finalSwipeDirection: finalSwipeDirection,
               action: finalSwipeDirection === 'right' ? 'ACCEPT' : 'DECLINE'
@@ -283,7 +287,7 @@ const ReactionRecorder = forwardRef(({
             onReactionRecorded({
               file: file, // Explicitly pass the file
               emotion: finalEmotion,
-              swipeDirection: finalSwipeDirection // Use the direction from stopRecordingManually
+              swipeDirection: finalSwipeDirection // Use the direction from ref (most reliable)
             });
             console.log('✅ onReactionRecorded callback called successfully');
           } catch (callbackError) {
@@ -343,9 +347,10 @@ const ReactionRecorder = forwardRef(({
     if (stopRecordingTimeoutRef.current) {
       clearTimeout(stopRecordingTimeoutRef.current);
     }
-    // Store the direction so it's available when recording stops
+    // Store the direction in both state (for UI) and ref (for synchronous access in onstop)
     setSwipeDir(direction);
-    console.log('✅ Swipe direction stored:', direction);
+    swipeDirRef.current = direction; // Store in ref for immediate synchronous access
+    console.log('✅ Swipe direction stored in state and ref:', direction);
     stopRecording();
   };
 
