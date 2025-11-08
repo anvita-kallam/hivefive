@@ -8,6 +8,7 @@ import eventRoutes from './routes/events.js';
 import mediaRoutes from './routes/media.js';
 import authRoutes from './routes/auth.js';
 import calendarRoutes from './routes/calendar.js';
+import userCalendarRoutes from './routes/userCalendar.js';
 
 dotenv.config();
 
@@ -65,6 +66,7 @@ app.use('/api/hives', hiveRoutes);
 app.use('/api/events', eventRoutes);
 app.use('/api/media', mediaRoutes);
 app.use('/api/calendar', calendarRoutes);
+app.use('/api/user-calendar', userCalendarRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

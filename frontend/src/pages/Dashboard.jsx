@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 import { Calendar, Users, Plus, LogOut } from 'lucide-react';
 import CalendarSync from '../components/CalendarSync';
+import SimpleCalendar from '../components/SimpleCalendar';
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -84,6 +85,11 @@ function Dashboard() {
         {/* Calendar Sync */}
         <section className="mb-8">
           <CalendarSync />
+        </section>
+
+        {/* Simple Calendar */}
+        <section className="mb-8">
+          <SimpleCalendar />
         </section>
 
         {/* Upcoming Events */}
