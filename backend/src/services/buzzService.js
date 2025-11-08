@@ -178,11 +178,23 @@ function extractCategory(title) {
  */
 export async function generateBuzzResponse(hiveId, conversationHistory, userMessage, userId) {
   try {
+    console.log('🤖 Generating Buzz response for hive:', hiveId);
+    console.log('📝 User message:', userMessage);
+    console.log('🔑 Generative model available:', !!generativeModel);
+    console.log('🔑 Using API key:', useApiKey);
+    
     // Build hive context
     const context = await buildHiveContext(hiveId);
     if (!context) {
+      console.warn('⚠️ Could not build hive context');
       return "Hey! I'm having trouble accessing the hive info right now. Can you try again in a moment? 🐝";
     }
+    
+    console.log('✅ Hive context built:', {
+      hiveName: context.hiveName,
+      memberCount: context.memberCount,
+      preferredCategories: context.preferredCategories.length
+    });
 
     // Get user info
     const user = await User.findById(userId);
@@ -222,7 +234,10 @@ ${recentMessages}
 
 USER MESSAGE: ${userName}: ${userMessage}
 
-Generate a helpful, context-aware response as Buzz. If the message is about event planning, ask clarifying questions or make suggestions based on the hive's preferences.`;
+Generate a helpful, context-aware response as Buzz. If the message is about event planning, ask clarifying questions or make suggestions based on the hive's preferences. Keep it friendly and concise.`;
+    
+    console.log('📤 Sending request to Gemini API...');
+    console.log('📏 Prompt length:', systemPrompt.length, 'characters');
 
     // Use Gemini/Vertex AI if available, otherwise use enhanced mock
     if (generativeModel) {
@@ -233,9 +248,13 @@ Generate a helpful, context-aware response as Buzz. If the message is about even
           // Google Generative AI API (API key authentication)
           result = await generativeModel.generateContent(systemPrompt);
           const response = result.response;
-          const buzzMessage = response.text() || 
-            generateEnhancedMockResponse(userMessage, context, conversationHistory);
-          return buzzMessage.trim();
+          const buzzMessage = response.text();
+          if (buzzMessage && buzzMessage.trim()) {
+            return buzzMessage.trim();
+          } else {
+            console.warn('Gemini API returned empty response, using enhanced mock');
+            return generateEnhancedMockResponse(userMessage, context, conversationHistory);
+          }
         } else {
           // Vertex AI (service account authentication)
           result = await generativeModel.generateContent({
@@ -252,8 +271,15 @@ Generate a helpful, context-aware response as Buzz. If the message is about even
           return buzzMessage.trim();
         }
       } catch (aiError) {
-        console.error('Error calling Gemini/Vertex AI:', aiError.message);
+        console.error('❌ Error calling Gemini/Vertex AI:', aiError.message);
+        console.error('Error details:', {
+          name: aiError.name,
+          message: aiError.message,
+          stack: aiError.stack?.split('\n').slice(0, 5).join('\n'),
+          useApiKey: useApiKey
+        });
         // Fallback to mock response
+        console.log('🔄 Falling back to enhanced mock response');
         return generateEnhancedMockResponse(userMessage, context, conversationHistory);
       }
     } else {
@@ -261,8 +287,15 @@ Generate a helpful, context-aware response as Buzz. If the message is about even
       return generateEnhancedMockResponse(userMessage, context, conversationHistory);
     }
   } catch (error) {
-    console.error('Error generating Buzz response:', error);
-    return "Oops! Something went wrong. Give me a sec and try again? 🐝";
+    console.error('❌ Error generating Buzz response:', error);
+    console.error('Error stack:', error.stack);
+    // Try to provide more helpful error message or fallback
+    try {
+      return generateEnhancedMockResponse(userMessage, context || {}, []);
+    } catch (fallbackError) {
+      console.error('❌ Even fallback failed:', fallbackError);
+      return "Oops! Something went wrong. Give me a sec and try again? 🐝";
+    }
   }
 }
 
