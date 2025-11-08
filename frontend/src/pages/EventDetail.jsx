@@ -1,10 +1,13 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../config/api';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
-import { ArrowLeft, Calendar, MapPin, Users, Check, X, Trash2, Image as ImageIcon } from 'lucide-react';
+import { ArrowLeft, Calendar, MapPin, Users, Check, X, Trash2, Image as ImageIcon, Upload, Loader2 } from 'lucide-react';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { storage } from '../config/firebase';
+import { useAuthStore } from '../store/authStore';
 import MapContainer from '../components/MapView';
 import EventReactions from '../components/EventReactions';
 import Gallery from '../components/Gallery';
@@ -14,7 +17,11 @@ function EventDetail() {
   const { eventId } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { user } = useAuthStore();
   const [showGallery, setShowGallery] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [uploadCaption, setUploadCaption] = useState('');
+  const fileInputRef = useRef(null);
 
   // Get event details
   const { data: event, isLoading: eventLoading } = useQuery({
@@ -103,6 +110,90 @@ function EventDetail() {
     changeSwipeMutation.mutate({
       eventId: eventId,
       direction: newDirection
+    });
+  };
+
+  // Media upload mutation
+  const uploadMediaMutation = useMutation({
+    mutationFn: async ({ file, fileType, caption }) => {
+      try {
+        // Verify user is authenticated
+        const { auth } = await import('../config/firebase');
+        const currentUser = auth.currentUser;
+        
+        if (!currentUser) {
+          throw new Error('You must be signed in to upload files. Please sign in and try again.');
+        }
+
+        // Get fresh auth token
+        const token = await currentUser.getIdToken(false);
+        console.log('Upload: User authenticated', { uid: currentUser.uid, email: currentUser.email });
+
+        // Upload to Firebase Storage
+        const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+        const fileRef = ref(storage, `hive-media/${event.hiveID}/${eventId}/${Date.now()}_${sanitizedFileName}`);
+        
+        // Determine content type
+        const contentType = file.type || (fileType === 'image' ? 'image/jpeg' : 'video/mp4');
+        
+        const metadata = {
+          contentType: contentType,
+          customMetadata: {
+            uploadedBy: currentUser.uid,
+            hiveId: event.hiveID,
+            eventId: eventId,
+            uploadedAt: new Date().toISOString()
+          }
+        };
+        
+        await uploadBytes(fileRef, file, metadata);
+        const fileURL = await getDownloadURL(fileRef);
+
+        // Upload metadata to backend
+        const backendResponse = await api.post('/media', {
+          eventID: eventId,
+          fileURL,
+          fileType,
+          caption: caption || ''
+        });
+        
+        return backendResponse;
+      } catch (error) {
+        console.error('Upload error:', error);
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['media', eventId]);
+      queryClient.invalidateQueries(['event', eventId]);
+      setUploading(false);
+      setUploadCaption('');
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    },
+    onError: (error) => {
+      console.error('Upload error:', error);
+      setUploading(false);
+      alert(error.message || 'Failed to upload file. Please try again.');
+    }
+  });
+
+  const handleFileSelect = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    
+    // Determine file type
+    const isImage = file.type.startsWith('image/');
+    const isVideo = file.type.startsWith('video/');
+    const fileType = isImage ? 'image' : isVideo ? 'video' : 'image';
+
+    uploadMediaMutation.mutate({
+      file,
+      fileType,
+      caption: uploadCaption
     });
   };
 
@@ -298,6 +389,65 @@ function EventDetail() {
                 </div>
               </motion.div>
             )}
+
+            {/* Upload Media Section */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15 }}
+              className="honey-card p-6"
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <Upload className="w-5 h-5 text-[#2D1B00]" />
+                <h3 className="text-[#2D1B00] font-medium text-lg">Upload Media</h3>
+              </div>
+              
+              <div className="space-y-4">
+                {/* File Input */}
+                <div>
+                  <label className="block mb-2">
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*,video/*"
+                      onChange={handleFileSelect}
+                      disabled={uploading}
+                      className="hidden"
+                    />
+                    <div className="border-2 border-dashed border-[#C17D3A]/50 rounded-lg p-6 text-center cursor-pointer hover:border-[#C17D3A] hover:bg-[rgba(193,125,58,0.1)] transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                         onClick={() => !uploading && fileInputRef.current?.click()}>
+                      {uploading ? (
+                        <div className="flex flex-col items-center gap-2">
+                          <Loader2 className="w-8 h-8 text-[#C17D3A] animate-spin" />
+                          <p className="text-[#6B4E00]">Uploading...</p>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center gap-2">
+                          <Upload className="w-8 h-8 text-[#C17D3A]" />
+                          <p className="text-[#2D1B00] font-medium">Click to upload photos or videos</p>
+                          <p className="text-sm text-[#6B4E00]">Supports images and videos</p>
+                        </div>
+                      )}
+                    </div>
+                  </label>
+                </div>
+
+                {/* Caption Input */}
+                <div>
+                  <label className="block text-sm text-[#2D1B00] mb-1 font-medium">
+                    Caption (optional)
+                  </label>
+                  <input
+                    type="text"
+                    value={uploadCaption}
+                    onChange={(e) => setUploadCaption(e.target.value)}
+                    placeholder="Add a caption to your media..."
+                    disabled={uploading}
+                    className="w-full px-4 py-2 border border-[#2D1B00]/20 rounded-lg bg-[rgba(255,249,230,0.6)] text-[#2D1B00] focus:outline-none focus:ring-2 focus:ring-[#C17D3A]/50 disabled:opacity-50"
+                  />
+                </div>
+              </div>
+            </motion.div>
 
             {/* Photo Gallery */}
             {regularMedia && regularMedia.length > 0 && (
