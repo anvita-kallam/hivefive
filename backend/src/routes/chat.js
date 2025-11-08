@@ -121,11 +121,24 @@ router.post('/:hiveId', authenticateToken, async (req, res) => {
     let buzzMessage = null;
     if (await shouldTriggerBuzz(message, eventId)) {
       // Get recent conversation history (include the message we just saved)
-      const recentMessages = await Chat.find({ hiveId: req.params.hiveId })
+      // Use lean() and deduplicate to avoid duplicates
+      const allMessages = await Chat.find({ hiveId: req.params.hiveId })
         .populate('sender', 'name')
         .sort({ timestamp: -1 })
-        .limit(10)
-        .then(msgs => msgs.reverse());
+        .limit(15)
+        .lean();
+      
+      // Deduplicate by _id
+      const seen = new Set();
+      const recentMessages = allMessages
+        .filter(msg => {
+          const id = msg._id?.toString();
+          if (!id || seen.has(id)) return false;
+          seen.add(id);
+          return true;
+        })
+        .reverse()
+        .slice(-10); // Last 10 unique messages
 
       // Generate Buzz response
       const buzzResponse = await generateBuzzResponse(
@@ -135,21 +148,23 @@ router.post('/:hiveId', authenticateToken, async (req, res) => {
         user._id
       );
 
-      // Create and save Buzz message
-      buzzMessage = new Chat({
-        hiveId: req.params.hiveId,
-        sender: null, // Buzz doesn't have a user ID
-        message: buzzResponse,
-        isBuzzMessage: true,
-        mentions: [],
-        eventId: eventId || null,
-        metadata: {
-          triggeredBy: user._id,
-          triggerMessage: message
-        }
-      });
+      // Create and save Buzz message (only if we got a response)
+      if (buzzResponse && buzzResponse.trim()) {
+        buzzMessage = new Chat({
+          hiveId: req.params.hiveId,
+          sender: null, // Buzz doesn't have a user ID
+          message: buzzResponse.trim(),
+          isBuzzMessage: true,
+          mentions: [],
+          eventId: eventId || null,
+          metadata: {
+            triggeredBy: user._id,
+            triggerMessage: message
+          }
+        });
 
-      await buzzMessage.save();
+        await buzzMessage.save();
+      }
     }
 
     // Return user message and optionally Buzz response
