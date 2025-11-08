@@ -131,8 +131,9 @@ router.post('/:id/swipe', authenticateToken, async (req, res) => {
 
     const { swipeDirection, responseTime, emotionData, reactionMediaId, gpsData } = req.body;
 
-    console.log('Swipe request body:', {
+    console.log('📥 Swipe request body received:', {
       swipeDirection,
+      swipeDirectionType: typeof swipeDirection,
       responseTime,
       hasEmotionData: !!emotionData,
       reactionMediaId,
@@ -140,21 +141,21 @@ router.post('/:id/swipe', authenticateToken, async (req, res) => {
       hasGpsData: !!gpsData
     });
 
-          // Validate swipeDirection
-          console.log('🔍 Validating swipeDirection:', {
-            swipeDirection: swipeDirection,
-            type: typeof swipeDirection,
-            isLeft: swipeDirection === 'left',
-            isRight: swipeDirection === 'right',
-            trimmed: typeof swipeDirection === 'string' ? swipeDirection.trim() : swipeDirection
-          });
-          
-          if (!swipeDirection || (swipeDirection !== 'left' && swipeDirection !== 'right')) {
-            console.error('❌ Invalid swipeDirection:', swipeDirection, typeof swipeDirection);
-            return res.status(400).json({ error: 'swipeDirection must be "left" or "right"' });
-          }
-          
-          console.log('✅ swipeDirection validated:', swipeDirection, 'action:', swipeDirection === 'right' ? 'ACCEPT' : 'DECLINE');
+    // Validate swipeDirection
+    console.log('🔍 Validating swipeDirection:', {
+      swipeDirection: swipeDirection,
+      type: typeof swipeDirection,
+      isLeft: swipeDirection === 'left',
+      isRight: swipeDirection === 'right',
+      trimmed: typeof swipeDirection === 'string' ? swipeDirection.trim() : swipeDirection
+    });
+    
+    if (!swipeDirection || (swipeDirection !== 'left' && swipeDirection !== 'right')) {
+      console.error('❌ Invalid swipeDirection:', swipeDirection, typeof swipeDirection);
+      return res.status(400).json({ error: 'swipeDirection must be "left" or "right"' });
+    }
+    
+    console.log('✅ swipeDirection validated:', swipeDirection, 'action:', swipeDirection === 'right' ? 'ACCEPT' : 'DECLINE');
 
     const event = await Event.findById(req.params.id);
     if (!event) {
