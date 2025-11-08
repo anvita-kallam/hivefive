@@ -30,18 +30,31 @@ function FullScreenEventInvites() {
   });
 
   // Get events for all hives
-  const { data: allEvents = [] } = useQuery({
+  const { data: allEvents = [], error: eventsError } = useQuery({
     queryKey: ['allEvents'],
     queryFn: async () => {
       if (!hives || hives.length === 0) return [];
       
-      const eventPromises = hives.map(hive => 
-        api.get(`/events/hive/${hive._id}`).then(res => res.data)
-      );
-      const eventsArrays = await Promise.all(eventPromises);
-      return eventsArrays.flat();
+      try {
+        const eventPromises = hives.map(hive => 
+          api.get(`/events/hive/${hive._id}`).then(res => res.data).catch(error => {
+            // Log error but don't fail the entire request
+            console.warn(`Error fetching events for hive ${hive._id}:`, error.response?.status, error.message);
+            // Return empty array for this hive
+            return [];
+          })
+        );
+        const eventsArrays = await Promise.all(eventPromises);
+        return eventsArrays.flat();
+      } catch (error) {
+        console.error('Error fetching all events:', error);
+        // Return empty array on error so app doesn't crash
+        return [];
+      }
     },
-    enabled: !!hives && hives.length > 0
+    enabled: !!hives && hives.length > 0,
+    retry: 1, // Only retry once
+    retryDelay: 1000
   });
 
   // Filter pending events (events user hasn't responded to)
