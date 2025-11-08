@@ -228,7 +228,7 @@ function HexagonIcon() {
       style={{ color: '#2D1B00' }}
     >
       <path
-        d="M 5 3.34 L 15 3.34 L 20 10 L 15 16.66 L 5 16.66 L 0 10 Z"
+        d="M 6 0 L 14 0 L 20 6 L 20 14 L 14 20 L 6 20 L 0 14 L 0 6 Z"
         stroke="currentColor"
         strokeWidth="2"
         fill="none"
