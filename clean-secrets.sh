@@ -12,13 +12,13 @@ git branch backup-before-clean-$(date +%s)
 # Remove secrets from GOOGLE_CLOUD_SETUP.md in all commits
 FILTER_BRANCH_SQUELCH_WARNING=1 git filter-branch -f --tree-filter '
 if [ -f GOOGLE_CLOUD_SETUP.md ]; then
-  # Replace OAuth Client ID
-  sed -i.bak "s|231258515997-ac5afu0ci23i34mqtlruamid7gokfaac\.apps\.googleusercontent\.com|[Your OAuth Client ID]|g" GOOGLE_CLOUD_SETUP.md 2>/dev/null || \
-  sed -i "" "s|231258515997-ac5afu0ci23i34mqtlruamid7gokfaac\.apps\.googleusercontent\.com|[Your OAuth Client ID]|g" GOOGLE_CLOUD_SETUP.md
+  # Replace OAuth Client ID (replace YOUR_SECRET with actual secret)
+  # sed -i.bak "s|YOUR_OAUTH_CLIENT_ID|[Your OAuth Client ID]|g" GOOGLE_CLOUD_SETUP.md 2>/dev/null || \
+  # sed -i "" "s|YOUR_OAUTH_CLIENT_ID|[Your OAuth Client ID]|g" GOOGLE_CLOUD_SETUP.md
   
-  # Replace OAuth Client Secret
-  sed -i.bak "s|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|[Your OAuth Client Secret]|g" GOOGLE_CLOUD_SETUP.md 2>/dev/null || \
-  sed -i "" "s|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|[Your OAuth Client Secret]|g" GOOGLE_CLOUD_SETUP.md
+  # Replace OAuth Client Secret (replace YOUR_SECRET with actual secret)
+  # sed -i.bak "s|YOUR_OAUTH_CLIENT_SECRET|[Your OAuth Client Secret]|g" GOOGLE_CLOUD_SETUP.md 2>/dev/null || \
+  # sed -i "" "s|YOUR_OAUTH_CLIENT_SECRET|[Your OAuth Client Secret]|g" GOOGLE_CLOUD_SETUP.md
   
   # Clean up backup files
   rm -f GOOGLE_CLOUD_SETUP.md.bak 2>/dev/null
