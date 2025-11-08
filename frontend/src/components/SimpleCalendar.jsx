@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../config/api';
-import { Calendar, Plus, ChevronLeft, ChevronRight, X, Bee } from 'lucide-react';
+import { Calendar, Plus, ChevronLeft, ChevronRight, X, Hexagon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, startOfWeek, endOfWeek } from 'date-fns';
 
@@ -123,7 +123,7 @@ function SimpleCalendar() {
     <div className="honey-card p-6">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
-          <Bee className="w-6 h-6 text-honey-brown bee-icon" />
+          <Hexagon className="w-6 h-6 text-honey-brown bee-icon" />
           <Calendar className="w-6 h-6 text-honey-amber" />
           <h2 className="text-2xl font-bold honey-text text-honey-brown">My Calendar</h2>
         </div>
@@ -136,7 +136,7 @@ function SimpleCalendar() {
           className="honey-drop-button buzz-hover flex items-center gap-2"
         >
           <Plus className="w-5 h-5" />
-          <Bee className="w-4 h-4" />
+          <Hexagon className="w-4 h-4" />
           Add Event
         </button>
       </div>
@@ -315,7 +315,7 @@ function EventModal({ selectedDate, event, onClose, onSubmit, isLoading }) {
       >
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <Bee className="w-5 h-5 text-honey-brown bee-icon" />
+            <Hexagon className="w-5 h-5 text-honey-brown bee-icon" />
             <h3 className="text-xl font-bold honey-text text-honey-brown">
               {event ? 'Edit Event' : 'Add Event'}
             </h3>

@@ -4,7 +4,7 @@ import { useAuthStore } from '../store/authStore';
 import api from '../config/api';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
-import { Calendar, Users, Plus, LogOut, Bee } from 'lucide-react';
+import { Calendar, Users, Plus, LogOut, Hexagon } from 'lucide-react';
 import CalendarSync from '../components/CalendarSync';
 import SimpleCalendar from '../components/SimpleCalendar';
 import FullScreenEventInvites from '../components/FullScreenEventInvites';
@@ -54,7 +54,7 @@ function Dashboard() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Bee className="w-8 h-8 text-honey-brown bee-icon" />
+              <Hexagon className="w-8 h-8 text-honey-brown bee-icon" />
               <div>
                 <h1 className="text-3xl font-bold honey-text text-honey-brown">HiveFive</h1>
                 <p className="text-sm text-honey-brown font-medium">Welcome back, {user?.name || user?.email}</p>
@@ -103,7 +103,7 @@ function Dashboard() {
         {events && events.length > 0 && (
           <section className="mb-8">
             <div className="flex items-center gap-3 mb-6">
-              <Bee className="w-6 h-6 text-honey-brown bee-icon" />
+              <Hexagon className="w-6 h-6 text-honey-brown bee-icon" />
               <h2 className="text-2xl font-bold honey-text text-honey-brown">Upcoming Events</h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -138,7 +138,7 @@ function Dashboard() {
         <section>
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
-              <Bee className="w-6 h-6 text-honey-brown bee-icon" />
+              <Hexagon className="w-6 h-6 text-honey-brown bee-icon" />
               <h2 className="text-2xl font-bold honey-text text-honey-brown">My Hives</h2>
             </div>
             <button
@@ -146,21 +146,21 @@ function Dashboard() {
               className="honey-drop-button buzz-hover flex items-center gap-2"
             >
               <Plus className="w-6 h-6" />
-              <Bee className="w-5 h-5" />
+              <Hexagon className="w-5 h-5" />
               Create Hive
             </button>
           </div>
 
           {!hives || hives.length === 0 ? (
             <div className="honey-card p-12 text-center">
-              <Bee className="w-20 h-20 text-honey-brown mx-auto mb-4 bee-icon" />
+              <Hexagon className="w-20 h-20 text-honey-brown mx-auto mb-4 bee-icon" />
               <h3 className="text-2xl font-bold honey-text text-honey-brown mb-2">No hives yet</h3>
               <p className="text-honey-amber-dark mb-6 font-medium">Create or join a hive to get started</p>
               <button
                 onClick={() => navigate('/create-hive')}
                 className="honey-drop-button buzz-hover"
               >
-                <Bee className="w-5 h-5 inline mr-2" />
+                <Hexagon className="w-5 h-5 inline mr-2" />
                 Create Your First Hive
               </button>
             </div>
@@ -176,7 +176,7 @@ function Dashboard() {
                 >
                   <div className="hexagon">
                     <div className="hexagon-content">
-                      <Bee className="w-8 h-8 text-honey-brown mb-2 bee-icon" />
+                      <Hexagon className="w-8 h-8 text-honey-brown mb-2 bee-icon" />
                       <h3 className="text-lg font-bold honey-text text-honey-brown mb-2 text-center">{hive.name}</h3>
                       <div className="flex items-center gap-2 text-honey-amber-dark mb-3">
                         <Users className="w-4 h-4" />

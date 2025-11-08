@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import api from '../config/api';
-import { Calendar, Check, Bee } from 'lucide-react';
+import { Calendar, Check, Hexagon } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 function CalendarSync() {
@@ -59,7 +59,7 @@ function CalendarSync() {
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Bee className="w-6 h-6 text-honey-brown bee-icon" />
+          <Hexagon className="w-6 h-6 text-honey-brown bee-icon" />
           <Calendar className="w-6 h-6 text-honey-amber" />
           <div>
             <h3 className="font-bold honey-text text-honey-brown">Google Calendar Sync</h3>

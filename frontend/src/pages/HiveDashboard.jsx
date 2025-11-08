@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../config/api';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
-import { ArrowLeft, Calendar, MapPin, Users, Plus, LogOut as LeaveIcon, Check, X, Bee } from 'lucide-react';
+import { ArrowLeft, Calendar, MapPin, Users, Plus, LogOut as LeaveIcon, Check, X, Hexagon } from 'lucide-react';
 import EventSwipe from '../components/EventSwipe';
 import Gallery from '../components/Gallery';
 import CreateEventModal from '../components/CreateEventModal';
@@ -178,7 +178,7 @@ function HiveDashboard() {
         {pendingEvents.length > 0 && (
           <section className="mb-8">
             <div className="flex items-center gap-3 mb-4">
-              <Bee className="w-6 h-6 text-honey-brown bee-icon" />
+              <Hexagon className="w-6 h-6 text-honey-brown bee-icon" />
               <h2 className="text-2xl font-bold honey-text text-honey-brown">Pending Events</h2>
             </div>
             <div className="flex gap-4 overflow-x-auto pb-4">
@@ -207,7 +207,7 @@ function HiveDashboard() {
             {/* Event Timeline */}
             <div className="honey-card p-6">
               <div className="flex items-center gap-3 mb-4">
-                <Bee className="w-6 h-6 text-honey-brown bee-icon" />
+                <Hexagon className="w-6 h-6 text-honey-brown bee-icon" />
                 <h2 className="text-xl font-bold honey-text text-honey-brown">Event Timeline</h2>
               </div>
               <div className="space-y-4">
