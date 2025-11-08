@@ -30,12 +30,28 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
           const currentUser = auth.currentUser;
           if (!currentUser) throw new Error('Not authenticated');
 
+          // Get fresh token and verify authentication
           const token = await currentUser.getIdToken(true);
+          console.log('Uploading reaction video:', {
+            uid: currentUser.uid,
+            email: currentUser.email,
+            fileName: reactionFile.name,
+            fileType: reactionFile.type,
+            fileSize: reactionFile.size
+          });
+
           const sanitizedFileName = reactionFile.name.replace(/[^a-zA-Z0-9.-]/g, '_');
           const fileRef = ref(storage, `reactions/${event.hiveID}/${event._id}/${Date.now()}_${sanitizedFileName}`);
           
+          // Ensure content type is set correctly - Firebase Storage rules require video/*
+          // Default to video/webm if type is not set or invalid
+          let contentType = reactionFile.type || 'video/webm';
+          if (!contentType.startsWith('video/')) {
+            contentType = 'video/webm';
+          }
+          
           const metadata = {
-            contentType: reactionFile.type || 'video/webm',
+            contentType: contentType,
             customMetadata: {
               uploadedBy: currentUser.uid,
               hiveId: event.hiveID,
@@ -44,6 +60,12 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
               uploadedAt: new Date().toISOString()
             }
           };
+
+          console.log('Uploading with metadata:', {
+            path: `reactions/${event.hiveID}/${event._id}/${sanitizedFileName}`,
+            contentType: contentType,
+            size: reactionFile.size
+          });
 
           await uploadBytes(fileRef, reactionFile, metadata);
           const fileURL = await getDownloadURL(fileRef);
