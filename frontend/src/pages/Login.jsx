@@ -2,6 +2,7 @@ import { signInWithPopup } from 'firebase/auth';
 import { auth, googleProvider } from '../config/firebase';
 import { useAuthStore } from '../store/authStore';
 import { useNavigate } from 'react-router-dom';
+import { BeeLogo } from '../components/BeeDecor.jsx';
 
 function Login() {
   const navigate = useNavigate();
@@ -44,8 +45,11 @@ function Login() {
     <div className="min-h-screen honey-gradient-bg flex items-center justify-center p-4">
       <div className="max-w-md w-full honey-card rounded-2xl shadow-xl p-8">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-primary-900 mb-2">HiveFive</h1>
-          <p className="text-gray-600">AI-Driven Social Graph for Real-World Connection</p>
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <BeeLogo width={48} height={48} />
+            <h1 className="text-4xl font-bold text-[#2D1B00] mb-2">HiveFive</h1>
+          </div>
+          <p className="text-[#6B4E00]">AI-Driven Social Graph for Real-World Connection</p>
         </div>
         
         <div className="space-y-4">

@@ -58,7 +58,7 @@ function Dashboard() {
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <BeeLogo />
+              <BeeLogo width={40} height={40} />
               <div>
                 <h1 className="text-[#2D1B00] text-2xl font-medium">HiveFive</h1>
                 <p className="text-sm text-[#6B4E00]">Welcome back, {user?.name || user?.email}</p>
