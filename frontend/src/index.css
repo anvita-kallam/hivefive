@@ -12,22 +12,34 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: #D4A574 !important;
-  background-color: #D4A574 !important;
+  background-image: url('/hive-background.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-color: #D4A574;
   color: #2D1B00 !important;
   min-height: 100vh;
 }
 
 html {
-  background: #D4A574 !important;
-  background-color: #D4A574 !important;
+  background-image: url('/hive-background.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-color: #D4A574;
   min-height: 100vh;
 }
 
 #root {
   min-height: 100vh;
-  background: #D4A574 !important;
-  background-color: #D4A574 !important;
+  background-image: url('/hive-background.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-color: #D4A574;
 }
 
 code {

@@ -334,23 +334,31 @@
   transform: scale(1.1);
 }
 
-/* Background - Based on Figma Design */
+/* Background - Based on Figma Design with Background Image */
 .honey-gradient-bg {
-  background: #D4A574 !important;
-  background-color: #D4A574 !important;
+  background-image: url('/hive-background.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-color: #D4A574;
   min-height: 100vh;
   width: 100%;
   position: relative;
   overflow-x: hidden;
 }
 
-/* Ensure html and body also have the warm background - High specificity */
+/* Ensure html and body also have the background image - High specificity */
 html.honey-gradient-bg,
 html,
 body.honey-gradient-bg,
 body {
-  background: #D4A574 !important;
-  background-color: #D4A574 !important;
+  background-image: url('/hive-background.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-color: #D4A574;
   margin: 0 !important;
   padding: 0 !important;
   min-height: 100vh !important;
