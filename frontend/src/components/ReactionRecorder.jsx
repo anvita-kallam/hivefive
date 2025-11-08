@@ -213,11 +213,12 @@ const ReactionRecorder = forwardRef(({
           console.warn('⚠️ No video chunks recorded - recording may not have started');
           // Still call callback with null file
           if (onReactionRecorded) {
-            console.log('Calling onReactionRecorded with no file');
+            const finalSwipeDirection = swipeDir || swipeDirection;
+            console.log('Calling onReactionRecorded with no file, direction:', finalSwipeDirection);
             onReactionRecorded({
               file: null,
               emotion: null,
-              swipeDirection: swipeDir || swipeDirection
+              swipeDirection: finalSwipeDirection
             });
           }
           // Cleanup and return
@@ -270,10 +271,19 @@ const ReactionRecorder = forwardRef(({
           });
           
           try {
+            // Use swipeDir (set by stopRecordingManually) or fallback to prop
+            const finalSwipeDirection = swipeDir || swipeDirection;
+            console.log('📤 Passing swipeDirection to callback:', {
+              swipeDir: swipeDir,
+              swipeDirectionProp: swipeDirection,
+              finalSwipeDirection: finalSwipeDirection,
+              action: finalSwipeDirection === 'right' ? 'ACCEPT' : 'DECLINE'
+            });
+            
             onReactionRecorded({
               file: file, // Explicitly pass the file
               emotion: finalEmotion,
-              swipeDirection: swipeDir || swipeDirection
+              swipeDirection: finalSwipeDirection // Use the direction from stopRecordingManually
             });
             console.log('✅ onReactionRecorded callback called successfully');
           } catch (callbackError) {
@@ -329,10 +339,13 @@ const ReactionRecorder = forwardRef(({
 
   // Stop recording manually (called when swipe completes)
   const stopRecordingManually = (direction) => {
+    console.log('🛑 stopRecordingManually called with direction:', direction, 'action:', direction === 'right' ? 'ACCEPT' : 'DECLINE');
     if (stopRecordingTimeoutRef.current) {
       clearTimeout(stopRecordingTimeoutRef.current);
     }
+    // Store the direction so it's available when recording stops
     setSwipeDir(direction);
+    console.log('✅ Swipe direction stored:', direction);
     stopRecording();
   };
 
