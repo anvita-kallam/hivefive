@@ -154,9 +154,15 @@ const ReactionRecorder = forwardRef(({
   // Start recording
   const startRecording = async () => {
     if (isRecording || recordingRef.current) {
-      console.log('Already recording, skipping start');
+      console.log('⚠️ Already recording, skipping start');
       return;
     }
+    
+    console.log('🎬 Starting recording...', {
+      hasStream: !!streamRef.current,
+      hasVideo: !!videoRef.current,
+      isReady: isReady
+    });
 
     try {
       // If camera isn't started, start it first
@@ -196,23 +202,46 @@ const ReactionRecorder = forwardRef(({
 
       // Set up stop handler
       mediaRecorder.onstop = async () => {
-        console.log('Recording stopped. Processing data...', {
+        console.log('🎥 Recording stopped. Processing data...', {
           chunks: chunksRef.current.length,
-          totalSize: chunksRef.current.reduce((sum, chunk) => sum + chunk.size, 0)
+          totalSize: chunksRef.current.reduce((sum, chunk) => sum + chunk.size, 0),
+          hasOnReactionRecorded: !!onReactionRecorded
         });
         
         // Make sure we have video data
         if (chunksRef.current.length === 0) {
-          console.warn('No video chunks recorded');
+          console.warn('⚠️ No video chunks recorded - recording may not have started');
+          // Still call callback with null file
+          if (onReactionRecorded) {
+            console.log('Calling onReactionRecorded with no file');
+            onReactionRecorded({
+              file: null,
+              emotion: null,
+              swipeDirection: swipeDir || swipeDirection
+            });
+          }
           // Cleanup and return
           cleanup();
           return;
         }
 
         const blob = new Blob(chunksRef.current, { type: 'video/webm' });
-        console.log('Video blob created:', { size: blob.size, type: blob.type });
+        console.log('📦 Video blob created:', { 
+          size: blob.size, 
+          type: blob.type,
+          blobType: typeof blob,
+          isBlob: blob instanceof Blob
+        });
         
         const file = new File([blob], `reaction-${Date.now()}.webm`, { type: 'video/webm' });
+        console.log('📁 File created from blob:', {
+          name: file.name,
+          size: file.size,
+          type: file.type,
+          fileType: typeof file,
+          isFile: file instanceof File,
+          isBlob: file instanceof Blob
+        });
         
         // Get final emotion
         let finalEmotion = null;
@@ -231,16 +260,27 @@ const ReactionRecorder = forwardRef(({
         
         // Call callback
         if (onReactionRecorded) {
-          console.log('Calling onReactionRecorded with:', {
+          console.log('📞 Calling onReactionRecorded callback with:', {
             fileSize: file.size,
+            fileName: file.name,
+            fileType: file.type,
             hasEmotion: !!finalEmotion,
-            swipeDirection: swipeDir || swipeDirection
+            swipeDirection: swipeDir || swipeDirection,
+            callbackType: typeof onReactionRecorded
           });
-          onReactionRecorded({
-            file,
-            emotion: finalEmotion,
-            swipeDirection: swipeDir || swipeDirection
-          });
+          
+          try {
+            onReactionRecorded({
+              file: file, // Explicitly pass the file
+              emotion: finalEmotion,
+              swipeDirection: swipeDir || swipeDirection
+            });
+            console.log('✅ onReactionRecorded callback called successfully');
+          } catch (callbackError) {
+            console.error('❌ Error calling onReactionRecorded:', callbackError);
+          }
+        } else {
+          console.error('❌ onReactionRecorded callback is not defined!');
         }
 
         // Cleanup
