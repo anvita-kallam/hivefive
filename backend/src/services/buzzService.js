@@ -5,6 +5,7 @@ import Hive from '../models/Hive.js';
 import Event from '../models/Event.js';
 import User from '../models/User.js';
 import Media from '../models/Media.js';
+import UserCalendarEvent from '../models/UserCalendarEvent.js';
 
 dotenv.config();
 
@@ -148,7 +149,7 @@ try {
 
 /**
  * Build hive context for Buzz
- * Includes: members, recent events, preferences, activity patterns
+ * Includes: members, recent events, preferences, activity patterns, calendar events
  */
 async function buildHiveContext(hiveId) {
   try {
@@ -197,13 +198,73 @@ async function buildHiveContext(hiveId) {
       .filter(m => m.facialSentiment && m.facialSentiment.overallSentiment > 0.6)
       .map(m => m.eventID);
 
+    // Get calendar events for today and upcoming days for all hive members
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const sevenDaysFromNow = new Date(today);
+    sevenDaysFromNow.setDate(sevenDaysFromNow.getDate() + 7);
+
+    const memberIds = hive.members.map(m => m._id);
+    const calendarEvents = await UserCalendarEvent.find({
+      userID: { $in: memberIds },
+      startTime: { $gte: today, $lte: sevenDaysFromNow }
+    }).sort({ startTime: 1 });
+
+    // Count events per member per day
+    const memberEventCounts = {};
+    const todayEventCounts = {};
+    
+    calendarEvents.forEach(calEvent => {
+      const userId = calEvent.userID.toString();
+      const eventDate = new Date(calEvent.startTime);
+      eventDate.setHours(0, 0, 0, 0);
+      const dateKey = eventDate.toISOString().split('T')[0];
+      
+      // Count events per member
+      if (!memberEventCounts[userId]) {
+        memberEventCounts[userId] = {};
+      }
+      if (!memberEventCounts[userId][dateKey]) {
+        memberEventCounts[userId][dateKey] = 0;
+      }
+      memberEventCounts[userId][dateKey]++;
+      
+      // Count today's events
+      const todayKey = today.toISOString().split('T')[0];
+      if (dateKey === todayKey) {
+        if (!todayEventCounts[userId]) {
+          todayEventCounts[userId] = 0;
+        }
+        todayEventCounts[userId]++;
+      }
+    });
+
+    // Build member calendar info
+    const membersWithCalendar = hive.members.map(member => {
+      const memberId = member._id.toString();
+      const todayCount = todayEventCounts[memberId] || 0;
+      const upcomingEvents = calendarEvents
+        .filter(e => e.userID.toString() === memberId)
+        .slice(0, 3) // Next 3 events
+        .map(e => ({
+          title: e.title,
+          startTime: e.startTime,
+          location: e.location
+        }));
+
+      return {
+        name: member.name,
+        major: member.major,
+        hobbies: member.hobbies,
+        eventsToday: todayCount,
+        upcomingEvents: upcomingEvents,
+        totalEventsThisWeek: calendarEvents.filter(e => e.userID.toString() === memberId).length
+      };
+    });
+
     return {
       hiveName: hive.name,
-      members: hive.members.map(m => ({
-        name: m.name,
-        major: m.major,
-        hobbies: m.hobbies
-      })),
+      members: membersWithCalendar,
       memberCount: hive.members.length,
       activityFrequency: hive.activityFrequency,
       recentEvents: recentEvents.map(e => ({
@@ -221,7 +282,12 @@ async function buildHiveContext(hiveId) {
         .map(([category]) => category),
       locationPreferences: [...new Set(locationPreferences)].slice(0, 5),
       positiveEventCount: new Set(positiveEvents).size,
-      defaultLocation: hive.settings?.defaultLocation
+      defaultLocation: hive.settings?.defaultLocation,
+      calendarInsights: {
+        membersWithManyEventsToday: membersWithCalendar.filter(m => m.eventsToday >= 2),
+        totalEventsToday: Object.values(todayEventCounts).reduce((sum, count) => sum + count, 0),
+        upcomingEventsCount: calendarEvents.length
+      }
     };
   } catch (error) {
     console.error('Error building hive context:', error);
@@ -295,31 +361,58 @@ export async function generateBuzzResponse(hiveId, conversationHistory, userMess
       }
     }).join('\n');
 
+    // Build calendar awareness section
+    const calendarInsights = [];
+    if (context.calendarInsights) {
+      const busyMembers = context.calendarInsights.membersWithManyEventsToday;
+      if (busyMembers.length > 0) {
+        calendarInsights.push(`📅 CALENDAR AWARENESS: ${busyMembers.map(m => `${m.name} has ${m.eventsToday} events today`).join(', ')}. Consider suggesting later times if planning events today.`);
+      }
+      
+      // Add upcoming events info
+      const membersWithUpcoming = context.members.filter(m => m.upcomingEvents && m.upcomingEvents.length > 0);
+      if (membersWithUpcoming.length > 0) {
+        const upcomingInfo = membersWithUpcoming.map(m => {
+          const nextEvent = m.upcomingEvents[0];
+          const eventTime = new Date(nextEvent.startTime);
+          return `${m.name} has "${nextEvent.title}" ${eventTime.toLocaleDateString()}`;
+        }).join('; ');
+        calendarInsights.push(`Upcoming: ${upcomingInfo}`);
+      }
+    }
+
     // Build system prompt with hive context
     const systemPrompt = `You are Buzz, a friendly and helpful AI assistant for the "${context.hiveName}" hive. You're like a digital member of the group who helps with event planning and keeps conversations fun.
 
 HIVE CONTEXT:
 - Hive Name: ${context.hiveName}
-- Members: ${context.members.map(m => m.name).join(', ')}
+- Members: ${context.members.map(m => `${m.name}${m.eventsToday > 0 ? ` (${m.eventsToday} events today)` : ''}`).join(', ')}
 - Activity Frequency: ${context.activityFrequency}
 - Preferred Event Types: ${context.preferredCategories.join(', ') || 'Various'}
 - Favorite Locations: ${context.locationPreferences.join(', ') || 'Various'}
 - Recent Successful Events: ${context.positiveEventCount}
+
+${calendarInsights.length > 0 ? calendarInsights.join('\n') + '\n' : ''}CALENDAR AWARENESS RULES:
+- If a member has 2+ events today, suggest pushing new events to later today or another day
+- Check member schedules before suggesting event times
+- Mention if someone is already busy: "Just a heads up - ${context.members.find(m => m.eventsToday >= 2)?.name || 'some members'} already have ${context.members.find(m => m.eventsToday >= 2)?.eventsToday || 2}+ events today. Maybe we could do this later or tomorrow?"
+- Be considerate of busy schedules when planning events
 
 YOUR PERSONALITY:
 - Friendly, casual, and enthusiastic
 - Use emojis naturally (especially 🐝 🍯)
 - Reference past events and preferences when relevant
 - Ask clarifying questions to help plan better events
-- Be helpful with event suggestions based on hive history
+- Be helpful with event suggestions based on hive history and calendar availability
 - Keep responses concise (2-3 sentences max usually)
+- Always consider member calendar events when suggesting times
 
 CURRENT CONVERSATION:
 ${recentMessages}
 
 USER MESSAGE: ${userName}: ${userMessage}
 
-Generate a helpful, context-aware response as Buzz. If the message is about event planning, ask clarifying questions or make suggestions based on the hive's preferences. Keep it friendly and concise.`;
+Generate a helpful, context-aware response as Buzz. If the message is about event planning, consider member calendars and suggest times when people aren't already busy. If members have many events today, suggest later times or different days. Keep it friendly and concise.`;
     
     console.log('📤 Sending request to Gemini API...');
     console.log('📏 Prompt length:', systemPrompt.length, 'characters');

@@ -36,29 +36,39 @@ router.get('/:hiveId', authenticateToken, async (req, res) => {
       })
       .populate('mentions', 'name')
       .sort({ timestamp: -1 })
-      .limit(limit);
+      .limit(limit)
+      .lean(); // Use lean() for better performance and to avoid duplicate issues
+
+    // Deduplicate messages by _id (in case of any race conditions)
+    const seen = new Set();
+    const uniqueMessages = messages.filter(msg => {
+      const id = msg._id?.toString();
+      if (!id || seen.has(id)) {
+        return false;
+      }
+      seen.add(id);
+      return true;
+    });
 
     // Convert to JSON and handle reactions Map
-    const messagesWithReactions = messages.map(msg => {
-      const msgObj = msg.toObject ? msg.toObject() : msg;
-      
+    const messagesWithReactions = uniqueMessages.map(msg => {
       // Convert reactions Map to object for JSON response
-      if (msgObj.reactions) {
-        if (msgObj.reactions instanceof Map) {
-          msgObj.reactions = Object.fromEntries(msgObj.reactions);
-        } else if (typeof msgObj.reactions === 'object') {
+      if (msg.reactions) {
+        if (msg.reactions instanceof Map) {
+          msg.reactions = Object.fromEntries(msg.reactions);
+        } else if (typeof msg.reactions === 'object') {
           // Ensure arrays are properly formatted
           const reactionsObj = {};
-          Object.entries(msgObj.reactions).forEach(([emoji, userIds]) => {
+          Object.entries(msg.reactions).forEach(([emoji, userIds]) => {
             reactionsObj[emoji] = Array.isArray(userIds) ? userIds : [userIds];
           });
-          msgObj.reactions = reactionsObj;
+          msg.reactions = reactionsObj;
         }
       } else {
-        msgObj.reactions = {};
+        msg.reactions = {};
       }
       
-      return msgObj;
+      return msg;
     });
 
     // Reverse to get chronological order

@@ -21,11 +21,20 @@ function BuzzChat({ hiveId }) {
     queryKey: ['chat', hiveId],
     queryFn: async () => {
       const response = await api.get(`/chat/${hiveId}`);
-      return response.data || [];
+      const messageList = response.data || [];
+      // Deduplicate messages by _id to prevent duplicates
+      const seen = new Set();
+      return messageList.filter(msg => {
+        if (seen.has(msg._id)) {
+          return false;
+        }
+        seen.add(msg._id);
+        return true;
+      });
     },
-    refetchInterval: 2000, // Poll every 2 seconds for new messages
+    refetchInterval: 3000, // Poll every 3 seconds for new messages (reduced frequency)
     enabled: !!hiveId,
-    staleTime: 1000 // Consider data stale after 1 second
+    staleTime: 2000 // Consider data stale after 2 seconds
   });
 
   // Send message mutation
