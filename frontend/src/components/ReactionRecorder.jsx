@@ -426,60 +426,41 @@ const ReactionRecorder = forwardRef(({
   }
 
   return (
-    <div className="relative w-full h-full">
-      {/* Video preview (hidden if showVideo is false) */}
-      {showVideo && (
-        <>
-          <video
-            ref={videoRef}
-            autoPlay
-            playsInline
-            muted
-            className="w-full h-full object-cover rounded-lg"
-            style={{ transform: 'scaleX(-1)' }}
-          />
-          <canvas
-            ref={canvasRef}
-            className="hidden"
-          />
-        </>
-      )}
-      
-      {/* Hidden video and canvas for recording even if not showing video */}
-      {!showVideo && (
-        <>
-          <video
-            ref={videoRef}
-            autoPlay
-            playsInline
-            muted
-            className="hidden"
-          />
-          <canvas
-            ref={canvasRef}
-            className="hidden"
-          />
-        </>
-      )}
+    <div className="relative w-full h-full bg-black rounded-lg overflow-hidden">
+      {/* Video preview - always present for recording, shown if showVideo is true */}
+      <video
+        ref={videoRef}
+        autoPlay
+        playsInline
+        muted
+        className={`w-full h-full object-cover ${showVideo ? '' : 'hidden'}`}
+        style={{ transform: 'scaleX(-1)' }}
+      />
+      <canvas
+        ref={canvasRef}
+        className="hidden"
+      />
 
-      {/* Overlay content (the swipe card) */}
+      {/* Overlay content (the swipe card) - positioned above video */}
       {overlayContent && (
-        <div className="absolute inset-0 z-20 pointer-events-auto">
-          {overlayContent}
+        <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
+          <div className="pointer-events-auto w-full h-full">
+            {overlayContent}
+          </div>
         </div>
       )}
 
-      {/* Recording indicator */}
+      {/* Recording indicator - above overlay */}
       {isRecording && (
-        <div className="absolute top-4 right-4 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-medium flex items-center gap-2 z-30">
+        <div className="absolute top-4 right-4 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-medium flex items-center gap-2 z-40 shadow-lg">
           <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
           Recording
         </div>
       )}
 
-      {/* Emotion indicator */}
+      {/* Emotion indicator - above overlay */}
       {emotion && showVideo && (
-        <div className="absolute top-4 left-4 bg-black bg-opacity-50 text-white px-3 py-1 rounded-full text-sm z-30">
+        <div className="absolute top-4 left-4 bg-black bg-opacity-70 text-white px-3 py-1 rounded-full text-sm z-40 backdrop-blur-sm">
           {emotion.dominant === 'happy' ? '😊 Happy' :
            emotion.dominant === 'sad' ? '😢 Sad' :
            emotion.dominant === 'angry' ? '😠 Angry' :
@@ -489,9 +470,9 @@ const ReactionRecorder = forwardRef(({
         </div>
       )}
 
-      {/* Status message */}
+      {/* Status message - above overlay */}
       {!isReady && modelsLoaded && (
-        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-50 text-white px-4 py-2 rounded-lg text-sm z-30">
+        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-70 text-white px-4 py-2 rounded-lg text-sm z-40 backdrop-blur-sm">
           Starting camera...
         </div>
       )}

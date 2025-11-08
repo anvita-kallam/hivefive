@@ -212,8 +212,12 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
   // Render the swipe card content
   const swipeCardContent = (
     <motion.div
-      className={cardClass}
+      className={`${cardClass} relative`}
       whileHover={fullScreen ? {} : { scale: 1.02 }}
+      style={fullScreen ? { 
+        backgroundColor: 'rgba(245, 230, 211, 0.95)',
+        backdropFilter: 'blur(10px)'
+      } : {}}
     >
           {/* Header */}
           <div className="mb-6 md:mb-8">
@@ -293,17 +297,21 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
           ref={recorderRef}
           onReactionRecorded={handleReactionRecorded}
           eventId={event._id}
-          showVideo={false}
+          showVideo={true}
           overlayContent={
-            <TinderCard
-              ref={swipeRef}
-              className="absolute w-full h-full"
-              onSwipe={handleSwipe}
-              preventSwipe={['up', 'down']}
-              swipeThreshold={50}
-            >
-              {swipeCardContent}
-            </TinderCard>
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div className="pointer-events-auto w-full max-w-2xl mx-auto px-4">
+                <TinderCard
+                  ref={swipeRef}
+                  className="w-full h-full"
+                  onSwipe={handleSwipe}
+                  preventSwipe={['up', 'down']}
+                  swipeThreshold={50}
+                >
+                  {swipeCardContent}
+                </TinderCard>
+              </div>
+            </div>
           }
         />
       </div>
