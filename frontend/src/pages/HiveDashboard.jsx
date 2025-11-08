@@ -317,9 +317,10 @@ function HiveDashboard() {
                 )}
               </div>
             </div>
+          </div>
 
-            {/* Sidebar - Members */}
-            <div className="lg:col-span-1">
+          {/* Sidebar - Members */}
+          <div className="lg:col-span-1">
               <div className="honey-card p-6 sticky top-4">
                 <div className="flex items-center gap-3 mb-4">
                   <Users className="w-5 h-5 text-[#2D1B00]" />
