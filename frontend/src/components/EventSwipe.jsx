@@ -186,7 +186,7 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
     // This prevents the modal from reopening during the upload process
     if (fullScreen && onSwiped) {
       console.log('Closing modal immediately, starting upload in background');
-      onSwiped();
+      onSwiped(event._id); // Pass event ID so parent can track it
     }
     
     // Validate that we have a file
@@ -242,8 +242,8 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
           } else {
             console.log('No active recording, submitting swipe without video');
             // No recording active, close modal and submit swipe without video
-            if (onSwiped) {
-              onSwiped();
+            if (fullScreen && onSwiped) {
+              onSwiped(event._id); // Pass event ID
             }
             const responseTime = Date.now() - startTime;
             swipeMutation.mutate({
@@ -257,8 +257,8 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
         } catch (error) {
           console.error('Error stopping recording:', error);
           // If recording fails, close modal and submit swipe without video
-          if (onSwiped) {
-            onSwiped();
+          if (fullScreen && onSwiped) {
+            onSwiped(event._id); // Pass event ID
           }
           const responseTime = Date.now() - startTime;
           swipeMutation.mutate({
@@ -272,8 +272,8 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
       } else {
         // No recorder, close modal immediately and submit swipe
         console.log('No recorder available, closing modal and submitting swipe');
-        if (onSwiped) {
-          onSwiped();
+        if (fullScreen && onSwiped) {
+          onSwiped(event._id); // Pass event ID
         }
         const responseTime = Date.now() - startTime;
         swipeMutation.mutate({
