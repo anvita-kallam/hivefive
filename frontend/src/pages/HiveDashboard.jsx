@@ -185,10 +185,11 @@ function HiveDashboard() {
                 <HexagonIcon />
                 <h2 className="text-[#2D1B00] text-xl font-medium">Pending Events</h2>
               </div>
-            <div className="flex gap-4 overflow-x-auto pb-4">
-              {pendingEvents.map((event) => (
-                <EventSwipe key={event._id} event={event} />
-              ))}
+              <div className="flex gap-4 overflow-x-auto pb-4">
+                {pendingEvents.map((event) => (
+                  <EventSwipe key={event._id} event={event} />
+                ))}
+              </div>
             </div>
           </section>
         )}
