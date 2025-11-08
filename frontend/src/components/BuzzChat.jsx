@@ -94,7 +94,7 @@ function BuzzChat({ hiveId }) {
   };
 
   return (
-    <div className="honey-card p-4 flex flex-col h-full max-h-[600px]">
+    <div className="honey-card p-4 flex flex-col h-[500px]">
       {/* Header */}
       <div className="flex items-center justify-between mb-4 pb-3 border-b border-[#2D1B00]/20">
         <div className="flex items-center gap-2">

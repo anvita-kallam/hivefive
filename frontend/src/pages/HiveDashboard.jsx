@@ -251,8 +251,6 @@ function HiveDashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Buzz Chat */}
-            <BuzzChat hiveId={hiveId} />
                 {/* Actions */}
                      <div className="honey-card p-6 mb-6">
                      <button
@@ -405,8 +403,8 @@ function HiveDashboard() {
             </div>
           </div>
 
-          {/* Sidebar - Members */}
-          <div className="lg:col-span-1">
+          {/* Sidebar - Members and Buzz Chat */}
+          <div className="lg:col-span-1 space-y-6">
               <div className="honey-card p-6 sticky top-4">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
@@ -440,6 +438,11 @@ function HiveDashboard() {
                          </div>
                        ))}
                      </div>
+              </div>
+              
+              {/* Buzz Chat */}
+              <div className="sticky top-4">
+                <BuzzChat hiveId={hiveId} />
               </div>
             </div>
           </div>
