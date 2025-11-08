@@ -314,7 +314,7 @@ function HiveDashboard() {
                           </div>
 
                           {/* Event Reactions */}
-                          <EventReactions eventId={event._id} />
+                          <EventReactions event={event} />
                     </motion.div>
                   ))
                 ) : (

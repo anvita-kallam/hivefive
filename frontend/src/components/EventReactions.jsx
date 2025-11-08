@@ -1,25 +1,9 @@
-import { useQuery } from '@tanstack/react-query';
-import api from '../config/api';
-import { Smile, Frown, Meh, AlertCircle } from 'lucide-react';
+import { Smile, Frown, Meh } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-function EventReactions({ eventId }) {
-  const { data: reactions, isLoading } = useQuery({
-    queryKey: ['eventReactions', eventId],
-    queryFn: async () => {
-      const response = await api.get(`/events/${eventId}`);
-      return response.data.swipeLogs || [];
-    },
-    enabled: !!eventId
-  });
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-4">
-        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#C17D3A]"></div>
-      </div>
-    );
-  }
+function EventReactions({ event }) {
+  // Use event data directly instead of making a separate API call
+  const reactions = event?.swipeLogs || [];
 
   if (!reactions || reactions.length === 0) {
     return null;
@@ -27,7 +11,7 @@ function EventReactions({ eventId }) {
 
   // Filter reactions that have media (photos/videos)
   const reactionsWithMedia = reactions.filter(
-    log => log.reactionMediaId && log.reactionMediaId.fileURL
+    log => log.reactionMediaId && (log.reactionMediaId.fileURL || (typeof log.reactionMediaId === 'object' && log.reactionMediaId.fileURL))
   );
 
   if (reactionsWithMedia.length === 0) {
@@ -68,8 +52,12 @@ function EventReactions({ eventId }) {
       <h4 className="text-sm font-medium text-[#2D1B00] mb-3">Reactions</h4>
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
         {reactionsWithMedia.map((log, index) => {
-          const user = log.userID;
-          const media = log.reactionMediaId;
+          // Handle both populated and non-populated userID
+          const user = typeof log.userID === 'object' ? log.userID : { _id: log.userID };
+          // Handle both populated and non-populated reactionMediaId
+          const media = typeof log.reactionMediaId === 'object' && log.reactionMediaId !== null 
+            ? log.reactionMediaId 
+            : null;
           const emotion = media?.facialSentiment || log.emotionData;
           const isAccepted = log.swipeDirection === 'right';
 
