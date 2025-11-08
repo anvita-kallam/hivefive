@@ -585,22 +585,33 @@ export async function generateEventFollowUp(eventId) {
     const eventDesc = (event.description || '').toLowerCase();
     let followUp = null;
 
-    if (eventTitle.includes('dinner') || eventTitle.includes('lunch') || eventTitle.includes('brunch') || eventDesc.includes('dinner') || eventDesc.includes('lunch') || eventDesc.includes('brunch')) {
+    // Check for busy members in calendar
+    const busyMembers = context.calendarInsights?.membersWithManyEventsToday || [];
+    const hasBusyMembers = busyMembers.length > 0;
+    let calendarNote = '';
+    
+    if (hasBusyMembers) {
+      const busyNames = busyMembers.map(m => m.name).join(' and ');
+      const maxEvents = Math.max(...busyMembers.map(m => m.eventsToday));
+      calendarNote = ` Just a heads up - ${busyNames} ${busyMembers.length === 1 ? 'has' : 'have'} ${maxEvents}+ events today already. Maybe we could do this later or tomorrow?`;
+    }
+
+    if (eventTitle.includes('dinner') || eventTitle.includes('lunch') || eventTitle.includes('brunch') || eventDesc.includes('dinner') || eventDesc.includes('lunch') || eventDesc.includes('brunch') || eventDesc.includes('eat')) {
       const location = context.locationPreferences.length > 0 ? context.locationPreferences[0] : 'some great spots';
-      followUp = `Yum! 🍯 What kind of cuisine are you craving? I noticed the hive loved ${location} before - want to try there again or explore something new?`;
+      followUp = `Yum! 🍯 What kind of cuisine are you craving? I noticed the hive loved ${location} before - want to try there again or explore something new?${calendarNote}`;
     } else if (eventTitle.includes('game') || eventDesc.includes('game')) {
-      followUp = `Game night! 🎮 Would you prefer a casual night in or heading somewhere like Battle & Brew?`;
+      followUp = `Game night! 🎮 Would you prefer a casual night in or heading somewhere like Battle & Brew?${calendarNote}`;
     } else if (eventTitle.includes('study') || eventDesc.includes('study')) {
-      followUp = `Study session! 📚 Want to meet at the library, a coffee shop, or somewhere else?`;
+      followUp = `Study session! 📚 Want to meet at the library, a coffee shop, or somewhere else?${calendarNote}`;
     } else if (eventTitle.includes('coffee') || eventTitle.includes('cafe') || eventDesc.includes('coffee') || eventDesc.includes('cafe')) {
-      followUp = `Coffee time! ☕ Want to meet at your usual spot or try somewhere new?`;
+      followUp = `Coffee time! ☕ Want to meet at your usual spot or try somewhere new?${calendarNote}`;
     } else {
       // Generic follow-up with context
       if (context.preferredCategories.length > 0) {
         const category = context.preferredCategories[0];
-        followUp = `Sounds fun! 🐝 Want help picking a time or location? The hive really enjoys ${category} - I can suggest something similar!`;
+        followUp = `Sounds fun! 🐝 Want help picking a time or location? The hive really enjoys ${category} - I can suggest something similar!${calendarNote}`;
       } else {
-        followUp = `Sounds fun! 🐝 Want help picking a time or location? I can suggest based on what the hive usually likes!`;
+        followUp = `Sounds fun! 🐝 Want help picking a time or location? I can suggest based on what the hive usually likes!${calendarNote}`;
       }
     }
 
