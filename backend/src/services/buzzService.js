@@ -75,9 +75,9 @@ try {
       } else {
         try {
           const genAI = new GoogleGenerativeAI(apiKey);
-          // Use gemini-pro (most widely available via API key)
-          // The @google/generative-ai SDK handles the correct endpoint automatically
-          const modelName = 'gemini-pro';
+          // Use gemini-2.0-flash (available via API key, fast and efficient)
+          // This matches the model available in the REST API
+          const modelName = 'gemini-2.0-flash';
           generativeModel = genAI.getGenerativeModel({
             model: modelName,
             generationConfig: {
@@ -91,13 +91,14 @@ try {
           useVertexAI = false;
           console.log(`✅ Gemini API initialized with API key (${modelName})`);
           
-          // Test the API with a simple call to verify it works
+          // Test the API with a simple call to verify it works (async, don't wait)
           console.log('🧪 Testing Gemini API connection...');
           generativeModel.generateContent('Test').then(() => {
             console.log('✅ Gemini API test successful - ready to use!');
           }).catch((testError) => {
             console.warn('⚠️ Gemini API test failed:', testError.message);
             console.warn('⚠️ Will attempt to use API, but will fall back to enhanced mock responses on error');
+            // Don't fail initialization if test fails - might be a temporary issue
           });
         } catch (initError) {
           console.error('❌ Failed to initialize Gemini API:', initError.message);
