@@ -311,7 +311,7 @@ function EventModal({ selectedDate, event, onClose, onSubmit, isLoading }) {
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="honey-card rounded-lg shadow-xl p-6 max-w-md w-full mx-4 border-4 border-honey-brown"
+        className="honey-card rounded-lg shadow-xl p-6 max-w-md w-full mx-4"
       >
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
