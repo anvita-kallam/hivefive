@@ -30,16 +30,16 @@ export const GoogleMapsProvider = ({ children }) => {
 
   // Check if Google Maps is already loaded on mount and poll if script is in DOM
   useEffect(() => {
-      if (isGoogleMapsLoaded() && !isLoaded) {
-        setIsLoaded(true);
-        setGoogle(window.google);
-        return;
-      }
+    if (isGoogleMapsLoaded() && window.google && window.google.maps && window.google.maps.Map && !isLoaded) {
+      setIsLoaded(true);
+      setGoogle(window.google);
+      return;
+    }
 
     // If script is in DOM but not loaded yet, poll until it loads
     if (isScriptInDOM() && !isGoogleMapsLoaded() && !isLoaded) {
       const checkInterval = setInterval(() => {
-        if (isGoogleMapsLoaded()) {
+        if (isGoogleMapsLoaded() && window.google && window.google.maps && window.google.maps.Map) {
           setIsLoaded(true);
           setGoogle(window.google);
           clearInterval(checkInterval);
@@ -65,10 +65,10 @@ export const GoogleMapsProvider = ({ children }) => {
     // Wait a bit to ensure the API is fully initialized
     // Check multiple times to ensure the API is ready
     let retries = 0;
-    const maxRetries = 20; // Maximum 1 second of retries (20 * 50ms)
+    const maxRetries = 30; // Maximum 1.5 seconds of retries (30 * 50ms)
     
     const checkGoogleMaps = () => {
-      if (isGoogleMapsLoaded()) {
+      if (isGoogleMapsLoaded() && window.google && window.google.maps && window.google.maps.Map) {
         setIsLoaded(true);
         setGoogle(window.google);
       } else if (retries < maxRetries) {
@@ -91,16 +91,8 @@ export const GoogleMapsProvider = ({ children }) => {
     setLoadError(error);
   };
 
-  // If already loaded or script is in DOM, don't use LoadScript (avoid duplicate loads)
-  if (isLoaded || isGoogleMapsLoaded() || isScriptInDOM()) {
-    return (
-      <GoogleMapsContext.Provider value={{ isLoaded, loadError, google }}>
-        {children}
-      </GoogleMapsContext.Provider>
-    );
-  }
-
-  // Only use LoadScript if we need to load it
+  // Always use LoadScript to ensure components have access to google object
+  // LoadScript handles duplicate script loading internally
   return (
     <LoadScript
       googleMapsApiKey={GOOGLE_MAPS_API_KEY}
@@ -109,7 +101,7 @@ export const GoogleMapsProvider = ({ children }) => {
       onError={handleError}
       loadingElement={<div>Loading Google Maps...</div>}
     >
-      <GoogleMapsContext.Provider value={{ isLoaded, loadError, google }}>
+      <GoogleMapsContext.Provider value={{ isLoaded, loadError, google: window.google || null }}>
         {children}
       </GoogleMapsContext.Provider>
     </LoadScript>

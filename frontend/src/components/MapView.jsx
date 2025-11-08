@@ -24,10 +24,12 @@ const MapContainer = ({ location, markers = [], height = '400px', width = '100%'
     return <div className="text-red-500">Error loading Google Maps: {loadError.message}</div>;
   }
 
-  if (!isLoaded) {
+  // Check both isLoaded from context and window.google availability
+  if (!isLoaded || !window.google || !window.google.maps || !window.google.maps.Map) {
     return (
       <div className="flex items-center justify-center" style={{ height, width }}>
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+        <p className="ml-3 text-gray-600">Loading Google Maps...</p>
       </div>
     );
   }
