@@ -143,9 +143,9 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
       return api.post(`/events/${event._id}/swipe`, swipeData);
     },
     onSuccess: (data) => {
-      console.log('✅ Swipe successful, invalidating queries...');
-      // Ensure swiped state is set
-      setSwiped(true);
+      console.log('✅ Swipe mutation successful, invalidating queries...');
+      setIsProcessing(false);
+      
       // Invalidate all related queries to refresh data
       queryClient.invalidateQueries(['events']);
       queryClient.invalidateQueries(['allEvents']);
@@ -157,18 +157,16 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
       queryClient.invalidateQueries(['media']);
       // Also invalidate the event query to get updated swipe logs
       queryClient.invalidateQueries(['event', event._id]);
-      
-      // Modal is already closed for full screen mode
-      // Only call onSwiped for non-full screen mode
-      if (!fullScreen && onSwiped) {
-        setTimeout(() => {
-          onSwiped();
-        }, 500);
-      }
     },
     onError: (error) => {
-      console.error('❌ Swipe error (non-blocking):', error);
-      // Don't show error to user - modal is already closed
+      console.error('❌ Swipe mutation error:', error);
+      console.error('Error details:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status
+      });
+      setIsProcessing(false);
+      
       // Still invalidate queries to refresh data
       queryClient.invalidateQueries(['events']);
       queryClient.invalidateQueries(['allEvents']);
@@ -188,14 +186,44 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
     
     // Validate that we have a file
     const reactionFile = (reaction.file && reaction.file.size > 0) ? reaction.file : null;
+    
+    if (!reactionFile) {
+      console.warn('⚠️ No file in reaction, submitting swipe without video');
+    } else {
+      console.log('📹 File ready:', {
+        name: reactionFile.name,
+        size: reactionFile.size,
+        type: reactionFile.type
+      });
+    }
+    
     const responseTime = Date.now() - startTime;
     
     // Submit swipe mutation - this will upload the video if available
+    console.log('Submitting swipe mutation with reaction data...');
     swipeMutation.mutate({
       direction: reaction.swipeDirection,
       responseTime,
       emotionData: reaction.emotion,
       reactionFile: reactionFile
+    }, {
+      onSuccess: () => {
+        // Close modal after video is uploaded and swipe is submitted
+        if (fullScreen && onSwiped) {
+          console.log('Swipe with video submitted successfully, closing modal');
+          onSwiped(event._id);
+        }
+        setIsProcessing(false);
+      },
+      onError: (error) => {
+        console.error('Error submitting swipe with video:', error);
+        // Close modal even on error
+        if (fullScreen && onSwiped) {
+          console.log('Swipe with video failed, closing modal');
+          onSwiped(event._id);
+        }
+        setIsProcessing(false);
+      }
     });
   };
 
@@ -205,40 +233,57 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
       return;
     }
     
-    // Mark as processing immediately
+    // Mark as processing immediately to prevent duplicate clicks
     setSwiped(true);
     setIsProcessing(true);
-    
-    // Close modal immediately
-    if (fullScreen && onSwiped) {
-      console.log('Closing modal immediately');
-      onSwiped(event._id);
-    }
     
     const swipeDirection = direction === 'right' ? 'right' : 'left';
     const responseTime = Date.now() - startTime;
     
+    console.log('Button clicked, direction:', swipeDirection);
+    
     // If recording is active, stop it and wait for the video
     if (recorderRef.current && recorderRef.current.isRecording && recorderRef.current.isRecording()) {
-      console.log('Stopping recording...');
+      console.log('Recording is active, stopping recording...');
       try {
         // Stop recording - this will call handleReactionRecorded when done
+        // Don't close modal yet - wait for recording to finish
         recorderRef.current.stopRecording(swipeDirection);
-        // handleReactionRecorded will handle the mutation
+        // handleReactionRecorded will handle the mutation and close the modal
+        console.log('Recording stop requested, waiting for video to process...');
         return;
       } catch (error) {
         console.error('Error stopping recording:', error);
-        // Continue without video if recording fails
+        // If stopping fails, continue without video
       }
+    } else {
+      console.log('No active recording, submitting swipe without video');
     }
     
     // No recording or recording failed, submit swipe without video
-    console.log('Submitting swipe without video');
+    // Close modal after submitting (or it will close in onSuccess)
     swipeMutation.mutate({
       direction: swipeDirection,
       responseTime,
       emotionData: null,
       reactionFile: null
+    }, {
+      onSuccess: () => {
+        // Close modal after swipe is submitted
+        if (fullScreen && onSwiped) {
+          console.log('Swipe submitted, closing modal');
+          onSwiped(event._id);
+        }
+        setIsProcessing(false);
+      },
+      onError: () => {
+        // Close modal even on error
+        if (fullScreen && onSwiped) {
+          console.log('Swipe failed, closing modal');
+          onSwiped(event._id);
+        }
+        setIsProcessing(false);
+      }
     });
   };
 
@@ -361,9 +406,9 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
           ref={recorderRef}
           onReactionRecorded={handleReactionRecorded}
           eventId={event._id}
-          showVideo={!swiped} // Hide video after swipe, but keep component mounted
+          showVideo={!swiped} // Hide video after processing starts, but keep component mounted
           overlayContent={
-            !swiped ? (
+            !swiped && !isProcessing ? (
               <div className="absolute inset-0 flex items-center justify-center z-30 pointer-events-none">
                 <div className="w-full max-w-3xl mx-auto px-4 pointer-events-auto" style={{ height: '80%' }}>
                   <div className="relative w-full h-full">
@@ -371,7 +416,12 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
                   </div>
                 </div>
               </div>
-            ) : null // Hide overlay after swipe, but keep recorder mounted
+            ) : isProcessing ? (
+              // Show processing message while video is being processed
+              <div className="absolute inset-0 flex items-center justify-center z-30 bg-black bg-opacity-50">
+                <div className="text-white text-xl">Processing video...</div>
+              </div>
+            ) : null // Hide overlay after processing completes
           }
         />
       </div>
