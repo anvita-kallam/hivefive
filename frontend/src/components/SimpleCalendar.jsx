@@ -252,7 +252,7 @@ function EventModal({ selectedDate, event, onClose, onSubmit, isLoading }) {
         startTime: format(new Date(event.startTime), "yyyy-MM-dd'T'HH:mm"),
         endTime: format(new Date(event.endTime), "yyyy-MM-dd'T'HH:mm"),
         location: event.location || '',
-        color: event.color || '#3B82F6',
+        color: event.color || '#C17D3A',
         allDay: event.allDay || false
       };
     }
@@ -263,7 +263,7 @@ function EventModal({ selectedDate, event, onClose, onSubmit, isLoading }) {
         startTime: format(createDateWithHours(new Date(selectedDate), 9), "yyyy-MM-dd'T'HH:mm"),
         endTime: format(createDateWithHours(new Date(selectedDate), 10), "yyyy-MM-dd'T'HH:mm"),
         location: '',
-        color: '#FFC30B',
+        color: '#C17D3A',
         allDay: false
       };
     }

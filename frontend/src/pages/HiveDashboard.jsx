@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../config/api';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
-import { ArrowLeft, Calendar, MapPin, Users, Plus, LogOut as LeaveIcon, Check, X, Hexagon } from 'lucide-react';
+import { ArrowLeft, Calendar, MapPin, Users, Plus, LogOut as LeaveIcon, Check, X } from 'lucide-react';
 import EventSwipe from '../components/EventSwipe';
 import Gallery from '../components/Gallery';
 import CreateEventModal from '../components/CreateEventModal';
@@ -312,39 +312,39 @@ function HiveDashboard() {
                     </motion.div>
                   ))
                 ) : (
-                  <p className="text-honey-amber-dark font-semibold text-center py-8">No events yet. Create your first event!</p>
+                  <p className="text-[#6B4E00] text-center py-8">No events yet. Create your first event!</p>
                 )}
               </div>
             </div>
-          </div>
 
-          {/* Sidebar - Members */}
-          <div className="lg:col-span-1">
-            <div className="honey-card p-6 sticky top-4">
-              <div className="flex items-center gap-3 mb-4">
-                <Users className="w-6 h-6 text-honey-brown" />
-                <h2 className="text-xl font-bold honey-text text-honey-brown">Members</h2>
-              </div>
-              <div className="space-y-4">
-                {hive.members && hive.members.map((member) => (
-                  <div key={member._id} className="flex items-center gap-3 buzz-hover p-2 rounded-lg hover:bg-honey-light">
-                    <img
-                      src={member.profilePhoto || `https://ui-avatars.com/api/?name=${member.name}`}
-                      alt={member.name}
-                      className="w-12 h-12 rounded-full object-cover border-2 border-honey-gold"
-                    />
-                    <div>
-                      <p className="font-bold text-honey-brown">{member.name}</p>
-                      {member.major && (
-                        <p className="text-sm text-honey-amber-dark font-medium">{member.major}</p>
-                      )}
+            {/* Sidebar - Members */}
+            <div className="lg:col-span-1">
+              <div className="honey-card p-6 sticky top-4">
+                <div className="flex items-center gap-3 mb-4">
+                  <Users className="w-5 h-5 text-[#2D1B00]" />
+                  <h2 className="text-[#2D1B00] text-xl font-medium">Members</h2>
+                </div>
+                <div className="space-y-3">
+                  {hive.members && hive.members.map((member) => (
+                    <div key={member._id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-[rgba(245,230,211,0.6)] transition-colors">
+                      <img
+                        src={member.profilePhoto || `https://ui-avatars.com/api/?name=${member.name}`}
+                        alt={member.name}
+                        className="w-10 h-10 rounded-full object-cover border-2 border-[#D4A574]"
+                      />
+                      <div>
+                        <p className="font-medium text-[#2D1B00]">{member.name}</p>
+                        {member.major && (
+                          <p className="text-sm text-[#6B4E00]">{member.major}</p>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        </main>
       </div>
 
       {/* Modals */}
@@ -366,6 +366,22 @@ function HiveDashboard() {
         />
       )}
     </div>
+  );
+}
+
+function HexagonIcon() {
+  return (
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 20 20"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className="text-[#2D1B00]"
+      style={{ color: '#2D1B00' }}
+    >
+      <circle cx="10" cy="10" r="9" stroke="currentColor" strokeWidth="2" fill="none" />
+    </svg>
   );
 }
 

@@ -4,7 +4,7 @@ import { useAuthStore } from '../store/authStore';
 import api from '../config/api';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
-import { Calendar, Users, Plus, LogOut, Hexagon } from 'lucide-react';
+import { Calendar, Users, Plus, LogOut } from 'lucide-react';
 import CalendarSync from '../components/CalendarSync';
 import SimpleCalendar from '../components/SimpleCalendar';
 import FullScreenEventInvites from '../components/FullScreenEventInvites';
