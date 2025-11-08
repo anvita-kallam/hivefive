@@ -27,16 +27,49 @@
 
 ## Verification
 
-When the server starts, you should see:
-```
-✅ Gemini API initialized with API key (Gemini 2.0 Flash)
-```
+### Check if API key is loaded:
+1. **Check your backend server logs** when it starts. You should see:
+   ```
+   ✅ Gemini API initialized with API key (gemini-1.5-flash)
+   ```
 
-If you see:
-```
-⚠️ No Gemini/Vertex AI credentials found. Buzz will use enhanced mock responses.
-```
-Then the API key is not being loaded correctly.
+2. **If you see this instead:**
+   ```
+   ⚠️ No Gemini/Vertex AI credentials found. Buzz will use enhanced mock responses.
+   ```
+   Then the API key is not being loaded correctly.
+
+### Debugging Steps:
+1. **Verify `.env` file exists** in `backend/` directory:
+   ```bash
+   cd backend
+   ls -la .env
+   ```
+
+2. **Check if the key is set**:
+   ```bash
+   cd backend
+   node -e "require('dotenv').config(); console.log('Key set:', !!process.env.GEMINI_API_KEY);"
+   ```
+
+3. **Make sure the server is restarted** after creating/updating `.env`:
+   ```bash
+   # Stop the server (Ctrl+C) and restart:
+   npm run dev
+   ```
+
+4. **Check server logs** when you send a message in Buzz Chat. You should see:
+   ```
+   🤖 Generating Buzz response for hive: ...
+   🔑 Generative model available: true
+   🔑 Using API key: true
+   📤 Sending request to Gemini API...
+   ```
+
+5. **If you see errors**, check the detailed error logs:
+   ```
+   ❌ Error calling Gemini/Vertex AI: [error message]
+   ```
 
 ## Security Notes
 
