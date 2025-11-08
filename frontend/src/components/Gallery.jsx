@@ -16,14 +16,17 @@ function Gallery({ hiveId, eventId, onClose }) {
   const [reviewRating, setReviewRating] = useState(5);
   const [selectedMedia, setSelectedMedia] = useState(null);
   const [showReviewForm, setShowReviewForm] = useState(null);
+  const [filter, setFilter] = useState('all'); // 'all', 'photos', 'reactions'
 
   const { data: media, isLoading } = useQuery({
     queryKey: ['media', hiveId, eventId],
     queryFn: async () => {
       const endpoint = eventId ? `/media/event/${eventId}` : `/media/hive/${hiveId}`;
       const response = await api.get(endpoint);
+      console.log('Gallery: Fetched media', { endpoint, count: response.data?.length, reactions: response.data?.filter(m => m.isReaction)?.length });
       return response.data;
-    }
+    },
+    refetchOnWindowFocus: true
   });
 
   const uploadMutation = useMutation({
@@ -299,14 +302,14 @@ function Gallery({ hiveId, eventId, onClose }) {
                         
                         {/* Reaction badge */}
                         {item.isReaction && (
-                          <div className="absolute top-2 right-2 bg-yellow-400 text-black px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+                          <div className="absolute top-2 right-2 bg-yellow-400 text-black px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1 z-10">
                             {emotionEmoji} Reaction
                           </div>
                         )}
                         
                         {/* Emotion indicator */}
                         {emotion && (
-                          <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 text-white px-2 py-1 rounded text-xs">
+                          <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 text-white px-2 py-1 rounded text-xs z-10">
                             {emotionEmoji} {emotion.dominant ? emotion.dominant.charAt(0).toUpperCase() + emotion.dominant.slice(1) : 'Neutral'}
                           </div>
                         )}
