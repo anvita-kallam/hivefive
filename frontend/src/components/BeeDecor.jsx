@@ -29,7 +29,7 @@ export function BeeDecor() {
   );
 }
 
-function HoneycombPattern({ scale = 1 }: { scale?: number }) {
+function HoneycombPattern({ scale = 1 }) {
   const baseSize = 120;
   const size = baseSize * scale;
   
@@ -47,7 +47,7 @@ function HoneycombPattern({ scale = 1 }: { scale?: number }) {
   );
 }
 
-function HexagonPath({ x, y }: { x: number; y: number }) {
+function HexagonPath({ x, y }) {
   return (
     <path
       d={`M ${x + 26} ${y + 0} L ${x + 52} ${y + 15} L ${x + 52} ${y + 45} L ${x + 26} ${y + 60} L ${x + 0} ${y + 45} L ${x + 0} ${y + 15} Z`}
