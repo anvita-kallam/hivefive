@@ -127,15 +127,13 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
       // Also invalidate the event query to get updated swipe logs
       queryClient.invalidateQueries(['event', event._id]);
       
-      // For full screen mode, call onSwiped callback to close modal
+      // For full screen mode, close modal immediately
       if (fullScreen) {
-        // Show success message briefly, then close modal
-        setTimeout(() => {
-          // Call onSwiped callback if provided (this will close the modal)
-          if (onSwiped) {
-            onSwiped();
-          }
-        }, 1500); // 1.5 seconds to see the success message
+        // Close modal immediately (don't wait for success message)
+        if (onSwiped) {
+          // Call immediately to close the modal
+          onSwiped();
+        }
       } else {
         // Call onSwiped callback if provided (for non-full screen mode)
         if (onSwiped) {
@@ -332,26 +330,9 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
 
   // For full screen mode, show recorder with card overlay
   if (fullScreen) {
-    // If swiped, show success message
+    // If swiped, return null (modal will close via onSwiped callback)
     if (swiped) {
-      return (
-        <div className={containerClass}>
-          <div className="w-full h-full flex items-center justify-center">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="honey-card p-8 md:p-12 rounded-3xl text-center max-w-md"
-            >
-              <h3 className="text-3xl md:text-4xl font-medium text-[#2D1B00] mb-4">
-                Thanks for your response! 🎉
-              </h3>
-              <p className="text-xl text-[#6B4E00]">
-                Your reaction has been recorded
-              </p>
-            </motion.div>
-          </div>
-        </div>
-      );
+      return null;
     }
     
     // Show card with recording
