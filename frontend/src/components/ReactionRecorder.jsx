@@ -65,7 +65,7 @@ function ReactionRecorder({ onReactionRecorded, eventId, swipeDirection = null }
           stack: localError.stack
         });
         
-        // Try unpkg CDN as fallback (more reliable than jsdelivr for face-api.js)
+        // Try unpkg CDN as fallback (more reliable)
         try {
           console.warn('Trying unpkg CDN fallback...');
           const CDN_URL = 'https://unpkg.com/face-api.js@0.22.2/weights';
@@ -79,7 +79,7 @@ function ReactionRecorder({ onReactionRecorded, eventId, swipeDirection = null }
           setModelsLoaded(true);
         } catch (cdnError) {
           console.error('Error loading face-api models from CDN:', cdnError);
-          console.warn('Continuing without emotion detection - recording will still work');
+          console.warn('⚠️ Continuing without emotion detection - recording will still work');
           // Allow component to continue even if models fail (users can still record)
           setModelsLoaded(false);
           // Don't set error - allow recording without emotion detection
