@@ -43,9 +43,14 @@ firebase-admin-sdk.json
 
 # Google credentials
 credentials.json
+*-admin-sdk.json
+# Allow configuration JSON files
+!cors.json
+# Block other JSON files except package files
 *.json
 !package.json
 !package-lock.json
+!cors.json
 
 # Coverage
 coverage/
