@@ -55,7 +55,8 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
             fileType: 'video',
             caption: `Reaction: ${direction === 'right' ? 'Accepted' : 'Declined'}`,
             facialSentiment: emotionData,
-            isReaction: true
+            isReaction: true,
+            swipeDirection: direction
           });
 
           reactionMediaId = mediaResponse.data._id;

@@ -8,6 +8,7 @@ import { ArrowLeft, Calendar, MapPin, Users, Plus, LogOut as LeaveIcon, Check, X
 import EventSwipe from '../components/EventSwipe';
 import Gallery from '../components/Gallery';
 import CreateEventModal from '../components/CreateEventModal';
+import EventReactions from '../components/EventReactions';
 import { BeeDecor, BeeLogo } from '../components/BeeDecor.jsx';
 
 function HiveDashboard() {
@@ -311,6 +312,9 @@ function HiveDashboard() {
                               View Media
                             </button>
                           </div>
+
+                          {/* Event Reactions */}
+                          <EventReactions eventId={event._id} />
                     </motion.div>
                   ))
                 ) : (

@@ -22,6 +22,15 @@ router.get('/hive/:hiveId', authenticateToken, async (req, res) => {
       .populate('createdBy', 'name profilePhoto')
       .populate('acceptedBy', 'name profilePhoto')
       .populate('declinedBy', 'name profilePhoto')
+      .populate({
+        path: 'swipeLogs.reactionMediaId',
+        select: 'fileURL fileType facialSentiment caption uploaderID',
+        populate: {
+          path: 'uploaderID',
+          select: 'name profilePhoto'
+        }
+      })
+      .populate('swipeLogs.userID', 'name profilePhoto')
       .sort({ createdAt: -1 });
     
     res.json(events);
@@ -36,7 +45,16 @@ router.get('/:id', authenticateToken, async (req, res) => {
     const event = await Event.findById(req.params.id)
       .populate('createdBy', 'name profilePhoto')
       .populate('acceptedBy', 'name profilePhoto')
-      .populate('declinedBy', 'name profilePhoto');
+      .populate('declinedBy', 'name profilePhoto')
+      .populate({
+        path: 'swipeLogs.reactionMediaId',
+        select: 'fileURL fileType facialSentiment caption uploaderID',
+        populate: {
+          path: 'uploaderID',
+          select: 'name profilePhoto'
+        }
+      })
+      .populate('swipeLogs.userID', 'name profilePhoto');
     
     if (!event) {
       return res.status(404).json({ error: 'Event not found' });
@@ -179,6 +197,7 @@ router.post('/:id/swipe', authenticateToken, async (req, res) => {
       swipeDirection,
       responseTime: responseTime || 0,
       emotionData: emotionData || null,
+      reactionMediaId: reactionMediaId || null,
       timestamp: new Date()
     };
     event.swipeLogs.push(swipeLog);
@@ -250,7 +269,16 @@ router.post('/:id/swipe', authenticateToken, async (req, res) => {
     const populatedEvent = await Event.findById(event._id)
       .populate('createdBy', 'name profilePhoto')
       .populate('acceptedBy', 'name profilePhoto')
-      .populate('declinedBy', 'name profilePhoto');
+      .populate('declinedBy', 'name profilePhoto')
+      .populate({
+        path: 'swipeLogs.reactionMediaId',
+        select: 'fileURL fileType facialSentiment caption uploaderID',
+        populate: {
+          path: 'uploaderID',
+          select: 'name profilePhoto'
+        }
+      })
+      .populate('swipeLogs.userID', 'name profilePhoto');
     
     console.log('Swipe update successful');
     res.json(populatedEvent);

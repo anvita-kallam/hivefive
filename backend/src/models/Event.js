@@ -22,6 +22,11 @@ const swipeLogSchema = new mongoose.Schema({
   emotionData: {
     type: Object, // Store emotion detection results from camera
     default: null
+  },
+  reactionMediaId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Media',
+    default: null
   }
 }, { _id: false });
 
