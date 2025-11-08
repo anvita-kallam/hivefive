@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import TinderCard from 'react-tinder-card';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../config/api';
@@ -13,9 +13,9 @@ import { useAuthStore } from '../store/authStore';
 function EventSwipe({ event, onSwiped, fullScreen = false }) {
   const [swiped, setSwiped] = useState(false);
   const [startTime] = useState(Date.now());
-  const [showReaction, setShowReaction] = useState(false);
   const [reactionData, setReactionData] = useState(null);
   const swipeRef = useRef(null);
+  const recorderRef = useRef(null);
   const queryClient = useQueryClient();
   const { user } = useAuthStore();
 
@@ -152,10 +152,12 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
   const handleSwipe = (direction) => {
     if (swiped) return;
     
-    // For full screen mode, show reaction recorder
-    if (fullScreen) {
-      setShowReaction(true);
-      return;
+    // For full screen mode, stop recording and save with swipe direction
+    if (fullScreen && recorderRef.current) {
+      const swipeDirection = direction === 'right' ? 'right' : 'left';
+      // Stop recording with the swipe direction
+      recorderRef.current.stopRecording(swipeDirection);
+      return; // Don't proceed with swipe yet, wait for recording to complete
     }
     
     // For non-full screen, proceed without reaction
@@ -169,6 +171,8 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
       reactionFile: null
     });
   };
+
+  // Recording will start automatically when ReactionRecorder models are loaded
 
   if (swiped && !fullScreen) {
     return (
@@ -199,32 +203,12 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
     ? "text-xl md:text-2xl text-[#6B4E00] mb-6"
     : "text-[#6B4E00]";
 
-  // Show reaction recorder overlay in full screen mode
-  if (showReaction && fullScreen && reactionData?.swipeDirection) {
-    return (
-      <div className={containerClass}>
-        <ReactionRecorder
-          onReactionRecorded={handleReactionRecorded}
-          eventId={event._id}
-          swipeDirection={reactionData.swipeDirection}
-        />
-      </div>
-    );
-  }
-
-  return (
-    <div className={containerClass}>
-      <TinderCard
-        ref={swipeRef}
-        className="absolute w-full h-full"
-        onSwipe={handleSwipe}
-        preventSwipe={['up', 'down']}
-        swipeThreshold={50}
-      >
-        <motion.div
-          className={cardClass}
-          whileHover={fullScreen ? {} : { scale: 1.02 }}
-        >
+  // Render the swipe card content
+  const swipeCardContent = (
+    <motion.div
+      className={cardClass}
+      whileHover={fullScreen ? {} : { scale: 1.02 }}
+    >
           {/* Header */}
           <div className="mb-6 md:mb-8">
             <h3 className={titleClass}>{event.title}</h3>
@@ -292,7 +276,45 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
               <p className={`text-center text-[#6B4E00] mt-4 ${fullScreen ? 'text-lg md:text-xl' : 'text-xs'}`}>
                 Swipe right to accept, left to decline
               </p>
-        </motion.div>
+    </motion.div>
+  );
+
+  // For full screen mode, show recorder with card overlay
+  if (fullScreen && !swiped) {
+    return (
+      <div className={containerClass}>
+        <ReactionRecorder
+          ref={recorderRef}
+          onReactionRecorded={handleReactionRecorded}
+          eventId={event._id}
+          showVideo={false}
+          overlayContent={
+            <TinderCard
+              ref={swipeRef}
+              className="absolute w-full h-full"
+              onSwipe={handleSwipe}
+              preventSwipe={['up', 'down']}
+              swipeThreshold={50}
+            >
+              {swipeCardContent}
+            </TinderCard>
+          }
+        />
+      </div>
+    );
+  }
+
+  // For non-full screen mode, show card normally
+  return (
+    <div className={containerClass}>
+      <TinderCard
+        ref={swipeRef}
+        className="absolute w-full h-full"
+        onSwipe={handleSwipe}
+        preventSwipe={['up', 'down']}
+        swipeThreshold={50}
+      >
+        {swipeCardContent}
       </TinderCard>
     </div>
   );

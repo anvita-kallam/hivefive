@@ -1,24 +1,61 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
 import * as faceapi from 'face-api.js';
 
-function ReactionRecorder({ onReactionRecorded, eventId, swipeDirection = null }) {
+const ReactionRecorder = forwardRef(({ 
+  onReactionRecorded, 
+  eventId, 
+  swipeDirection = null,
+  showVideo = false,
+  overlayContent = null
+}, ref) => {
   const [swipeDir, setSwipeDir] = useState(swipeDirection);
   const [isRecording, setIsRecording] = useState(false);
   const [modelsLoaded, setModelsLoaded] = useState(false);
   const [emotion, setEmotion] = useState(null);
   const [error, setError] = useState(null);
+  const [isReady, setIsReady] = useState(false);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const streamRef = useRef(null);
-  const recordingRef = useRef(null);
+  const recordingRef = useRef(false);
   const mediaRecorderRef = useRef(null);
   const chunksRef = useRef([]);
   const emotionIntervalRef = useRef(null);
+  const stopRecordingTimeoutRef = useRef(null);
+
+  // Expose methods to parent via ref
+  useImperativeHandle(ref, () => ({
+    startRecording: async () => {
+      if (!recordingRef.current) {
+        await startRecording();
+      }
+    },
+    stopRecording: (direction) => {
+      if (recordingRef.current) {
+        stopRecordingManually(direction);
+      }
+    },
+    isRecording: () => recordingRef.current
+  }));
+
+  // Auto-start recording when models are loaded (for full screen mode)
+  useEffect(() => {
+    if (modelsLoaded && !streamRef.current && !recordingRef.current) {
+      // Start camera and recording automatically
+      startCamera().then(() => {
+        // Small delay to ensure camera is ready
+        setTimeout(() => {
+          if (!recordingRef.current) {
+            startRecording();
+          }
+        }, 500);
+      });
+    }
+  }, [modelsLoaded]);
 
   // Load face-api models
   useEffect(() => {
     const loadModels = async () => {
-      // Try loading from jsdelivr CDN (most reliable for face-api.js models)
       const CDN_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model';
       
       try {
@@ -34,7 +71,6 @@ function ReactionRecorder({ onReactionRecorded, eventId, swipeDirection = null }
       } catch (cdnError) {
         console.error('Error loading face-api models from CDN:', cdnError);
         
-        // Try local models as fallback
         try {
           console.warn('Trying local models folder...');
           const MODEL_URL = '/models';
@@ -49,9 +85,7 @@ function ReactionRecorder({ onReactionRecorded, eventId, swipeDirection = null }
         } catch (localError) {
           console.error('Error loading face-api models from local:', localError);
           console.warn('⚠️ Continuing without emotion detection - recording will still work');
-          // Allow component to continue even if models fail (users can still record)
           setModelsLoaded(false);
-          // Don't set error - allow recording without emotion detection
         }
       }
     };
@@ -59,22 +93,23 @@ function ReactionRecorder({ onReactionRecorded, eventId, swipeDirection = null }
     loadModels();
 
     return () => {
-      // Cleanup
       if (streamRef.current) {
         streamRef.current.getTracks().forEach(track => track.stop());
       }
       if (emotionIntervalRef.current) {
         clearInterval(emotionIntervalRef.current);
       }
+      if (stopRecordingTimeoutRef.current) {
+        clearTimeout(stopRecordingTimeoutRef.current);
+      }
     };
   }, []);
 
-  // Start camera and recording
-  const startRecording = async () => {
+  // Start camera
+  const startCamera = async () => {
     try {
       setError(null);
       
-      // Request camera access
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { 
           width: { ideal: 640 },
@@ -89,18 +124,41 @@ function ReactionRecorder({ onReactionRecorded, eventId, swipeDirection = null }
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         await videoRef.current.play();
+        setIsReady(true);
       }
 
       // Start emotion detection (if models are loaded)
       if (modelsLoaded && canvasRef.current && videoRef.current) {
         detectEmotions();
-        emotionIntervalRef.current = setInterval(detectEmotions, 500); // Check every 500ms
-      } else {
-        console.warn('Models not loaded, recording without emotion detection');
+        emotionIntervalRef.current = setInterval(detectEmotions, 500);
+      }
+    } catch (err) {
+      console.error('Error starting camera:', err);
+      setError('Failed to access camera. Please allow camera access and try again.');
+    }
+  };
+
+  // Start recording
+  const startRecording = async () => {
+    if (isRecording || recordingRef.current) {
+      console.log('Already recording, skipping start');
+      return;
+    }
+
+    try {
+      // If camera isn't started, start it first
+      if (!streamRef.current || !isReady) {
+        await startCamera();
+        // Wait a bit for camera to be ready
+        await new Promise(resolve => setTimeout(resolve, 300));
+      }
+
+      if (!streamRef.current) {
+        throw new Error('Camera stream not available');
       }
 
       // Start video recording
-      const mediaRecorder = new MediaRecorder(stream, {
+      const mediaRecorder = new MediaRecorder(streamRef.current, {
         mimeType: 'video/webm;codecs=vp9'
       });
 
@@ -112,35 +170,32 @@ function ReactionRecorder({ onReactionRecorded, eventId, swipeDirection = null }
       };
 
       mediaRecorder.onstop = async () => {
+        console.log('Recording stopped. Processing data...');
         const blob = new Blob(chunksRef.current, { type: 'video/webm' });
         
-        // Convert to file
         const file = new File([blob], `reaction-${Date.now()}.webm`, { type: 'video/webm' });
         
-        // Get the final emotion detection (if models are loaded)
-        // Try to get emotion even if models weren't fully loaded
+        // Get final emotion
         let finalEmotion = null;
         try {
           if (modelsLoaded) {
             finalEmotion = await detectEmotionsOnce();
           } else if (emotion) {
-            // Use the last detected emotion if we have one
             finalEmotion = emotion;
           }
         } catch (error) {
           console.warn('Error detecting final emotion:', error);
-          // Use last known emotion if available
           if (emotion) {
             finalEmotion = emotion;
           }
         }
         
-        // Call callback with reaction data (emotion may be null, but file should always be provided)
+        // Call callback
         if (onReactionRecorded) {
           onReactionRecorded({
             file,
             emotion: finalEmotion,
-            swipeDirection: swipeDir
+            swipeDirection: swipeDir || swipeDirection
           });
         }
 
@@ -151,29 +206,45 @@ function ReactionRecorder({ onReactionRecorded, eventId, swipeDirection = null }
         if (videoRef.current) {
           videoRef.current.srcObject = null;
         }
+        chunksRef.current = [];
+        setIsRecording(false);
+        recordingRef.current = false;
+        setIsReady(false);
       };
 
       mediaRecorderRef.current = mediaRecorder;
       mediaRecorder.start();
       setIsRecording(true);
       recordingRef.current = true;
+      console.log('✅ Recording started');
 
-      // Auto-stop after 3 seconds (enough for a reaction)
-      setTimeout(() => {
+      // Auto-stop after 15 seconds max
+      stopRecordingTimeoutRef.current = setTimeout(() => {
         if (recordingRef.current) {
+          console.log('⏱️ Auto-stopping recording after 15 seconds');
           stopRecording();
         }
-      }, 3000);
+      }, 15000);
 
     } catch (err) {
       console.error('Error starting recording:', err);
-      setError('Failed to access camera. Please allow camera access and try again.');
+      setError('Failed to start recording. Please try again.');
     }
+  };
+
+  // Stop recording manually (called when swipe completes)
+  const stopRecordingManually = (direction) => {
+    if (stopRecordingTimeoutRef.current) {
+      clearTimeout(stopRecordingTimeoutRef.current);
+    }
+    setSwipeDir(direction);
+    stopRecording();
   };
 
   // Stop recording
   const stopRecording = () => {
-    if (mediaRecorderRef.current && recordingRef.current) {
+    if (mediaRecorderRef.current && recordingRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      console.log('🛑 Stopping recording...');
       recordingRef.current = false;
       mediaRecorderRef.current.stop();
       setIsRecording(false);
@@ -186,21 +257,18 @@ function ReactionRecorder({ onReactionRecorded, eventId, swipeDirection = null }
 
   // Detect emotions from video frame
   const detectEmotions = async () => {
-    if (!videoRef.current || !canvasRef.current || !modelsLoaded) return;
+    if (!videoRef.current || !canvasRef.current || !modelsLoaded || !videoRef.current.readyState) return;
 
     try {
       const video = videoRef.current;
       const canvas = canvasRef.current;
       
-      // Set canvas size to match video
       canvas.width = video.videoWidth || 640;
       canvas.height = video.videoHeight || 480;
 
-      // Draw video frame to canvas
       const ctx = canvas.getContext('2d');
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-      // Detect faces and expressions
       const detection = await faceapi
         .detectSingleFace(canvas, new faceapi.TinyFaceDetectorOptions())
         .withFaceLandmarks()
@@ -208,16 +276,10 @@ function ReactionRecorder({ onReactionRecorded, eventId, swipeDirection = null }
 
       if (detection) {
         const expressions = detection.expressions;
-        
-        // Get the dominant emotion
         const dominantEmotion = Object.keys(expressions).reduce((a, b) => 
           expressions[a] > expressions[b] ? a : b
         );
 
-        // Calculate sentiment score (-1 to 1)
-        // Positive emotions: happy, surprised
-        // Negative emotions: sad, angry, fearful, disgusted
-        // Neutral: neutral
         let sentiment = 0;
         if (dominantEmotion === 'happy') sentiment = 0.8;
         else if (dominantEmotion === 'surprised') sentiment = 0.6;
@@ -291,12 +353,8 @@ function ReactionRecorder({ onReactionRecorded, eventId, swipeDirection = null }
   useEffect(() => {
     if (swipeDirection) {
       setSwipeDir(swipeDirection);
-      // Start recording when swipe direction is set and models are loaded
-      if (modelsLoaded && !isRecording && !recordingRef.current) {
-        startRecording();
-      }
     }
-  }, [swipeDirection, modelsLoaded]);
+  }, [swipeDirection]);
 
   if (error) {
     return (
@@ -314,51 +372,78 @@ function ReactionRecorder({ onReactionRecorded, eventId, swipeDirection = null }
 
   return (
     <div className="relative w-full h-full">
-      {/* Video preview */}
-      <video
-        ref={videoRef}
-        autoPlay
-        playsInline
-        muted
-        className="w-full h-full object-cover rounded-lg"
-        style={{ transform: 'scaleX(-1)' }} // Mirror effect
-      />
+      {/* Video preview (hidden if showVideo is false) */}
+      {showVideo && (
+        <>
+          <video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            muted
+            className="w-full h-full object-cover rounded-lg"
+            style={{ transform: 'scaleX(-1)' }}
+          />
+          <canvas
+            ref={canvasRef}
+            className="hidden"
+          />
+        </>
+      )}
+      
+      {/* Hidden video and canvas for recording even if not showing video */}
+      {!showVideo && (
+        <>
+          <video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            muted
+            className="hidden"
+          />
+          <canvas
+            ref={canvasRef}
+            className="hidden"
+          />
+        </>
+      )}
 
-      {/* Hidden canvas for face detection */}
-      <canvas
-        ref={canvasRef}
-        className="hidden"
-      />
-
-      {/* Emotion overlay */}
-      {emotion && (
-        <div className="absolute top-4 left-4 bg-black bg-opacity-50 text-white px-4 py-2 rounded-lg">
-          <div className="text-sm font-medium capitalize">
-            {emotion.dominant} ({Math.round(emotion.confidence * 100)}%)
-          </div>
-          <div className="text-xs">
-            Sentiment: {emotion.sentiment > 0 ? '😊' : emotion.sentiment < 0 ? '😢' : '😐'}
-          </div>
+      {/* Overlay content (the swipe card) */}
+      {overlayContent && (
+        <div className="absolute inset-0 z-20 pointer-events-auto">
+          {overlayContent}
         </div>
       )}
 
       {/* Recording indicator */}
       {isRecording && (
-        <div className="absolute top-4 right-4 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-medium flex items-center gap-2">
+        <div className="absolute top-4 right-4 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-medium flex items-center gap-2 z-30">
           <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
           Recording
         </div>
       )}
 
-      {/* Instructions */}
-      {!isRecording && modelsLoaded && (
-        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-50 text-white px-4 py-2 rounded-lg text-sm text-center">
-          Show your reaction! 📸
+      {/* Emotion indicator */}
+      {emotion && showVideo && (
+        <div className="absolute top-4 left-4 bg-black bg-opacity-50 text-white px-3 py-1 rounded-full text-sm z-30">
+          {emotion.dominant === 'happy' ? '😊 Happy' :
+           emotion.dominant === 'sad' ? '😢 Sad' :
+           emotion.dominant === 'angry' ? '😠 Angry' :
+           emotion.dominant === 'surprised' ? '😲 Surprised' :
+           emotion.dominant === 'fearful' ? '😨 Fearful' :
+           emotion.dominant === 'disgusted' ? '🤢 Disgusted' : '😐 Neutral'}
+        </div>
+      )}
+
+      {/* Status message */}
+      {!isReady && modelsLoaded && (
+        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-50 text-white px-4 py-2 rounded-lg text-sm z-30">
+          Starting camera...
         </div>
       )}
     </div>
   );
-}
+});
+
+ReactionRecorder.displayName = 'ReactionRecorder';
 
 export default ReactionRecorder;
-
