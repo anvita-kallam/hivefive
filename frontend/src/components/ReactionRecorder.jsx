@@ -185,6 +185,8 @@ const ReactionRecorder = forwardRef(({
       });
 
       chunksRef.current = [];
+      
+      // Set up data handler
       mediaRecorder.ondataavailable = (e) => {
         if (e.data && e.data.size > 0) {
           chunksRef.current.push(e.data);
@@ -192,6 +194,7 @@ const ReactionRecorder = forwardRef(({
         }
       };
 
+      // Set up stop handler
       mediaRecorder.onstop = async () => {
         console.log('Recording stopped. Processing data...', {
           chunks: chunksRef.current.length,
