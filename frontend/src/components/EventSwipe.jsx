@@ -21,9 +21,9 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
 
   const swipeMutation = useMutation({
     mutationFn: async ({ direction, responseTime, emotionData, reactionFile }) => {
-      // If we have a reaction file, upload it first
+      // If we have a reaction file, upload it (even if emotionData is null)
       let reactionMediaId = null;
-      if (reactionFile && emotionData) {
+      if (reactionFile) {
         try {
           // Upload reaction video to Firebase Storage
           const { auth } = await import('../config/firebase');
@@ -48,18 +48,19 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
           await uploadBytes(fileRef, reactionFile, metadata);
           const fileURL = await getDownloadURL(fileRef);
 
-          // Upload reaction metadata to backend
+          // Upload reaction metadata to backend (emotionData may be null if face detection failed)
           const mediaResponse = await api.post('/media', {
             eventID: event._id,
             fileURL,
             fileType: 'video',
             caption: `Reaction: ${direction === 'right' ? 'Accepted' : 'Declined'}`,
-            facialSentiment: emotionData,
+            facialSentiment: emotionData || null,
             isReaction: true,
             swipeDirection: direction
           });
 
           reactionMediaId = mediaResponse.data._id;
+          console.log('Reaction video uploaded successfully:', reactionMediaId);
         } catch (error) {
           console.error('Error uploading reaction:', error);
           // Continue with swipe even if reaction upload fails

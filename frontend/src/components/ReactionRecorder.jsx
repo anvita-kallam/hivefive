@@ -118,12 +118,24 @@ function ReactionRecorder({ onReactionRecorded, eventId, swipeDirection = null }
         const file = new File([blob], `reaction-${Date.now()}.webm`, { type: 'video/webm' });
         
         // Get the final emotion detection (if models are loaded)
+        // Try to get emotion even if models weren't fully loaded
         let finalEmotion = null;
-        if (modelsLoaded) {
-          finalEmotion = await detectEmotionsOnce();
+        try {
+          if (modelsLoaded) {
+            finalEmotion = await detectEmotionsOnce();
+          } else if (emotion) {
+            // Use the last detected emotion if we have one
+            finalEmotion = emotion;
+          }
+        } catch (error) {
+          console.warn('Error detecting final emotion:', error);
+          // Use last known emotion if available
+          if (emotion) {
+            finalEmotion = emotion;
+          }
         }
         
-        // Call callback with reaction data (emotion may be null if models aren't loaded)
+        // Call callback with reaction data (emotion may be null, but file should always be provided)
         if (onReactionRecorded) {
           onReactionRecorded({
             file,

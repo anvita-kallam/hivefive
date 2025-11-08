@@ -152,6 +152,17 @@ function Gallery({ hiveId, eventId, onClose }) {
     });
   };
 
+  // Filter media based on selected filter
+  const filteredMedia = media?.filter(item => {
+    if (filter === 'reactions') return item.isReaction === true;
+    if (filter === 'photos') return item.isReaction !== true;
+    return true; // 'all' shows everything
+  }) || [];
+
+  // Count media types
+  const reactionCount = media?.filter(m => m.isReaction).length || 0;
+  const photoCount = media?.filter(m => !m.isReaction).length || 0;
+
   return (
     <>
       <AnimatePresence>
@@ -182,8 +193,8 @@ function Gallery({ hiveId, eventId, onClose }) {
               </button>
             </div>
 
-            {/* Upload Area */}
-            <div className="p-6 border-b bg-gray-50">
+            {/* Upload Area and Filters */}
+            <div className="p-6 border-b bg-gray-50 space-y-4">
               <label className="flex items-center justify-center gap-2 px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 cursor-pointer">
                 <Upload className="w-5 h-5" />
                 {uploading ? 'Uploading...' : 'Upload Photo/Video'}
@@ -195,6 +206,42 @@ function Gallery({ hiveId, eventId, onClose }) {
                   disabled={uploading}
                 />
               </label>
+              
+              {/* Filter Tabs */}
+              {eventId && (
+                <div className="flex items-center gap-2 justify-center">
+                  <button
+                    onClick={() => setFilter('all')}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      filter === 'all'
+                        ? 'bg-primary-600 text-white'
+                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                    }`}
+                  >
+                    All ({media?.length || 0})
+                  </button>
+                  <button
+                    onClick={() => setFilter('reactions')}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      filter === 'reactions'
+                        ? 'bg-yellow-500 text-white'
+                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                    }`}
+                  >
+                    Reactions ({reactionCount})
+                  </button>
+                  <button
+                    onClick={() => setFilter('photos')}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      filter === 'photos'
+                        ? 'bg-primary-600 text-white'
+                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                    }`}
+                  >
+                    Photos ({photoCount})
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Gallery Grid */}
@@ -207,9 +254,19 @@ function Gallery({ hiveId, eventId, onClose }) {
                 <div className="text-center py-12">
                   <p className="text-gray-500">No media yet. Upload the first photo or video!</p>
                 </div>
+              ) : filteredMedia.length === 0 ? (
+                <div className="text-center py-12">
+                  <p className="text-gray-500">
+                    {filter === 'reactions' 
+                      ? 'No reactions yet. React to event invites to see them here!' 
+                      : filter === 'photos' 
+                      ? 'No photos yet. Upload the first photo!' 
+                      : 'No media found.'}
+                  </p>
+                </div>
               ) : (
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {media.map((item) => {
+                  {filteredMedia.map((item) => {
                     const emotion = item.facialSentiment;
                     const emotionEmoji = emotion?.dominant === 'happy' ? '😊' : 
                                         emotion?.dominant === 'sad' ? '😢' : 
