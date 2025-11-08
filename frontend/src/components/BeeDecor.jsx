@@ -58,7 +58,7 @@ function HexagonPath({ x, y }) {
   );
 }
 
-export function BeeLogo({ className = "", width = 32, height = 32 }) {
+export function BeeLogo({ className = "", width = 48, height = 48 }) {
   return (
     <img 
       src="/bee_logo.png" 
@@ -69,7 +69,8 @@ export function BeeLogo({ className = "", width = 32, height = 32 }) {
         height: `${height}px`, 
         objectFit: 'contain',
         backgroundColor: 'transparent',
-        background: 'transparent'
+        background: 'transparent',
+        filter: 'sepia(40%) saturate(120%) hue-rotate(5deg) brightness(0.9) contrast(1.1)'
       }}
     />
   );

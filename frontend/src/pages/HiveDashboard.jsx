@@ -211,7 +211,7 @@ function HiveDashboard() {
               >
                 <ArrowLeft className="w-5 h-5" />
               </button>
-              <BeeLogo width={32} height={32} />
+              <BeeLogo width={48} height={48} />
               <div>
                 <h1 className="text-[#2D1B00] text-xl font-medium">{hive.name}</h1>
                 <p className="text-sm text-[#6B4E00]">{hive.members?.length || 0} members</p>

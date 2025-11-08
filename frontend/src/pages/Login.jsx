@@ -46,7 +46,7 @@ function Login() {
       <div className="max-w-md w-full honey-card rounded-2xl shadow-xl p-8">
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-4">
-            <BeeLogo width={48} height={48} />
+            <BeeLogo width={64} height={64} />
             <h1 className="text-4xl font-bold text-[#2D1B00] mb-2">HiveFive</h1>
           </div>
           <p className="text-[#6B4E00]">AI-Driven Social Graph for Real-World Connection</p>
