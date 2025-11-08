@@ -62,3 +62,7 @@ coverage/
 
 *.bak
 .env.bak
+
+# Private deployment values (contains actual secrets)
+DEPLOYMENT_ENV_VALUES.local.md
+*.local.md

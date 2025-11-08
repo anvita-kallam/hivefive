@@ -76,28 +76,32 @@
 ## Environment Variables Checklist
 
 ### Frontend (Vercel)
-- [ ] `VITE_FIREBASE_API_KEY`
-- [ ] `VITE_FIREBASE_AUTH_DOMAIN`
-- [ ] `VITE_FIREBASE_PROJECT_ID`
-- [ ] `VITE_FIREBASE_STORAGE_BUCKET`
-- [ ] `VITE_FIREBASE_MESSAGING_SENDER_ID`
-- [ ] `VITE_FIREBASE_APP_ID`
-- [ ] `VITE_FIREBASE_MEASUREMENT_ID`
-- [ ] `VITE_GOOGLE_MAPS_API_KEY`
-- [ ] `VITE_API_BASE_URL` (your backend URL)
+See `DEPLOYMENT_ENV_VALUES.local.md` for all actual values.
+
+- [ ] `VITE_FIREBASE_API_KEY=AIzaSyBpgoBQkpHTKPOjBsXS8XNMf3wDQJTQSmg`
+- [ ] `VITE_FIREBASE_AUTH_DOMAIN=hivefive-477603.firebaseapp.com`
+- [ ] `VITE_FIREBASE_PROJECT_ID=hivefive-477603`
+- [ ] `VITE_FIREBASE_STORAGE_BUCKET=hivefive-477603.firebasestorage.app`
+- [ ] `VITE_FIREBASE_MESSAGING_SENDER_ID=231258515997`
+- [ ] `VITE_FIREBASE_APP_ID=1:231258515997:web:827c3520193ef0e7fcf4f4`
+- [ ] `VITE_FIREBASE_MEASUREMENT_ID=G-GC7V2BFH44`
+- [ ] `VITE_GOOGLE_MAPS_API_KEY=AIzaSyChjQubjJduS4Gcu3CAs42wZK-trub-pCM`
+- [ ] `VITE_API_BASE_URL=https://your-backend-url.railway.app/api` (update after backend deploy)
 
 ### Backend (Railway)
+See `DEPLOYMENT_ENV_VALUES.local.md` for all actual values.
+
 - [ ] `PORT=5001`
 - [ ] `NODE_ENV=production`
-- [ ] `MONGODB_URI`
-- [ ] `FIREBASE_ADMIN_SDK` (entire JSON as string)
-- [ ] `GOOGLE_CLIENT_ID`
-- [ ] `GOOGLE_CLIENT_SECRET`
-- [ ] `GOOGLE_REDIRECT_URI` (your backend URL + `/api/calendar/callback`)
-- [ ] `VERTEX_AI_PROJECT_ID`
-- [ ] `VERTEX_AI_LOCATION`
-- [ ] `JWT_SECRET` (random string)
-- [ ] `FRONTEND_URL` (your frontend URL)
+- [ ] `MONGODB_URI` (see DEPLOYMENT_ENV_VALUES.local.md)
+- [ ] `FIREBASE_ADMIN_SDK` (copy entire JSON from `DEPLOYMENT_ENV_VALUES.local.md` as single line)
+- [ ] `GOOGLE_CLIENT_ID` (get from Google Cloud Console)
+- [ ] `GOOGLE_CLIENT_SECRET` (get from Google Cloud Console)
+- [ ] `GOOGLE_REDIRECT_URI=https://your-backend-url.railway.app/api/calendar/callback` (update after deploy)
+- [ ] `VERTEX_AI_PROJECT_ID=hivefive-477603`
+- [ ] `VERTEX_AI_LOCATION=us-central1`
+- [ ] `JWT_SECRET` (generate: `openssl rand -base64 32`)
+- [ ] `FRONTEND_URL=https://your-frontend-url.vercel.app` (update after frontend deploy)
 
 ## Firebase Setup
 

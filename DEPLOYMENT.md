@@ -50,18 +50,19 @@ Vercel is the easiest option for React/Vite apps.
 
 3. **Environment Variables** (in Vercel Dashboard):
    - Go to Project Settings → Environment Variables
-   - Add all variables from `frontend/.env.local`:
+   - Add all variables (see `DEPLOYMENT_ENV_VALUES.local.md` for actual values):
      ```
-     VITE_FIREBASE_API_KEY=your-key
-     VITE_FIREBASE_AUTH_DOMAIN=your-domain
-     VITE_FIREBASE_PROJECT_ID=your-project-id
-     VITE_FIREBASE_STORAGE_BUCKET=your-bucket
-     VITE_FIREBASE_MESSAGING_SENDER_ID=your-sender-id
-     VITE_FIREBASE_APP_ID=your-app-id
-     VITE_FIREBASE_MEASUREMENT_ID=your-measurement-id
-     VITE_GOOGLE_MAPS_API_KEY=your-maps-key
-     VITE_API_BASE_URL=https://your-backend-url.com/api
+     VITE_FIREBASE_API_KEY=AIzaSyBpgoBQkpHTKPOjBsXS8XNMf3wDQJTQSmg
+     VITE_FIREBASE_AUTH_DOMAIN=hivefive-477603.firebaseapp.com
+     VITE_FIREBASE_PROJECT_ID=hivefive-477603
+     VITE_FIREBASE_STORAGE_BUCKET=hivefive-477603.firebasestorage.app
+     VITE_FIREBASE_MESSAGING_SENDER_ID=231258515997
+     VITE_FIREBASE_APP_ID=1:231258515997:web:827c3520193ef0e7fcf4f4
+     VITE_FIREBASE_MEASUREMENT_ID=G-GC7V2BFH44
+     VITE_GOOGLE_MAPS_API_KEY=AIzaSyChjQubjJduS4Gcu3CAs42wZK-trub-pCM
+     VITE_API_BASE_URL=https://your-backend-url.railway.app/api
      ```
+   - **Note**: Update `VITE_API_BASE_URL` after deploying your backend!
 
 4. **Deploy**:
    - Click "Deploy"
@@ -148,25 +149,29 @@ Railway is easy and has good MongoDB integration.
 
 4. **Environment Variables**:
    - Go to Variables tab
-   - Add all variables from `backend/.env`:
+   - Add all variables (see `DEPLOYMENT_ENV_VALUES.local.md` for actual values):
      ```
      PORT=5001
      NODE_ENV=production
-     MONGODB_URI=your-mongodb-uri
-     FIREBASE_ADMIN_SDK_PATH=./firebase-admin-sdk.json
-     GOOGLE_CLIENT_ID=your-client-id
-     GOOGLE_CLIENT_SECRET=your-client-secret
-     GOOGLE_REDIRECT_URI=https://your-backend-url.com/api/calendar/callback
-     VERTEX_AI_PROJECT_ID=your-project-id
+     MONGODB_URI=<see DEPLOYMENT_ENV_VALUES.local.md>
+     FIREBASE_ADMIN_SDK=<paste entire JSON from DEPLOYMENT_ENV_VALUES.local.md>
+     GOOGLE_CLIENT_ID=<get from Google Cloud Console>
+     GOOGLE_CLIENT_SECRET=<get from Google Cloud Console>
+     GOOGLE_REDIRECT_URI=https://your-backend-url.railway.app/api/calendar/callback
+     VERTEX_AI_PROJECT_ID=hivefive-477603
      VERTEX_AI_LOCATION=us-central1
-     JWT_SECRET=your-random-secret
+     JWT_SECRET=<generate using: openssl rand -base64 32>
+     FRONTEND_URL=https://your-frontend-url.vercel.app
      ```
+     
+   **⚠️ Important**: See `DEPLOYMENT_ENV_VALUES.local.md` (in your local project) for actual values including MongoDB URI and Firebase Admin SDK JSON.
 
 5. **Upload Firebase Admin SDK**:
    - Go to Variables tab
    - Add a variable named `FIREBASE_ADMIN_SDK`
-   - Paste the entire JSON content of your service account file
-   - Update your code to read from environment variable instead of file
+   - Copy the entire JSON content from `DEPLOYMENT_ENV_VALUES.local.md` (as a single-line string)
+   - Paste it as the value
+   - **Note**: The JSON should be minified (all on one line)
 
 6. **Deploy**:
    - Railway will auto-deploy on push to main
