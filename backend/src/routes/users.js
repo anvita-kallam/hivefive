@@ -4,6 +4,20 @@ import User from '../models/User.js';
 
 const router = express.Router();
 
+// Get current user profile (must be before /:id route)
+router.get('/me', authenticateToken, async (req, res) => {
+  try {
+    const user = await User.findOne({ email: req.user.email })
+      .select('-googleCalendarRefreshToken');
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Get user by ID
 router.get('/:id', authenticateToken, async (req, res) => {
   try {
@@ -69,7 +83,18 @@ router.put('/:id', authenticateToken, async (req, res) => {
       return res.status(403).json({ error: 'Unauthorized' });
     }
 
-    Object.assign(user, req.body);
+    // Update allowed fields
+    const { name, school, major, hobbies, resHall, hometown, birthday, profilePhoto } = req.body;
+    
+    if (name !== undefined) user.name = name;
+    if (school !== undefined) user.school = school;
+    if (major !== undefined) user.major = major;
+    if (hobbies !== undefined) user.hobbies = hobbies;
+    if (resHall !== undefined) user.resHall = resHall;
+    if (hometown !== undefined) user.hometown = hometown;
+    if (birthday !== undefined) user.birthday = birthday ? new Date(birthday) : null;
+    if (profilePhoto !== undefined) user.profilePhoto = profilePhoto;
+
     await user.save();
     res.json(user);
   } catch (error) {

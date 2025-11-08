@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuthStore } from './store/authStore';
 import UserCreationPage from './pages/UserCreationPage';
+import EditProfile from './pages/EditProfile';
 import Dashboard from './pages/Dashboard';
 import HiveDashboard from './pages/HiveDashboard';
 import CreateHive from './pages/CreateHive';
@@ -30,6 +31,14 @@ function App() {
         element={
           <ProtectedRoute>
             <UserCreationPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/edit-profile"
+        element={
+          <ProtectedRoute>
+            <EditProfile />
           </ProtectedRoute>
         }
       />

@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../config/api';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
-import { ArrowLeft, Calendar, MapPin, Users, Plus } from 'lucide-react';
+import { ArrowLeft, Calendar, MapPin, Users, Plus, LogOut as LeaveIcon, Check, X } from 'lucide-react';
 import EventSwipe from '../components/EventSwipe';
 import Gallery from '../components/Gallery';
 import CreateEventModal from '../components/CreateEventModal';
@@ -53,6 +53,63 @@ function HiveDashboard() {
     }
   });
 
+  const queryClient = useQueryClient();
+
+  // Leave hive mutation
+  const leaveHiveMutation = useMutation({
+    mutationFn: async () => {
+      return api.delete(`/hives/${hiveId}/members/me`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['hives']);
+      navigate('/dashboard');
+    },
+    onError: (error) => {
+      console.error('Error leaving hive:', error);
+      alert(error.response?.data?.error || 'Failed to leave hive');
+    }
+  });
+
+  // Change event swipe status mutation
+  const changeSwipeMutation = useMutation({
+    mutationFn: async ({ eventId, direction }) => {
+      console.log('Changing swipe status:', { eventId, direction });
+      try {
+        const response = await api.post(`/events/${eventId}/swipe`, {
+          swipeDirection: direction === 'right' ? 'right' : 'left',
+          responseTime: 0
+        });
+        return response;
+      } catch (error) {
+        console.error('Swipe error:', error);
+        console.error('Error response:', error.response?.data);
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['events', hiveId]);
+      queryClient.invalidateQueries(['hive', hiveId]);
+    },
+    onError: (error) => {
+      console.error('Failed to change swipe status:', error);
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to update swipe status';
+      alert(`Error: ${errorMessage}`);
+    }
+  });
+
+  const handleLeaveHive = () => {
+    if (window.confirm(`Are you sure you want to leave "${hive?.name}"?`)) {
+      leaveHiveMutation.mutate();
+    }
+  };
+
+  const handleChangeSwipe = (event, newDirection) => {
+    changeSwipeMutation.mutate({
+      eventId: event._id,
+      direction: newDirection
+    });
+  };
+
   // Early returns AFTER all hooks
   if (hiveLoading || eventsLoading) {
     return (
@@ -90,17 +147,27 @@ function HiveDashboard() {
       {/* Header */}
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => navigate('/dashboard')}
-              className="p-2 hover:bg-gray-100 rounded-lg"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </button>
-            <div>
-              <h1 className="text-2xl font-bold text-primary-900">{hive.name}</h1>
-              <p className="text-sm text-gray-600">{hive.members?.length || 0} members</p>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => navigate('/dashboard')}
+                className="p-2 hover:bg-gray-100 rounded-lg"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </button>
+              <div>
+                <h1 className="text-2xl font-bold text-primary-900">{hive.name}</h1>
+                <p className="text-sm text-gray-600">{hive.members?.length || 0} members</p>
+              </div>
             </div>
+            <button
+              onClick={handleLeaveHive}
+              disabled={leaveHiveMutation.isLoading}
+              className="flex items-center gap-2 px-4 py-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+            >
+              <LeaveIcon className="w-5 h-5" />
+              Leave Hive
+            </button>
           </div>
         </div>
       </header>
@@ -177,15 +244,59 @@ function HiveDashboard() {
                           {event.acceptedBy?.length || 0} accepted, {event.declinedBy?.length || 0} declined
                         </span>
                       </div>
-                      <button
-                        onClick={() => {
-                          setSelectedEvent(event);
-                          setShowGallery(true);
-                        }}
-                        className="mt-2 text-sm text-primary-600 hover:text-primary-700"
-                      >
-                        View Media
-                      </button>
+                      
+                      {/* Show user's current status and allow changing */}
+                      {currentUser && event.status === 'proposed' && (
+                        <div className="mt-3 flex items-center gap-2">
+                          {event.acceptedBy?.some(id => {
+                            const userId = typeof id === 'object' ? id._id?.toString() : id?.toString();
+                            return userId === currentUser._id?.toString();
+                          }) ? (
+                            <>
+                              <span className="text-sm text-green-600 font-medium flex items-center gap-1">
+                                <Check className="w-4 h-4" />
+                                You accepted
+                              </span>
+                              <button
+                                onClick={() => handleChangeSwipe(event, 'left')}
+                                disabled={changeSwipeMutation.isLoading}
+                                className="text-sm text-red-600 hover:text-red-700 disabled:opacity-50 underline"
+                              >
+                                Change to Decline
+                              </button>
+                            </>
+                          ) : event.declinedBy?.some(id => {
+                            const userId = typeof id === 'object' ? id._id?.toString() : id?.toString();
+                            return userId === currentUser._id?.toString();
+                          }) ? (
+                            <>
+                              <span className="text-sm text-red-600 font-medium flex items-center gap-1">
+                                <X className="w-4 h-4" />
+                                You declined
+                              </span>
+                              <button
+                                onClick={() => handleChangeSwipe(event, 'right')}
+                                disabled={changeSwipeMutation.isLoading}
+                                className="text-sm text-green-600 hover:text-green-700 disabled:opacity-50 underline"
+                              >
+                                Change to Accept
+                              </button>
+                            </>
+                          ) : null}
+                        </div>
+                      )}
+                      
+                      <div className="flex gap-2 mt-2">
+                        <button
+                          onClick={() => {
+                            setSelectedEvent(event);
+                            setShowGallery(true);
+                          }}
+                          className="text-sm text-primary-600 hover:text-primary-700"
+                        >
+                          View Media
+                        </button>
+                      </div>
                     </motion.div>
                   ))
                 ) : (

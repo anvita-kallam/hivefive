@@ -141,5 +141,37 @@ router.post('/:id/members', authenticateToken, async (req, res) => {
   }
 });
 
+// Remove member from hive (leave hive)
+router.delete('/:id/members/me', authenticateToken, async (req, res) => {
+  try {
+    const hive = await Hive.findById(req.params.id);
+    if (!hive) {
+      return res.status(404).json({ error: 'Hive not found' });
+    }
+
+    const user = await User.findOne({ email: req.user.email });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Check if user is a member
+    if (!hive.members.includes(user._id)) {
+      return res.status(400).json({ error: 'You are not a member of this hive' });
+    }
+
+    // Remove user from hive members
+    hive.members = hive.members.filter(memberId => memberId.toString() !== user._id.toString());
+    await hive.save();
+
+    // Remove hive from user's hiveIDs
+    user.hiveIDs = user.hiveIDs.filter(hiveId => hiveId.toString() !== hive._id.toString());
+    await user.save();
+
+    res.json({ message: 'Successfully left hive', hive });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
 export default router;
 

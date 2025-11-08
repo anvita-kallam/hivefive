@@ -95,62 +95,128 @@ router.post('/', authenticateToken, async (req, res) => {
   }
 });
 
-// Swipe on event
+// Swipe on event (or change swipe status)
 router.post('/:id/swipe', authenticateToken, async (req, res) => {
   try {
+    console.log('Swipe request received:', {
+      eventId: req.params.id,
+      body: req.body,
+      userEmail: req.user.email
+    });
+
     const user = await User.findOne({ email: req.user.email });
+    if (!user) {
+      console.error('User not found:', req.user.email);
+      return res.status(404).json({ error: 'User not found' });
+    }
+
     const { swipeDirection, responseTime, emotionData, gpsData } = req.body;
+
+    // Validate swipeDirection
+    if (!swipeDirection || (swipeDirection !== 'left' && swipeDirection !== 'right')) {
+      console.error('Invalid swipeDirection:', swipeDirection);
+      return res.status(400).json({ error: 'swipeDirection must be "left" or "right"' });
+    }
 
     const event = await Event.findById(req.params.id);
     if (!event) {
+      console.error('Event not found:', req.params.id);
       return res.status(404).json({ error: 'Event not found' });
     }
 
     const hive = await Hive.findById(event.hiveID);
-    if (!hive.members.includes(user._id)) {
+    if (!hive) {
+      console.error('Hive not found:', event.hiveID);
+      return res.status(404).json({ error: 'Hive not found' });
+    }
+
+    if (!hive.members.some(id => id.toString() === user._id.toString())) {
+      console.error('User not a member of hive:', { userId: user._id, hiveId: hive._id });
       return res.status(403).json({ error: 'Unauthorized' });
     }
 
-    // Log interaction
-    const interactionLog = new InteractionLog({
-      userID: user._id,
-      hiveID: event.hiveID,
-      eventID: event._id,
-      swipeDirection,
-      responseTime: responseTime || 0,
-      emotionData,
-      gpsData
-    });
-    await interactionLog.save();
+    // Check if user has already swiped (to allow changing)
+    const existingSwipeIndex = event.swipeLogs.findIndex(log => 
+      log.userID.toString() === user._id.toString()
+    );
+    
+    // Log interaction (even if changing)
+    try {
+      const interactionLogData = {
+        userID: user._id,
+        hiveID: event.hiveID,
+        eventID: event._id,
+        swipeDirection,
+        responseTime: responseTime || 0,
+        emotionData: emotionData || null
+      };
+      
+      // Only add gpsData if provided and valid
+      if (gpsData && gpsData.coordinates && Array.isArray(gpsData.coordinates)) {
+        interactionLogData.gpsData = {
+          type: 'Point',
+          coordinates: gpsData.coordinates
+        };
+      }
+      
+      const interactionLog = new InteractionLog(interactionLogData);
+      await interactionLog.save();
+    } catch (logError) {
+      console.warn('Failed to save interaction log:', logError.message);
+      console.warn('Log error details:', logError);
+      // Don't fail the request if logging fails
+    }
 
-    // Update event
+    // Update or add swipe log
+    if (existingSwipeIndex !== -1) {
+      // Remove the old swipe log
+      event.swipeLogs.splice(existingSwipeIndex, 1);
+    }
+    
+    // Add new/updated swipe log
     const swipeLog = {
       userID: user._id,
       swipeDirection,
       responseTime: responseTime || 0,
-      emotionData,
+      emotionData: emotionData || null,
       timestamp: new Date()
     };
     event.swipeLogs.push(swipeLog);
 
+    // Update accepted/declined arrays
     if (swipeDirection === 'right') {
-      if (!event.acceptedBy.includes(user._id)) {
+      // Accept: add to acceptedBy, remove from declinedBy
+      const userAccepted = event.acceptedBy.some(id => id.toString() === user._id.toString());
+      const userDeclined = event.declinedBy.some(id => id.toString() === user._id.toString());
+      
+      if (!userAccepted) {
         event.acceptedBy.push(user._id);
       }
-      event.declinedBy = event.declinedBy.filter(id => id.toString() !== user._id.toString());
-    } else {
-      if (!event.declinedBy.includes(user._id)) {
+      if (userDeclined) {
+        event.declinedBy = event.declinedBy.filter(id => id.toString() !== user._id.toString());
+      }
+    } else if (swipeDirection === 'left') {
+      // Decline: add to declinedBy, remove from acceptedBy
+      const userAccepted = event.acceptedBy.some(id => id.toString() === user._id.toString());
+      const userDeclined = event.declinedBy.some(id => id.toString() === user._id.toString());
+      
+      if (!userDeclined) {
         event.declinedBy.push(user._id);
       }
-      event.acceptedBy = event.acceptedBy.filter(id => id.toString() !== user._id.toString());
+      if (userAccepted) {
+        event.acceptedBy = event.acceptedBy.filter(id => id.toString() !== user._id.toString());
+      }
+    } else {
+      return res.status(400).json({ error: 'Invalid swipeDirection. Must be "left" or "right".' });
     }
 
-    // Check if event should be confirmed
+    // Re-check if event should be confirmed/cancelled
     const allMembersResponded = hive.members.every(memberId => 
-      event.acceptedBy.includes(memberId) || event.declinedBy.includes(memberId)
+      event.acceptedBy.some(id => id.toString() === memberId.toString()) || 
+      event.declinedBy.some(id => id.toString() === memberId.toString())
     );
 
-    if (allMembersResponded) {
+    if (allMembersResponded && event.status === 'proposed') {
       const acceptanceRate = event.acceptedBy.length / hive.members.length;
       if (acceptanceRate >= 0.5) { // At least 50% acceptance
         event.status = 'confirmed';
@@ -159,12 +225,49 @@ router.post('/:id/swipe', authenticateToken, async (req, res) => {
       } else {
         event.status = 'cancelled';
       }
+    } else if (!allMembersResponded && (event.status === 'confirmed' || event.status === 'cancelled')) {
+      // If someone changed their vote and not all members have responded, reset to proposed
+      event.status = 'proposed';
+      event.confirmedTime = null;
     }
 
-    await event.save();
-    res.json(event);
+    // Save the event
+    try {
+      await event.save();
+      console.log('Event saved successfully');
+    } catch (saveError) {
+      console.error('Error saving event:', saveError);
+      console.error('Save error details:', {
+        message: saveError.message,
+        name: saveError.name,
+        errors: saveError.errors,
+        stack: saveError.stack
+      });
+      throw saveError;
+    }
+    
+    // Populate the response for consistency
+    const populatedEvent = await Event.findById(event._id)
+      .populate('createdBy', 'name profilePhoto')
+      .populate('acceptedBy', 'name profilePhoto')
+      .populate('declinedBy', 'name profilePhoto');
+    
+    console.log('Swipe update successful');
+    res.json(populatedEvent);
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    console.error('Error updating event swipe:', error);
+    console.error('Error stack:', error.stack);
+    console.error('Error name:', error.name);
+    if (error.errors) {
+      console.error('Validation errors:', error.errors);
+    }
+    const errorMessage = error.message || 'Failed to update swipe status';
+    const statusCode = error.name === 'ValidationError' ? 400 : 
+                       error.name === 'CastError' ? 400 : 500;
+    res.status(statusCode).json({ 
+      error: errorMessage,
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 });
 

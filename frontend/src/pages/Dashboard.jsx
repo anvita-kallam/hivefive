@@ -48,17 +48,34 @@ function Dashboard() {
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-primary-900">HiveFive</h1>
-              <p className="text-sm text-gray-600">Welcome back, {user?.name || user?.email}</p>
+            <div className="flex items-center gap-4">
+              <div>
+                <h1 className="text-2xl font-bold text-primary-900">HiveFive</h1>
+                <p className="text-sm text-gray-600">Welcome back, {user?.name || user?.email}</p>
+              </div>
+              {user?.profilePhoto && (
+                <img
+                  src={user.profilePhoto}
+                  alt={user.name}
+                  className="w-10 h-10 rounded-full object-cover"
+                />
+              )}
             </div>
-            <button
-              onClick={logout}
-              className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:text-gray-900"
-            >
-              <LogOut className="w-5 h-5" />
-              Logout
-            </button>
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => navigate('/edit-profile')}
+                className="px-4 py-2 text-primary-600 hover:text-primary-700 font-medium"
+              >
+                Edit Profile
+              </button>
+              <button
+                onClick={logout}
+                className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:text-gray-900"
+              >
+                <LogOut className="w-5 h-5" />
+                Logout
+              </button>
+            </div>
           </div>
         </div>
       </header>
