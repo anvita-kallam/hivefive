@@ -119,13 +119,28 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
         }
       }
 
-      return api.post(`/events/${event._id}/swipe`, {
-        swipeDirection: direction,
+      // Ensure direction is properly formatted
+      const swipeDirection = direction === 'right' ? 'right' : 'left';
+      
+      console.log('📤 Submitting swipe to backend:', {
+        eventId: event._id,
+        swipeDirection,
         responseTime,
+        hasReactionMediaId: !!reactionMediaId,
+        hasEmotionData: !!emotionData
+      });
+      
+      const swipeData = {
+        swipeDirection: swipeDirection,
+        responseTime: responseTime || 0,
         emotionData: emotionData || null,
         reactionMediaId: reactionMediaId || null,
-        gpsData: null // TODO: Add GPS data
-      });
+        gpsData: null
+      };
+      
+      console.log('Swipe request payload:', JSON.stringify(swipeData, null, 2));
+      
+      return api.post(`/events/${event._id}/swipe`, swipeData);
     },
     onSuccess: (data) => {
       console.log('✅ Swipe successful, invalidating queries...');
