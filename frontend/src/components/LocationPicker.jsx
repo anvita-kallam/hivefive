@@ -27,34 +27,51 @@ function LocationPicker({ onLocationSelect, initialLocation = null }) {
   }
 
   const onPlaceChanged = () => {
-    if (autocompleteRef.current) {
-      const place = autocompleteRef.current.getPlace();
-      if (place.geometry) {
-        const location = {
-          name: place.name,
-          address: place.formatted_address,
-          coordinates: [place.geometry.location.lng(), place.geometry.location.lat()]
-        };
-        setSelectedLocation(location);
-        setMapCenter({
-          lat: place.geometry.location.lat(),
-          lng: place.geometry.location.lng()
-        });
-        if (onLocationSelect) {
-          onLocationSelect(location);
+    if (autocompleteRef.current && isLoaded) {
+      try {
+        const place = autocompleteRef.current.getPlace();
+        if (place && place.geometry && place.geometry.location) {
+          const lat = typeof place.geometry.location.lat === 'function' 
+            ? place.geometry.location.lat() 
+            : place.geometry.location.lat;
+          const lng = typeof place.geometry.location.lng === 'function' 
+            ? place.geometry.location.lng() 
+            : place.geometry.location.lng;
+          
+          const location = {
+            name: place.name || '',
+            address: place.formatted_address || '',
+            coordinates: [lng, lat]
+          };
+          setSelectedLocation(location);
+          setMapCenter({ lat, lng });
+          if (onLocationSelect) {
+            onLocationSelect(location);
+          }
         }
+      } catch (error) {
+        console.error('Error processing place:', error);
       }
     }
   };
 
   const onMapClick = (e) => {
-    const location = {
-      coordinates: [e.latLng.lng(), e.latLng.lat()],
-      address: `${e.latLng.lat()}, ${e.latLng.lng()}`
-    };
-    setSelectedLocation(location);
-    if (onLocationSelect) {
-      onLocationSelect(location);
+    if (e.latLng && isLoaded) {
+      try {
+        const lat = typeof e.latLng.lat === 'function' ? e.latLng.lat() : e.latLng.lat;
+        const lng = typeof e.latLng.lng === 'function' ? e.latLng.lng() : e.latLng.lng;
+        const location = {
+          coordinates: [lng, lat],
+          address: `${lat}, ${lng}`,
+          name: ''
+        };
+        setSelectedLocation(location);
+        if (onLocationSelect) {
+          onLocationSelect(location);
+        }
+      } catch (error) {
+        console.error('Error processing map click:', error);
+      }
     }
   };
 
