@@ -93,8 +93,9 @@ function FullScreenEventInvites() {
 
   // Open modal when there are pending events
   useEffect(() => {
-    // Don't reopen immediately after closing (wait for queries to refetch)
+    // Don't reopen immediately after closing (wait longer for backend to process)
     if (justClosed) {
+      console.log('Modal just closed, preventing reopening');
       return;
     }
     
@@ -107,31 +108,20 @@ function FullScreenEventInvites() {
       console.log('No more pending events, closing modal');
       setIsOpen(false);
       setCurrentEventIndex(0);
+      setJustClosed(true);
     }
   }, [pendingEvents.length, isOpen, justClosed]);
   
-  // Reset justClosed flag after a delay to allow queries to refetch
+  // Reset justClosed flag after a longer delay to allow backend to process swipe
   useEffect(() => {
     if (justClosed) {
       const timer = setTimeout(() => {
-        console.log('Resetting justClosed flag, can now reopen if needed');
+        console.log('Resetting justClosed flag after delay');
         setJustClosed(false);
-      }, 5000); // Wait 5 seconds for queries to refetch and prevent flickering
+      }, 10000); // Wait 10 seconds for backend to process and queries to update
       return () => clearTimeout(timer);
     }
   }, [justClosed]);
-  
-  // Close modal if no pending events after a short delay (in case of race condition)
-  useEffect(() => {
-    if (pendingEvents.length === 0 && isOpen && !justClosed) {
-      const timer = setTimeout(() => {
-        console.log('No pending events, closing modal');
-        setIsOpen(false);
-        setJustClosed(true);
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-  }, [pendingEvents.length, isOpen, justClosed]);
 
   // Update current index if pending events change
   useEffect(() => {

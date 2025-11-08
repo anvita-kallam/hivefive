@@ -175,23 +175,6 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
       hasEmotion: !!reaction.emotion
     });
     
-    // Validate that we have a file
-    if (!reaction.file || reaction.file.size === 0) {
-      console.error('❌ No file or empty file in reaction:', reaction);
-      // Still submit swipe without video
-      const responseTime = Date.now() - startTime;
-      if (fullScreen && onSwiped) {
-        onSwiped();
-      }
-      swipeMutation.mutate({
-        direction: reaction.swipeDirection,
-        responseTime,
-        emotionData: reaction.emotion,
-        reactionFile: null
-      });
-      return;
-    }
-    
     setReactionData(reaction);
     // Mark as swiped (already set, but ensure it's set)
     setSwiped(true);
@@ -199,25 +182,33 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
     // Auto-submit swipe after reaction is recorded
     const responseTime = Date.now() - startTime;
     
-    // Submit swipe mutation FIRST - this ensures the file reference is captured
-    // and the upload starts before we close the modal
-    console.log('📤 Starting swipe mutation with video file...');
+    // For full screen mode, close modal FIRST before starting upload
+    // This prevents the modal from reopening during the upload process
+    if (fullScreen && onSwiped) {
+      console.log('Closing modal immediately, starting upload in background');
+      onSwiped();
+    }
+    
+    // Validate that we have a file
+    const reactionFile = (reaction.file && reaction.file.size > 0) ? reaction.file : null;
+    
+    if (!reactionFile) {
+      console.warn('⚠️ No file or empty file in reaction, submitting swipe without video');
+    }
+    
+    // Submit swipe mutation - this will upload the video if available
+    // This happens in the background, even if component unmounts
+    console.log('📤 Starting swipe mutation...', {
+      hasFile: !!reactionFile,
+      fileSize: reactionFile?.size
+    });
+    
     swipeMutation.mutate({
       direction: reaction.swipeDirection,
       responseTime,
       emotionData: reaction.emotion,
-      reactionFile: reaction.file
+      reactionFile: reactionFile
     });
-    
-    // For full screen mode, close modal after mutation is queued
-    // The mutation will continue uploading in background
-    if (fullScreen && onSwiped) {
-      // Small delay to ensure mutation is queued and file reference is captured
-      setTimeout(() => {
-        console.log('Closing modal, upload continuing in background');
-        onSwiped();
-      }, 200);
-    }
   };
 
   const handleSwipe = async (direction) => {
