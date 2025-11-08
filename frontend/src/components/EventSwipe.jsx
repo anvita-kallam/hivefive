@@ -298,21 +298,32 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
     console.log('Button clicked, direction:', swipeDirection);
     
     // If recording is active, stop it and wait for the video
-    if (recorderRef.current && recorderRef.current.isRecording && recorderRef.current.isRecording()) {
-      console.log('Recording is active, stopping recording...');
-      try {
-        // Stop recording - this will call handleReactionRecorded when done
-        // Don't close modal yet - wait for recording to finish
-        recorderRef.current.stopRecording(swipeDirection);
-        // handleReactionRecorded will handle the mutation and close the modal
-        console.log('Recording stop requested, waiting for video to process...');
-        return;
-      } catch (error) {
-        console.error('Error stopping recording:', error);
-        // If stopping fails, continue without video
+    if (recorderRef.current) {
+      const isRecording = recorderRef.current.isRecording ? recorderRef.current.isRecording() : false;
+      console.log('Checking recording status:', {
+        hasRecorder: !!recorderRef.current,
+        hasIsRecordingMethod: !!recorderRef.current.isRecording,
+        isRecording: isRecording
+      });
+      
+      if (isRecording) {
+        console.log('✅ Recording is active, stopping recording...');
+        try {
+          // Stop recording - this will call handleReactionRecorded when done
+          // Don't close modal yet - wait for recording to finish
+          recorderRef.current.stopRecording(swipeDirection);
+          // handleReactionRecorded will handle the mutation and close the modal
+          console.log('Recording stop requested, waiting for video to process...');
+          return;
+        } catch (error) {
+          console.error('❌ Error stopping recording:', error);
+          // If stopping fails, continue without video
+        }
+      } else {
+        console.log('ℹ️ No active recording detected, submitting swipe without video');
       }
     } else {
-      console.log('No active recording, submitting swipe without video');
+      console.log('ℹ️ No recorder ref available, submitting swipe without video');
     }
     
     // No recording or recording failed, submit swipe without video
