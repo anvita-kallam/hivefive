@@ -262,7 +262,7 @@ function EventModal({ selectedDate, event, onClose, onSubmit, isLoading }) {
         startTime: format(createDateWithHours(new Date(selectedDate), 9), "yyyy-MM-dd'T'HH:mm"),
         endTime: format(createDateWithHours(new Date(selectedDate), 10), "yyyy-MM-dd'T'HH:mm"),
         location: '',
-        color: '#3B82F6',
+        color: '#FFC30B',
         allDay: false
       };
     }
@@ -272,7 +272,7 @@ function EventModal({ selectedDate, event, onClose, onSubmit, isLoading }) {
       startTime: '',
       endTime: '',
       location: '',
-      color: '#3B82F6',
+      color: '#FFC30B',
       allDay: false
     };
   };

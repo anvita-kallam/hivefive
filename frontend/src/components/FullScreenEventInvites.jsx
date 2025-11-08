@@ -142,7 +142,7 @@ function FullScreenEventInvites() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 bg-black bg-opacity-90 flex items-center justify-center"
+          className="fixed inset-0 z-50 bg-honey-brown bg-opacity-95 flex items-center justify-center"
         >
           <div className="w-full h-full flex flex-col items-center justify-center p-4 relative">
             {/* Close button */}
