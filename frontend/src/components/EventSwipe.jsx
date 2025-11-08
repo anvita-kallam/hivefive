@@ -1,11 +1,9 @@
-import { useState, useRef, useEffect } from 'react';
-import TinderCard from 'react-tinder-card';
+import { useState, useRef } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
 import api from '../config/api';
 import { format } from 'date-fns';
 import { Calendar, MapPin, X, Check } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import ReactionRecorder from './ReactionRecorder';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { storage } from '../config/firebase';
@@ -14,11 +12,9 @@ import { useAuthStore } from '../store/authStore';
 function EventSwipe({ event, onSwiped, fullScreen = false }) {
   const [swiped, setSwiped] = useState(false);
   const [startTime] = useState(Date.now());
-  const [reactionData, setReactionData] = useState(null);
-  const swipeRef = useRef(null);
+  const [isProcessing, setIsProcessing] = useState(false);
   const recorderRef = useRef(null);
   const queryClient = useQueryClient();
-  const navigate = useNavigate();
   const { user } = useAuthStore();
 
   const swipeMutation = useMutation({
@@ -175,34 +171,11 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
       hasEmotion: !!reaction.emotion
     });
     
-    setReactionData(reaction);
-    // Mark as swiped (already set, but ensure it's set)
-    setSwiped(true);
-    
-    // Auto-submit swipe after reaction is recorded
-    const responseTime = Date.now() - startTime;
-    
-    // For full screen mode, close modal FIRST before starting upload
-    // This prevents the modal from reopening during the upload process
-    if (fullScreen && onSwiped) {
-      console.log('Closing modal immediately, starting upload in background');
-      onSwiped(event._id); // Pass event ID so parent can track it
-    }
-    
     // Validate that we have a file
     const reactionFile = (reaction.file && reaction.file.size > 0) ? reaction.file : null;
-    
-    if (!reactionFile) {
-      console.warn('⚠️ No file or empty file in reaction, submitting swipe without video');
-    }
+    const responseTime = Date.now() - startTime;
     
     // Submit swipe mutation - this will upload the video if available
-    // This happens in the background, even if component unmounts
-    console.log('📤 Starting swipe mutation...', {
-      hasFile: !!reactionFile,
-      fileSize: reactionFile?.size
-    });
-    
     swipeMutation.mutate({
       direction: reaction.swipeDirection,
       responseTime,
@@ -211,85 +184,41 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
     });
   };
 
-  const handleSwipe = async (direction) => {
-    if (swiped) {
-      console.log('⚠️ Already swiped, ignoring');
+  const handleButtonClick = async (direction) => {
+    if (swiped || isProcessing) {
+      console.log('⚠️ Already processing, ignoring');
       return;
     }
     
-    // Mark as swiped immediately to prevent duplicate interactions
+    // Mark as processing immediately
     setSwiped(true);
+    setIsProcessing(true);
     
-    // For full screen mode, stop recording first, then close modal after recording stops
-    if (fullScreen) {
-      const swipeDirection = direction === 'right' ? 'right' : 'left';
-      console.log('🛑 Swipe detected, stopping recording, direction:', swipeDirection);
-      
-      // Stop recording with the swipe direction (if recorder exists)
-      // This will process and call handleReactionRecorded when done
-      if (recorderRef.current) {
-        try {
-          // Check if recording is active (using the exposed method or checking internal state)
-          const isRecording = recorderRef.current.isRecording ? recorderRef.current.isRecording() : false;
-          
-          if (isRecording) {
-            console.log('Stopping active recording...');
-            // Stop recording - this will trigger onReactionRecorded callback
-            recorderRef.current.stopRecording(swipeDirection);
-            // Don't close modal yet - wait for recording to finish processing
-            // The modal will close in handleReactionRecorded after video is processed
-            return;
-          } else {
-            console.log('No active recording, submitting swipe without video');
-            // No recording active, close modal and submit swipe without video
-            if (fullScreen && onSwiped) {
-              onSwiped(event._id); // Pass event ID
-            }
-            const responseTime = Date.now() - startTime;
-            swipeMutation.mutate({
-              direction: swipeDirection,
-              responseTime,
-              emotionData: null,
-              reactionFile: null
-            });
-            return;
-          }
-        } catch (error) {
-          console.error('Error stopping recording:', error);
-          // If recording fails, close modal and submit swipe without video
-          if (fullScreen && onSwiped) {
-            onSwiped(event._id); // Pass event ID
-          }
-          const responseTime = Date.now() - startTime;
-          swipeMutation.mutate({
-            direction: swipeDirection,
-            responseTime,
-            emotionData: null,
-            reactionFile: null
-          });
-          return;
-        }
-      } else {
-        // No recorder, close modal immediately and submit swipe
-        console.log('No recorder available, closing modal and submitting swipe');
-        if (fullScreen && onSwiped) {
-          onSwiped(event._id); // Pass event ID
-        }
-        const responseTime = Date.now() - startTime;
-        swipeMutation.mutate({
-          direction: swipeDirection,
-          responseTime,
-          emotionData: null,
-          reactionFile: null
-        });
+    // Close modal immediately
+    if (fullScreen && onSwiped) {
+      console.log('Closing modal immediately');
+      onSwiped(event._id);
+    }
+    
+    const swipeDirection = direction === 'right' ? 'right' : 'left';
+    const responseTime = Date.now() - startTime;
+    
+    // If recording is active, stop it and wait for the video
+    if (recorderRef.current && recorderRef.current.isRecording && recorderRef.current.isRecording()) {
+      console.log('Stopping recording...');
+      try {
+        // Stop recording - this will call handleReactionRecorded when done
+        recorderRef.current.stopRecording(swipeDirection);
+        // handleReactionRecorded will handle the mutation
         return;
+      } catch (error) {
+        console.error('Error stopping recording:', error);
+        // Continue without video if recording fails
       }
     }
     
-    // For non-full screen, proceed without reaction
-    const responseTime = Date.now() - startTime;
-    const swipeDirection = direction === 'right' ? 'right' : 'left';
-    
+    // No recording or recording failed, submit swipe without video
+    console.log('Submitting swipe without video');
     swipeMutation.mutate({
       direction: swipeDirection,
       responseTime,
@@ -298,8 +227,7 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
     });
   };
 
-  // Recording will start automatically when ReactionRecorder models are loaded
-
+  // Don't render if already swiped (for non-full screen mode)
   if (swiped && !fullScreen) {
     return (
       <motion.div
@@ -378,15 +306,10 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
                     e.preventDefault();
                     e.stopPropagation();
                     console.log('Decline button clicked');
-                    if (fullScreen) {
-                      handleSwipe('left');
-                    } else {
-                      handleSwipe('left');
-                    }
+                    handleButtonClick('left');
                   }}
-                  onMouseDown={(e) => e.stopPropagation()}
-                  onTouchStart={(e) => e.stopPropagation()}
-                  className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 md:px-8 md:py-4 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 font-medium transition-colors border border-red-300 cursor-pointer z-50 relative ${fullScreen ? 'text-xl md:text-2xl' : ''}`}
+                  disabled={swiped || isProcessing}
+                  className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 md:px-8 md:py-4 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 font-medium transition-colors border border-red-300 cursor-pointer z-50 relative ${fullScreen ? 'text-xl md:text-2xl' : ''} ${(swiped || isProcessing) ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   <X className={fullScreen ? 'w-6 h-6 md:w-8 md:h-8' : 'w-5 h-5'} />
                   Decline
@@ -396,33 +319,27 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
                     e.preventDefault();
                     e.stopPropagation();
                     console.log('Accept button clicked');
-                    if (fullScreen) {
-                      handleSwipe('right');
-                    } else {
-                      handleSwipe('right');
-                    }
+                    handleButtonClick('right');
                   }}
-                  onMouseDown={(e) => e.stopPropagation()}
-                  onTouchStart={(e) => e.stopPropagation()}
-                  className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 md:px-8 md:py-4 bg-[rgba(193,125,58,0.8)] hover:bg-[rgba(193,125,58,0.9)] text-[#2D1B00] rounded-lg font-medium transition-colors border border-[#2D1B00]/20 backdrop-blur-sm cursor-pointer z-50 relative ${fullScreen ? 'text-xl md:text-2xl' : ''}`}
+                  disabled={swiped || isProcessing}
+                  className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 md:px-8 md:py-4 bg-[rgba(193,125,58,0.8)] hover:bg-[rgba(193,125,58,0.9)] text-[#2D1B00] rounded-lg font-medium transition-colors border border-[#2D1B00]/20 backdrop-blur-sm cursor-pointer z-50 relative ${fullScreen ? 'text-xl md:text-2xl' : ''} ${(swiped || isProcessing) ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   <Check className={fullScreen ? 'w-6 h-6 md:w-8 md:h-8' : 'w-5 h-5'} />
                   Accept
                 </button>
               </div>
 
-              {/* Swipe Hint */}
-              <p className={`text-center text-[#6B4E00] mt-4 ${fullScreen ? 'text-lg md:text-xl' : 'text-xs'}`}>
-                Swipe right to accept, left to decline
-              </p>
+              {/* Processing indicator */}
+              {(swiped || isProcessing) && (
+                <p className={`text-center text-[#6B4E00] mt-4 ${fullScreen ? 'text-lg md:text-xl' : 'text-xs'}`}>
+                  Processing...
+                </p>
+              )}
     </motion.div>
   );
 
   // For full screen mode, show recorder with card overlay
   if (fullScreen) {
-    // If swiped, still show recorder briefly to allow recording to finish
-    // Only return null if we've confirmed recording is done
-    // Keep the component mounted so recording can complete
     return (
       <div className={containerClass}>
         <ReactionRecorder
@@ -434,24 +351,9 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
             !swiped ? (
               <div className="absolute inset-0 flex items-center justify-center z-30 pointer-events-none">
                 <div className="w-full max-w-3xl mx-auto px-4 pointer-events-auto" style={{ height: '80%' }}>
-                  <TinderCard
-                    ref={swipeRef}
-                    className="w-full h-full"
-                    onSwipe={handleSwipe}
-                    preventSwipe={['up', 'down']}
-                    swipeThreshold={50}
-                    onCardLeftScreen={(dir) => {
-                      // Handle card leaving screen
-                      console.log('Card left screen:', dir);
-                      if (!swiped) {
-                        handleSwipe(dir);
-                      }
-                    }}
-                  >
-                    <div className="relative w-full h-full">
-                      {swipeCardContent}
-                    </div>
-                  </TinderCard>
+                  <div className="relative w-full h-full">
+                    {swipeCardContent}
+                  </div>
                 </div>
               </div>
             ) : null // Hide overlay after swipe, but keep recorder mounted
@@ -464,15 +366,7 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
   // For non-full screen mode, show card normally
   return (
     <div className={containerClass}>
-      <TinderCard
-        ref={swipeRef}
-        className="absolute w-full h-full"
-        onSwipe={handleSwipe}
-        preventSwipe={['up', 'down']}
-        swipeThreshold={50}
-      >
-        {swipeCardContent}
-      </TinderCard>
+      {swipeCardContent}
     </div>
   );
 }
