@@ -215,8 +215,9 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
       className={`${cardClass} relative`}
       whileHover={fullScreen ? {} : { scale: 1.02 }}
       style={fullScreen ? { 
-        backgroundColor: 'rgba(245, 230, 211, 0.95)',
-        backdropFilter: 'blur(10px)'
+        backgroundColor: 'rgba(245, 230, 211, 0.75)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)'
       } : {}}
     >
           {/* Header */}
@@ -253,29 +254,37 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
               {/* Action Buttons */}
               <div className={`flex gap-4 md:gap-6 mt-auto ${fullScreen ? 'mt-8' : ''}`}>
                 <button
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Decline button clicked');
                     if (fullScreen) {
-                      setReactionData({ swipeDirection: 'left' });
-                      setShowReaction(true);
+                      handleSwipe('left');
                     } else {
                       handleSwipe('left');
                     }
                   }}
-                  className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 md:px-8 md:py-4 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 font-medium transition-colors border border-red-300 ${fullScreen ? 'text-xl md:text-2xl' : ''}`}
+                  onMouseDown={(e) => e.stopPropagation()}
+                  onTouchStart={(e) => e.stopPropagation()}
+                  className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 md:px-8 md:py-4 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 font-medium transition-colors border border-red-300 cursor-pointer z-50 relative ${fullScreen ? 'text-xl md:text-2xl' : ''}`}
                 >
                   <X className={fullScreen ? 'w-6 h-6 md:w-8 md:h-8' : 'w-5 h-5'} />
                   Decline
                 </button>
                 <button
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Accept button clicked');
                     if (fullScreen) {
-                      setReactionData({ swipeDirection: 'right' });
-                      setShowReaction(true);
+                      handleSwipe('right');
                     } else {
                       handleSwipe('right');
                     }
                   }}
-                  className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 md:px-8 md:py-4 bg-[rgba(193,125,58,0.8)] hover:bg-[rgba(193,125,58,0.9)] text-[#2D1B00] rounded-lg font-medium transition-colors border border-[#2D1B00]/20 backdrop-blur-sm ${fullScreen ? 'text-xl md:text-2xl' : ''}`}
+                  onMouseDown={(e) => e.stopPropagation()}
+                  onTouchStart={(e) => e.stopPropagation()}
+                  className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 md:px-8 md:py-4 bg-[rgba(193,125,58,0.8)] hover:bg-[rgba(193,125,58,0.9)] text-[#2D1B00] rounded-lg font-medium transition-colors border border-[#2D1B00]/20 backdrop-blur-sm cursor-pointer z-50 relative ${fullScreen ? 'text-xl md:text-2xl' : ''}`}
                 >
                   <Check className={fullScreen ? 'w-6 h-6 md:w-8 md:h-8' : 'w-5 h-5'} />
                   Accept
@@ -299,16 +308,22 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
           eventId={event._id}
           showVideo={true}
           overlayContent={
-            <div className="absolute inset-0 flex items-center justify-center z-30">
-              <div className="w-full max-w-3xl mx-auto px-4" style={{ height: '80%' }}>
+            <div className="absolute inset-0 flex items-center justify-center z-30 pointer-events-none">
+              <div className="w-full max-w-3xl mx-auto px-4 pointer-events-auto" style={{ height: '80%' }}>
                 <TinderCard
                   ref={swipeRef}
                   className="w-full h-full"
                   onSwipe={handleSwipe}
                   preventSwipe={['up', 'down']}
                   swipeThreshold={50}
+                  onCardLeftScreen={(dir) => {
+                    // Handle card leaving screen
+                    console.log('Card left screen:', dir);
+                  }}
                 >
-                  {swipeCardContent}
+                  <div className="relative w-full h-full">
+                    {swipeCardContent}
+                  </div>
                 </TinderCard>
               </div>
             </div>
