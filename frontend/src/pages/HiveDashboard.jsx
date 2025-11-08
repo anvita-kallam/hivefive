@@ -155,7 +155,7 @@ function HiveDashboard() {
               >
                 <ArrowLeft className="w-5 h-5 text-honey-brown" />
               </button>
-              <Bee className="w-6 h-6 text-honey-brown bee-icon" />
+              <Hexagon className="w-6 h-6 text-honey-brown bee-icon" />
               <div>
                 <h1 className="text-2xl font-bold honey-text text-honey-brown">{hive.name}</h1>
                 <p className="text-sm text-honey-amber-dark font-semibold">{hive.members?.length || 0} members</p>
