@@ -60,9 +60,21 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
           });
 
           reactionMediaId = mediaResponse.data._id;
-          console.log('Reaction video uploaded successfully:', reactionMediaId);
+          console.log('✅ Reaction video uploaded successfully:', {
+            mediaId: reactionMediaId,
+            eventId: event._id,
+            hiveId: event.hiveID,
+            fileURL: fileURL,
+            isReaction: true,
+            emotionData: emotionData ? 'present' : 'missing'
+          });
         } catch (error) {
-          console.error('Error uploading reaction:', error);
+          console.error('❌ Error uploading reaction:', error);
+          console.error('Error details:', {
+            message: error.message,
+            response: error.response?.data,
+            status: error.response?.status
+          });
           // Continue with swipe even if reaction upload fails
         }
       }
@@ -75,12 +87,19 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
         gpsData: null // TODO: Add GPS data
       });
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('✅ Swipe successful, invalidating queries...');
+      // Invalidate all related queries to refresh data
       queryClient.invalidateQueries(['events']);
       queryClient.invalidateQueries(['allEvents']);
       queryClient.invalidateQueries(['hive', event.hiveID]);
       queryClient.invalidateQueries(['hives']);
+      // Specifically invalidate media queries for this event
+      queryClient.invalidateQueries(['media', event.hiveID, event._id]);
+      queryClient.invalidateQueries(['media', event.hiveID]);
       queryClient.invalidateQueries(['media']);
+      // Also invalidate the event query to get updated swipe logs
+      queryClient.invalidateQueries(['event', event._id]);
       setSwiped(true);
       setShowReaction(false);
       // Call onSwiped callback if provided (for full screen mode)
@@ -90,6 +109,9 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
           onSwiped();
         }, fullScreen ? 1500 : 500);
       }
+    },
+    onError: (error) => {
+      console.error('❌ Swipe error:', error);
     }
   });
 

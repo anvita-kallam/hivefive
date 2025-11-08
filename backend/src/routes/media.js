@@ -15,8 +15,16 @@ router.get('/event/:eventId', authenticateToken, async (req, res) => {
       .populate('reviews.userID', 'name profilePhoto')
       .sort({ timestamp: -1 });
     
+    console.log('📸 Fetched media for event:', {
+      eventId: req.params.eventId,
+      totalMedia: media.length,
+      reactions: media.filter(m => m.isReaction).length,
+      photos: media.filter(m => !m.isReaction).length
+    });
+    
     res.json(media);
   } catch (error) {
+    console.error('❌ Error fetching event media:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -66,11 +74,21 @@ router.post('/', authenticateToken, async (req, res) => {
       fileType,
       caption,
       facialSentiment: finalSentiment,
-      isReaction: isReaction || false,
+      isReaction: isReaction === true, // Explicitly set to boolean
       swipeDirection: swipeDirection || null
     });
 
     await media.save();
+
+    console.log('✅ Media saved:', {
+      mediaId: media._id,
+      eventID: eventID,
+      hiveID: event.hiveID,
+      fileType: fileType,
+      isReaction: media.isReaction,
+      hasSentiment: !!finalSentiment,
+      uploaderID: user._id
+    });
 
     // Update event sentiment scores
     if (finalSentiment) {
@@ -79,7 +97,11 @@ router.post('/', authenticateToken, async (req, res) => {
       await event.save();
     }
 
-    res.status(201).json(media);
+    // Populate uploader before returning
+    const populatedMedia = await Media.findById(media._id)
+      .populate('uploaderID', 'name profilePhoto');
+
+    res.status(201).json(populatedMedia);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
