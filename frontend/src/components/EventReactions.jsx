@@ -53,8 +53,8 @@ function EventReactions({ event, showTitle = true }) {
   };
 
   return (
-    <div className={showTitle !== false ? "mt-4" : ""}>
-      {showTitle !== false && (
+    <div className={showTitle ? "mt-4" : ""}>
+      {showTitle && (
         <h4 className="text-sm font-medium text-[#2D1B00] mb-3">Reactions</h4>
       )}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
