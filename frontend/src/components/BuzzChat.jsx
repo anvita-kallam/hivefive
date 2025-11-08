@@ -63,15 +63,49 @@ function BuzzChat({ hiveId }) {
       return response.data;
     },
     onSuccess: (data) => {
-      // Invalidate and refetch messages to get both user and Buzz messages
-      queryClient.invalidateQueries(['chat', hiveId]);
+      // Update query cache with new messages immediately to prevent duplicates
+      queryClient.setQueryData(['chat', hiveId], (oldData = []) => {
+        const seen = new Set();
+        const existing = (oldData || []).map(msg => {
+          const id = msg._id?.toString();
+          if (id) seen.add(id);
+          return msg;
+        });
+        
+        // Add new user message if not already present
+        if (data.userMessage) {
+          const userMsgId = data.userMessage._id?.toString();
+          if (userMsgId && !seen.has(userMsgId)) {
+            existing.push(data.userMessage);
+            seen.add(userMsgId);
+          }
+        }
+        
+        // Add new Buzz message if not already present
+        if (data.buzzMessage) {
+          const buzzMsgId = data.buzzMessage._id?.toString();
+          if (buzzMsgId && !seen.has(buzzMsgId)) {
+            existing.push(data.buzzMessage);
+            seen.add(buzzMsgId);
+          }
+        }
+        
+        // Sort by timestamp
+        return existing.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+      });
+      
+      // Also invalidate to ensure fresh data (with delay to avoid race conditions)
+      setTimeout(() => {
+        queryClient.invalidateQueries(['chat', hiveId]);
+      }, 1000);
+      
       setMessage('');
       setShowEmojiPicker(false);
       
       // Scroll to bottom after message is sent
       setTimeout(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-      }, 500);
+      }, 100);
     },
     onError: (error) => {
       console.error('Error sending message:', error);
