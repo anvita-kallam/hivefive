@@ -17,7 +17,23 @@ service firebase.storage {
     }
     
     // Hive media - users can upload to hives they belong to
+    // Support both flat structure (hive-media/{hiveId}/{fileName}) and nested structure (hive-media/{hiveId}/{eventId}/{fileName})
     match /hive-media/{hiveId}/{fileName} {
+      // Allow read access to all authenticated users
+      allow read: if request.auth != null;
+      
+      // Allow write access to authenticated users (hive membership checked in backend)
+      allow write: if request.auth != null
+                   && request.resource.size < 50 * 1024 * 1024 // 50MB limit for videos
+                   && (request.resource.contentType.matches('image/.*') || 
+                       request.resource.contentType.matches('video/.*'));
+      
+      // Allow delete only by uploader (checked in backend)
+      allow delete: if request.auth != null;
+    }
+    
+    // Hive media with event ID (nested structure) - users can upload to event galleries
+    match /hive-media/{hiveId}/{eventId}/{fileName} {
       // Allow read access to all authenticated users
       allow read: if request.auth != null;
       
