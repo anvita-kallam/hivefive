@@ -452,8 +452,8 @@ function EventModal({ selectedDate, event, onClose, onSubmit, isLoading }) {
 function HexagonIcon() {
   return (
     <svg
-      width="20"
-      height="20"
+      width="16"
+      height="16"
       viewBox="0 0 20 20"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
@@ -461,9 +461,9 @@ function HexagonIcon() {
       style={{ color: '#2D1B00' }}
     >
       <path
-        d="M 5 0 L 15 0 L 20 10 L 15 20 L 5 20 L 0 10 Z"
+        d="M 6 1 L 14 1 L 19 10 L 14 19 L 6 19 L 1 10 Z"
         stroke="currentColor"
-        strokeWidth="2"
+        strokeWidth="1.5"
         fill="none"
         strokeLinejoin="round"
       />
