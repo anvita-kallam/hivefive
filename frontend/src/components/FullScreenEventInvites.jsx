@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 function FullScreenEventInvites() {
   const [currentEventIndex, setCurrentEventIndex] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
+  const [justClosed, setJustClosed] = useState(false);
   const queryClient = useQueryClient();
 
   // Get all hives
@@ -79,6 +80,11 @@ function FullScreenEventInvites() {
 
   // Open modal when there are pending events
   useEffect(() => {
+    // Don't reopen immediately after closing (wait for queries to refetch)
+    if (justClosed) {
+      return;
+    }
+    
     if (pendingEvents.length > 0 && !isOpen) {
       console.log('Opening modal with pending events:', pendingEvents.length);
       setIsOpen(true);
@@ -89,7 +95,18 @@ function FullScreenEventInvites() {
       setIsOpen(false);
       setCurrentEventIndex(0);
     }
-  }, [pendingEvents.length, isOpen]);
+  }, [pendingEvents.length, isOpen, justClosed]);
+  
+  // Reset justClosed flag after a delay to allow queries to refetch
+  useEffect(() => {
+    if (justClosed) {
+      const timer = setTimeout(() => {
+        console.log('Resetting justClosed flag, can now reopen if needed');
+        setJustClosed(false);
+      }, 3000); // Wait 3 seconds for queries to refetch
+      return () => clearTimeout(timer);
+    }
+  }, [justClosed]);
 
   // Update current index if pending events change
   useEffect(() => {
@@ -101,7 +118,9 @@ function FullScreenEventInvites() {
   // Handle event swiped
   const handleEventSwiped = () => {
     console.log('Event swiped, closing modal and refreshing...');
-    // Close modal immediately and refresh data
+    // Set justClosed flag to prevent immediate reopening
+    setJustClosed(true);
+    // Close modal immediately
     setIsOpen(false);
     setCurrentEventIndex(0);
     
