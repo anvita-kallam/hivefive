@@ -40,17 +40,30 @@ const ReactionRecorder = forwardRef(({
 
   // Auto-start recording when models are loaded (for full screen mode)
   useEffect(() => {
-    if (modelsLoaded && !streamRef.current && !recordingRef.current) {
-      // Start camera and recording automatically
-      startCamera().then(() => {
-        // Small delay to ensure camera is ready
-        setTimeout(() => {
-          if (!recordingRef.current) {
-            startRecording();
+    let mounted = true;
+    
+    const autoStart = async () => {
+      if (modelsLoaded && !streamRef.current && !recordingRef.current && mounted) {
+        try {
+          // Start camera first
+          await startCamera();
+          // Wait for camera to be ready
+          await new Promise(resolve => setTimeout(resolve, 500));
+          // Start recording if still mounted and not already recording
+          if (mounted && !recordingRef.current) {
+            await startRecording();
           }
-        }, 500);
-      });
-    }
+        } catch (error) {
+          console.error('Error auto-starting recording:', error);
+        }
+      }
+    };
+
+    autoStart();
+
+    return () => {
+      mounted = false;
+    };
   }, [modelsLoaded]);
 
   // Load face-api models
@@ -158,20 +171,43 @@ const ReactionRecorder = forwardRef(({
       }
 
       // Start video recording
+      // Try different MIME types for better browser compatibility
+      let mimeType = 'video/webm;codecs=vp9';
+      if (!MediaRecorder.isTypeSupported(mimeType)) {
+        mimeType = 'video/webm;codecs=vp8';
+      }
+      if (!MediaRecorder.isTypeSupported(mimeType)) {
+        mimeType = 'video/webm';
+      }
+      
       const mediaRecorder = new MediaRecorder(streamRef.current, {
-        mimeType: 'video/webm;codecs=vp9'
+        mimeType: mimeType
       });
 
       chunksRef.current = [];
       mediaRecorder.ondataavailable = (e) => {
-        if (e.data.size > 0) {
+        if (e.data && e.data.size > 0) {
           chunksRef.current.push(e.data);
+          console.log('Video chunk received:', { size: e.data.size, totalChunks: chunksRef.current.length });
         }
       };
 
       mediaRecorder.onstop = async () => {
-        console.log('Recording stopped. Processing data...');
+        console.log('Recording stopped. Processing data...', {
+          chunks: chunksRef.current.length,
+          totalSize: chunksRef.current.reduce((sum, chunk) => sum + chunk.size, 0)
+        });
+        
+        // Make sure we have video data
+        if (chunksRef.current.length === 0) {
+          console.warn('No video chunks recorded');
+          // Cleanup and return
+          cleanup();
+          return;
+        }
+
         const blob = new Blob(chunksRef.current, { type: 'video/webm' });
+        console.log('Video blob created:', { size: blob.size, type: blob.type });
         
         const file = new File([blob], `reaction-${Date.now()}.webm`, { type: 'video/webm' });
         
@@ -192,6 +228,11 @@ const ReactionRecorder = forwardRef(({
         
         // Call callback
         if (onReactionRecorded) {
+          console.log('Calling onReactionRecorded with:', {
+            fileSize: file.size,
+            hasEmotion: !!finalEmotion,
+            swipeDirection: swipeDir || swipeDirection
+          });
           onReactionRecorded({
             file,
             emotion: finalEmotion,
@@ -200,6 +241,10 @@ const ReactionRecorder = forwardRef(({
         }
 
         // Cleanup
+        cleanup();
+      };
+      
+      const cleanup = () => {
         if (streamRef.current) {
           streamRef.current.getTracks().forEach(track => track.stop());
         }
@@ -213,18 +258,25 @@ const ReactionRecorder = forwardRef(({
       };
 
       mediaRecorderRef.current = mediaRecorder;
-      mediaRecorder.start();
+      
+      // Start recording with timeslices to get data periodically
+      // This ensures we capture frames even if recording stops abruptly
+      mediaRecorder.start(100); // Request data every 100ms
       setIsRecording(true);
       recordingRef.current = true;
-      console.log('✅ Recording started');
+      console.log('✅ Recording started', {
+        state: mediaRecorder.state,
+        mimeType: mediaRecorder.mimeType,
+        streamActive: streamRef.current.active
+      });
 
-      // Auto-stop after 15 seconds max
+      // Auto-stop after 30 seconds max (safety timeout)
       stopRecordingTimeoutRef.current = setTimeout(() => {
         if (recordingRef.current) {
-          console.log('⏱️ Auto-stopping recording after 15 seconds');
+          console.log('⏱️ Auto-stopping recording after 30 seconds (timeout)');
           stopRecording();
         }
-      }, 15000);
+      }, 30000);
 
     } catch (err) {
       console.error('Error starting recording:', err);

@@ -149,14 +149,20 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
     });
   };
 
-  const handleSwipe = (direction) => {
+  const handleSwipe = async (direction) => {
     if (swiped) return;
     
     // For full screen mode, stop recording and save with swipe direction
     if (fullScreen && recorderRef.current) {
       const swipeDirection = direction === 'right' ? 'right' : 'left';
+      console.log('🛑 Swipe detected, stopping recording with direction:', swipeDirection);
+      
       // Stop recording with the swipe direction
+      // The recording will process and call handleReactionRecorded when done
       recorderRef.current.stopRecording(swipeDirection);
+      
+      // Mark as swiped to prevent duplicate swipes
+      setSwiped(true);
       return; // Don't proceed with swipe yet, wait for recording to complete
     }
     
