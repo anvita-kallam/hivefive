@@ -158,6 +158,14 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
     setSwiped(true);
     // Auto-submit swipe after reaction is recorded
     const responseTime = Date.now() - startTime;
+    
+    // For full screen mode, call onSwiped immediately to close modal
+    // before the mutation completes
+    if (fullScreen && onSwiped) {
+      // Close modal immediately, don't wait for API response
+      onSwiped();
+    }
+    
     swipeMutation.mutate({
       direction: reaction.swipeDirection,
       responseTime,

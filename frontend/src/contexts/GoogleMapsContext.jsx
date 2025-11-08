@@ -99,7 +99,7 @@ export const GoogleMapsProvider = ({ children }) => {
   return (
     <LoadScript
       googleMapsApiKey={GOOGLE_MAPS_API_KEY}
-      libraries={['places']}
+      libraries={GOOGLE_MAPS_LIBRARIES}
       onLoad={handleLoad}
       onError={handleError}
       loadingElement={<div>Loading Google Maps...</div>}
