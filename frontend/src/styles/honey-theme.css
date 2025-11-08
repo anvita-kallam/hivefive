@@ -133,15 +133,18 @@
 /* Honeycomb Container */
 .honeycomb-container {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 1rem;
-  padding: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 2rem;
+  padding: 2rem;
+  justify-items: center;
+  align-items: center;
 }
 
 /* Hexagonal Shape */
 .hexagon {
   position: relative;
   width: 100%;
+  max-width: 300px;
   padding-bottom: 115.47%; /* Maintains hexagon aspect ratio */
   clip-path: polygon(
     30% 0%,
@@ -157,6 +160,7 @@
     rgba(255, 140, 0, 0.9) 100%
   );
   transition: all 0.3s ease;
+  margin: 0 auto;
 }
 
 .hexagon-content {
@@ -284,11 +288,12 @@
 .honey-gradient-bg {
   background: linear-gradient(
     180deg,
-    var(--honey-gradient-start) 0%,
+    #FFF8DC 0%,
     rgba(255, 215, 0, 0.8) 50%,
-    var(--honey-amber) 100%
-  );
+    #FF8C00 100%
+  ) !important;
   min-height: 100vh;
+  width: 100%;
 }
 
 /* Honeycomb Pattern Overlay */
@@ -398,11 +403,12 @@
 @media (max-width: 768px) {
   .hexagon {
     padding-bottom: 100%;
+    max-width: 250px;
   }
   
   .honeycomb-container {
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 0.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1.5rem;
   }
 }
 

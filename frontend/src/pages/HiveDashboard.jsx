@@ -143,9 +143,9 @@ function HiveDashboard() {
   }) || [];
 
   return (
-    <div className="min-h-screen honey-gradient-bg honeycomb-pattern">
+    <div className="min-h-screen honey-gradient-bg honeycomb-pattern" style={{ background: 'linear-gradient(180deg, #FFF8DC 0%, rgba(255, 215, 0, 0.8) 50%, #FF8C00 100%)' }}>
       {/* Header */}
-      <header className="bg-gradient-to-r from-honey-light via-honey-gold to-honey-amber shadow-lg border-b-4 border-honey-brown">
+      <header className="shadow-lg border-b-4" style={{ background: 'linear-gradient(to right, #FFF8DC, #FFC30B, #FF8C00)', borderColor: '#4A2C2A' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
