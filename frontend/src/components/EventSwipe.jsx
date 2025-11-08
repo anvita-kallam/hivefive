@@ -27,19 +27,39 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
       let reactionMediaId = null;
       if (reactionFile) {
         try {
+          console.log('📤 Starting video upload:', {
+            fileName: reactionFile.name,
+            fileSize: reactionFile.size,
+            fileType: reactionFile.type
+          });
+          
           // Upload reaction video to Firebase Storage
           const { auth } = await import('../config/firebase');
           const currentUser = auth.currentUser;
           if (!currentUser) throw new Error('Not authenticated');
 
-          // Get fresh token and verify authentication
-          const token = await currentUser.getIdToken(true);
+          // Get token (don't force refresh to avoid quota issues)
+          // Use cached token if available, only refresh if needed
+          let token;
+          try {
+            token = await currentUser.getIdToken(false);
+          } catch (error) {
+            if (error.code === 'auth/quota-exceeded') {
+              console.warn('Firebase quota exceeded, trying cached token');
+              // Try to get any available token
+              token = await currentUser.getIdToken(false);
+            } else {
+              throw error;
+            }
+          }
+          
           console.log('Uploading reaction video:', {
             uid: currentUser.uid,
             email: currentUser.email,
             fileName: reactionFile.name,
             fileType: reactionFile.type,
-            fileSize: reactionFile.size
+            fileSize: reactionFile.size,
+            hasToken: !!token
           });
 
           const sanitizedFileName = reactionFile.name.replace(/[^a-zA-Z0-9.-]/g, '_');
@@ -147,7 +167,7 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
   });
 
   const handleReactionRecorded = (reaction) => {
-    console.log('✅ Reaction recorded, processing and uploading:', {
+    console.log('✅ Reaction recorded, file ready for upload:', {
       hasFile: !!reaction.file,
       fileSize: reaction.file?.size,
       swipeDirection: reaction.swipeDirection,
@@ -160,15 +180,15 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
     // Auto-submit swipe after reaction is recorded
     const responseTime = Date.now() - startTime;
     
-    // For full screen mode, close modal after recording is processed
-    // but before upload starts (so user sees dashboard)
+    // For full screen mode, close modal immediately so user sees dashboard
+    // The upload will continue in background
     if (fullScreen && onSwiped) {
-      // Close modal immediately so user sees dashboard
-      // Upload will continue in background
+      console.log('Closing modal, upload will continue in background');
       onSwiped();
     }
     
     // Submit swipe mutation - this will upload the video
+    // This happens in the background, even if component unmounts
     swipeMutation.mutate({
       direction: reaction.swipeDirection,
       responseTime,
@@ -193,13 +213,33 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
       
       // Stop recording with the swipe direction (if recorder exists)
       // This will process and call handleReactionRecorded when done
-      if (recorderRef.current && recorderRef.current.isRecording()) {
+      if (recorderRef.current) {
         try {
-          // Stop recording - this will trigger onReactionRecorded callback
-          recorderRef.current.stopRecording(swipeDirection);
-          // Don't close modal yet - wait for recording to finish processing
-          // The modal will close in handleReactionRecorded
-          return;
+          // Check if recording is active (using the exposed method or checking internal state)
+          const isRecording = recorderRef.current.isRecording ? recorderRef.current.isRecording() : false;
+          
+          if (isRecording) {
+            console.log('Stopping active recording...');
+            // Stop recording - this will trigger onReactionRecorded callback
+            recorderRef.current.stopRecording(swipeDirection);
+            // Don't close modal yet - wait for recording to finish processing
+            // The modal will close in handleReactionRecorded after video is processed
+            return;
+          } else {
+            console.log('No active recording, submitting swipe without video');
+            // No recording active, close modal and submit swipe without video
+            if (onSwiped) {
+              onSwiped();
+            }
+            const responseTime = Date.now() - startTime;
+            swipeMutation.mutate({
+              direction: swipeDirection,
+              responseTime,
+              emotionData: null,
+              reactionFile: null
+            });
+            return;
+          }
         } catch (error) {
           console.error('Error stopping recording:', error);
           // If recording fails, close modal and submit swipe without video
@@ -216,8 +256,8 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
           return;
         }
       } else {
-        // No recorder or not recording, close modal immediately and submit swipe
-        console.log('No active recording, closing modal and submitting swipe');
+        // No recorder, close modal immediately and submit swipe
+        console.log('No recorder available, closing modal and submitting swipe');
         if (onSwiped) {
           onSwiped();
         }
