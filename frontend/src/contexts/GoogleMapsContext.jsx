@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useRef } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 import { LoadScript } from '@react-google-maps/api';
 import { GOOGLE_MAPS_API_KEY } from '../config/maps';
 
@@ -27,16 +27,14 @@ export const GoogleMapsProvider = ({ children }) => {
   const [isLoaded, setIsLoaded] = useState(() => isGoogleMapsLoaded());
   const [loadError, setLoadError] = useState(null);
   const [google, setGoogle] = useState(() => (window.google || null));
-  const shouldLoadScript = useRef(!isScriptInDOM() && !isGoogleMapsLoaded());
 
   // Check if Google Maps is already loaded on mount and poll if script is in DOM
   useEffect(() => {
-    if (isGoogleMapsLoaded() && !isLoaded) {
-      setIsLoaded(true);
-      setGoogle(window.google);
-      shouldLoadScript.current = false;
-      return;
-    }
+      if (isGoogleMapsLoaded() && !isLoaded) {
+        setIsLoaded(true);
+        setGoogle(window.google);
+        return;
+      }
 
     // If script is in DOM but not loaded yet, poll until it loads
     if (isScriptInDOM() && !isGoogleMapsLoaded() && !isLoaded) {
@@ -73,7 +71,6 @@ export const GoogleMapsProvider = ({ children }) => {
       if (isGoogleMapsLoaded()) {
         setIsLoaded(true);
         setGoogle(window.google);
-        shouldLoadScript.current = false;
       } else if (retries < maxRetries) {
         retries++;
         // Retry after a short delay if not ready
@@ -92,7 +89,6 @@ export const GoogleMapsProvider = ({ children }) => {
   const handleError = (error) => {
     console.error('Google Maps API load error:', error);
     setLoadError(error);
-    shouldLoadScript.current = false;
   };
 
   // If already loaded or script is in DOM, don't use LoadScript (avoid duplicate loads)
@@ -107,7 +103,6 @@ export const GoogleMapsProvider = ({ children }) => {
   // Only use LoadScript if we need to load it
   return (
     <LoadScript
-      ref={loadScriptRef}
       googleMapsApiKey={GOOGLE_MAPS_API_KEY}
       libraries={['places']}
       onLoad={handleLoad}
