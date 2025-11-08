@@ -19,6 +19,16 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
 
   const swipeMutation = useMutation({
     mutationFn: async ({ direction, responseTime, emotionData, reactionFile }) => {
+      console.log('🔄 Swipe mutation started:', {
+        direction,
+        hasReactionFile: !!reactionFile,
+        reactionFileType: reactionFile ? typeof reactionFile : 'null',
+        reactionFileIsFile: reactionFile instanceof File,
+        reactionFileIsBlob: reactionFile instanceof Blob,
+        reactionFileSize: reactionFile?.size,
+        reactionFileName: reactionFile?.name
+      });
+      
       // If we have a reaction file, upload it (even if emotionData is null)
       let reactionMediaId = null;
       if (reactionFile) {
@@ -26,7 +36,9 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
           console.log('📤 Starting video upload:', {
             fileName: reactionFile.name,
             fileSize: reactionFile.size,
-            fileType: reactionFile.type
+            fileType: reactionFile.type,
+            isFile: reactionFile instanceof File,
+            isBlob: reactionFile instanceof Blob
           });
           
           // Upload reaction video to Firebase Storage
@@ -116,7 +128,10 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
             status: error.response?.status
           });
           // Continue with swipe even if reaction upload fails
+          console.warn('⚠️ Video upload failed, continuing with swipe without video');
         }
+      } else {
+        console.log('ℹ️ No reaction file provided, skipping video upload');
       }
 
       // Ensure direction is properly formatted
@@ -176,50 +191,90 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
   });
 
   const handleReactionRecorded = (reaction) => {
-    console.log('✅ Reaction recorded, file ready for upload:', {
-      hasFile: !!reaction.file,
-      fileSize: reaction.file?.size,
-      fileType: reaction.file?.type,
-      swipeDirection: reaction.swipeDirection,
-      hasEmotion: !!reaction.emotion
+    console.log('✅ Reaction recorded callback called:', {
+      hasFile: !!reaction?.file,
+      fileSize: reaction?.file?.size,
+      fileType: reaction?.file?.type,
+      swipeDirection: reaction?.swipeDirection,
+      hasEmotion: !!reaction?.emotion,
+      reactionKeys: reaction ? Object.keys(reaction) : 'null'
     });
     
     // Validate that we have a file
+    if (!reaction || !reaction.file) {
+      console.error('❌ No file in reaction object:', reaction);
+      // Still submit swipe without video
+      const responseTime = Date.now() - startTime;
+      swipeMutation.mutate({
+        direction: reaction?.swipeDirection || 'right',
+        responseTime,
+        emotionData: reaction?.emotion || null,
+        reactionFile: null
+      }, {
+        onSuccess: () => {
+          if (fullScreen && onSwiped) {
+            onSwiped(event._id);
+          }
+          setIsProcessing(false);
+        },
+        onError: () => {
+          if (fullScreen && onSwiped) {
+            onSwiped(event._id);
+          }
+          setIsProcessing(false);
+        }
+      });
+      return;
+    }
+    
     const reactionFile = (reaction.file && reaction.file.size > 0) ? reaction.file : null;
     
     if (!reactionFile) {
-      console.warn('⚠️ No file in reaction, submitting swipe without video');
+      console.warn('⚠️ File is null or empty, submitting swipe without video');
+      console.warn('File details:', {
+        file: reaction.file,
+        size: reaction.file?.size,
+        type: reaction.file?.type
+      });
     } else {
-      console.log('📹 File ready:', {
+      console.log('📹 File validated and ready:', {
         name: reactionFile.name,
         size: reactionFile.size,
-        type: reactionFile.type
+        type: reactionFile.type,
+        isFile: reactionFile instanceof File,
+        isBlob: reactionFile instanceof Blob
       });
     }
     
     const responseTime = Date.now() - startTime;
     
     // Submit swipe mutation - this will upload the video if available
-    console.log('Submitting swipe mutation with reaction data...');
+    console.log('🚀 Submitting swipe mutation with reaction data...', {
+      direction: reaction.swipeDirection,
+      responseTime,
+      hasEmotion: !!reaction.emotion,
+      hasFile: !!reactionFile
+    });
+    
     swipeMutation.mutate({
       direction: reaction.swipeDirection,
       responseTime,
       emotionData: reaction.emotion,
-      reactionFile: reactionFile
+      reactionFile: reactionFile // Pass the file directly
     }, {
       onSuccess: () => {
         // Close modal after video is uploaded and swipe is submitted
         if (fullScreen && onSwiped) {
-          console.log('Swipe with video submitted successfully, closing modal');
+          console.log('✅ Swipe with video submitted successfully, closing modal');
           onSwiped(event._id);
         }
         setIsProcessing(false);
       },
       onError: (error) => {
-        console.error('Error submitting swipe with video:', error);
+        console.error('❌ Error submitting swipe with video:', error);
         // Close modal even on error
         if (fullScreen && onSwiped) {
-          console.log('Swipe with video failed, closing modal');
+          console.log('⚠️ Swipe with video failed, closing modal');
           onSwiped(event._id);
         }
         setIsProcessing(false);
