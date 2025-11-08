@@ -8,7 +8,7 @@ import { ArrowLeft, Calendar, MapPin, Users, Plus, LogOut as LeaveIcon, Check, X
 import EventSwipe from '../components/EventSwipe';
 import Gallery from '../components/Gallery';
 import CreateEventModal from '../components/CreateEventModal';
-import { BeeDecor, BeeLogo } from '../components/BeeDecor';
+import { BeeDecor, BeeLogo } from '../components/BeeDecor.jsx';
 
 function HiveDashboard() {
   const { hiveId } = useParams();

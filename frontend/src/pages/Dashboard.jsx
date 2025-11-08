@@ -8,7 +8,7 @@ import { Calendar, Users, Plus, LogOut } from 'lucide-react';
 import CalendarSync from '../components/CalendarSync';
 import SimpleCalendar from '../components/SimpleCalendar';
 import FullScreenEventInvites from '../components/FullScreenEventInvites';
-import { BeeDecor, BeeLogo } from '../components/BeeDecor';
+import { BeeDecor, BeeLogo } from '../components/BeeDecor.jsx';
 
 function Dashboard() {
   const navigate = useNavigate();
