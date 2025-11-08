@@ -80,11 +80,14 @@ function FullScreenEventInvites() {
   // Open modal when there are pending events
   useEffect(() => {
     if (pendingEvents.length > 0 && !isOpen) {
+      console.log('Opening modal with pending events:', pendingEvents.length);
       setIsOpen(true);
       setCurrentEventIndex(0);
     } else if (pendingEvents.length === 0 && isOpen) {
       // Close if no more pending events
+      console.log('No more pending events, closing modal');
       setIsOpen(false);
+      setCurrentEventIndex(0);
     }
   }, [pendingEvents.length, isOpen]);
 
@@ -97,20 +100,16 @@ function FullScreenEventInvites() {
 
   // Handle event swiped
   const handleEventSwiped = () => {
-    // Move to next event or close if no more events
-    // The queries will be invalidated by EventSwipe component
-    setTimeout(() => {
-      // Check if there are more events after the current one
-      if (currentEventIndex < pendingEvents.length - 1) {
-        setCurrentEventIndex(currentEventIndex + 1);
-      } else {
-        // Close modal and refresh data
-        setIsOpen(false);
-        queryClient.invalidateQueries(['allEvents']);
-        queryClient.invalidateQueries(['events']);
-        queryClient.invalidateQueries(['hives']);
-      }
-    }, 1500); // Wait for the "thanks" message animation
+    console.log('Event swiped, closing modal and refreshing...');
+    // Close modal immediately and refresh data
+    setIsOpen(false);
+    setCurrentEventIndex(0);
+    
+    // Invalidate queries to refresh data
+    queryClient.invalidateQueries(['allEvents']);
+    queryClient.invalidateQueries(['events']);
+    queryClient.invalidateQueries(['hives']);
+    queryClient.invalidateQueries(['media']);
   };
 
   // Handle skip/close

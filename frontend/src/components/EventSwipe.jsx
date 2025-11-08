@@ -127,17 +127,15 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
       // Also invalidate the event query to get updated swipe logs
       queryClient.invalidateQueries(['event', event._id]);
       
-      // For full screen mode, navigate to dashboard after showing success message
+      // For full screen mode, call onSwiped callback to close modal
       if (fullScreen) {
-        // Wait a bit to show the success state, then navigate
+        // Show success message briefly, then close modal
         setTimeout(() => {
-          // Call onSwiped callback if provided
+          // Call onSwiped callback if provided (this will close the modal)
           if (onSwiped) {
             onSwiped();
           }
-          // Navigate to dashboard
-          navigate('/dashboard');
-        }, 2000); // 2 seconds to see the success message
+        }, 1500); // 1.5 seconds to see the success message
       } else {
         // Call onSwiped callback if provided (for non-full screen mode)
         if (onSwiped) {
