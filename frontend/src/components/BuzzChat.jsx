@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../config/api';
 import { useAuthStore } from '../store/authStore';
 import { format, formatDistanceToNow } from 'date-fns';
-import { Send, Smile, Bee as BeeIcon } from 'lucide-react';
+import { Send, Smile, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const EMOJI_REACTIONS = ['👍', '❤️', '😂', '😮', '😢', '🔥', '🎉', '🐝'];
@@ -98,7 +98,7 @@ function BuzzChat({ hiveId }) {
       {/* Header */}
       <div className="flex items-center justify-between mb-4 pb-3 border-b border-[#2D1B00]/20">
         <div className="flex items-center gap-2">
-          <BeeIcon className="w-5 h-5 text-[#C17D3A]" />
+          <Sparkles className="w-5 h-5 text-[#C17D3A]" />
           <h3 className="text-[#2D1B00] font-medium text-lg">Buzz Chat</h3>
         </div>
         <button
@@ -115,7 +115,7 @@ function BuzzChat({ hiveId }) {
           <div className="text-center text-[#6B4E00] py-8">Loading messages...</div>
         ) : messages.length === 0 ? (
           <div className="text-center text-[#6B4E00] py-8">
-            <BeeIcon className="w-12 h-12 mx-auto mb-2 text-[#C17D3A] opacity-50" />
+            <Sparkles className="w-12 h-12 mx-auto mb-2 text-[#C17D3A] opacity-50" />
             <p>No messages yet. Start the conversation!</p>
             <p className="text-sm mt-2">Try mentioning @Buzz to get help with event planning 🐝</p>
           </div>
@@ -222,7 +222,7 @@ function MessageBubble({ message, currentUserId, onAddReaction }) {
       <div className="flex-shrink-0">
         {isBuzz ? (
           <div className="w-8 h-8 rounded-full bg-[#C17D3A] flex items-center justify-center">
-            <BeeIcon className="w-5 h-5 text-white" />
+            <Sparkles className="w-5 h-5 text-white" />
           </div>
         ) : message.sender?.profilePhoto ? (
           <img
