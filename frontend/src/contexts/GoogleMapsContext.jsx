@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { LoadScript } from '@react-google-maps/api';
 import { GOOGLE_MAPS_API_KEY } from '../config/maps';
 
@@ -12,10 +12,56 @@ export const useGoogleMaps = () => {
   return useContext(GoogleMapsContext);
 };
 
+// Check if Google Maps script is already in the DOM
+const isScriptInDOM = () => {
+  const scripts = document.querySelectorAll('script[src*="maps.googleapis.com"]');
+  return scripts.length > 0;
+};
+
+// Check if Google Maps API is fully loaded
+const isGoogleMapsLoaded = () => {
+  return window.google && window.google.maps && window.google.maps.Map;
+};
+
 export const GoogleMapsProvider = ({ children }) => {
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(() => isGoogleMapsLoaded());
   const [loadError, setLoadError] = useState(null);
-  const [google, setGoogle] = useState(null);
+  const [google, setGoogle] = useState(() => (window.google || null));
+  const shouldLoadScript = useRef(!isScriptInDOM() && !isGoogleMapsLoaded());
+
+  // Check if Google Maps is already loaded on mount and poll if script is in DOM
+  useEffect(() => {
+    if (isGoogleMapsLoaded() && !isLoaded) {
+      setIsLoaded(true);
+      setGoogle(window.google);
+      shouldLoadScript.current = false;
+      return;
+    }
+
+    // If script is in DOM but not loaded yet, poll until it loads
+    if (isScriptInDOM() && !isGoogleMapsLoaded() && !isLoaded) {
+      const checkInterval = setInterval(() => {
+        if (isGoogleMapsLoaded()) {
+          setIsLoaded(true);
+          setGoogle(window.google);
+          clearInterval(checkInterval);
+        }
+      }, 100);
+
+      // Clear after 5 seconds
+      const timeout = setTimeout(() => {
+        clearInterval(checkInterval);
+        if (!isLoaded) {
+          setLoadError(new Error('Google Maps API failed to load'));
+        }
+      }, 5000);
+
+      return () => {
+        clearInterval(checkInterval);
+        clearTimeout(timeout);
+      };
+    }
+  }, [isLoaded]);
 
   const handleLoad = () => {
     // Wait a bit to ensure the API is fully initialized
@@ -24,9 +70,10 @@ export const GoogleMapsProvider = ({ children }) => {
     const maxRetries = 20; // Maximum 1 second of retries (20 * 50ms)
     
     const checkGoogleMaps = () => {
-      if (window.google && window.google.maps && window.google.maps.Map) {
+      if (isGoogleMapsLoaded()) {
         setIsLoaded(true);
         setGoogle(window.google);
+        shouldLoadScript.current = false;
       } else if (retries < maxRetries) {
         retries++;
         // Retry after a short delay if not ready
@@ -45,18 +92,22 @@ export const GoogleMapsProvider = ({ children }) => {
   const handleError = (error) => {
     console.error('Google Maps API load error:', error);
     setLoadError(error);
+    shouldLoadScript.current = false;
   };
 
-  // Also check if Google Maps is already loaded (e.g., from a previous load)
-  useEffect(() => {
-    if (window.google && window.google.maps && window.google.maps.Map && !isLoaded) {
-      setIsLoaded(true);
-      setGoogle(window.google);
-    }
-  }, [isLoaded]);
+  // If already loaded or script is in DOM, don't use LoadScript (avoid duplicate loads)
+  if (isLoaded || isGoogleMapsLoaded() || isScriptInDOM()) {
+    return (
+      <GoogleMapsContext.Provider value={{ isLoaded, loadError, google }}>
+        {children}
+      </GoogleMapsContext.Provider>
+    );
+  }
 
+  // Only use LoadScript if we need to load it
   return (
     <LoadScript
+      ref={loadScriptRef}
       googleMapsApiKey={GOOGLE_MAPS_API_KEY}
       libraries={['places']}
       onLoad={handleLoad}
