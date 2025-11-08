@@ -135,7 +135,11 @@ router.post('/:id/members', authenticateToken, async (req, res) => {
     newMember.hiveIDs.push(hive._id);
     await newMember.save();
 
-    res.json(hive);
+    // Populate members before returning
+    const populatedHive = await Hive.findById(hive._id)
+      .populate('members', 'name profilePhoto email major hobbies resHall');
+
+    res.json(populatedHive);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
