@@ -9,6 +9,7 @@ function FullScreenEventInvites() {
   const [currentEventIndex, setCurrentEventIndex] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
   const [justClosed, setJustClosed] = useState(false);
+  const [swipedEventIds, setSwipedEventIds] = useState(new Set()); // Track locally swiped events
   const queryClient = useQueryClient();
 
   // Get all hives
@@ -62,6 +63,11 @@ function FullScreenEventInvites() {
     if (!allEvents || !currentUser) return [];
     
     return allEvents.filter(event => {
+      // Skip events that have been locally swiped (even if backend hasn't updated yet)
+      if (swipedEventIds.has(event._id)) {
+        return false;
+      }
+      
       // Only show proposed events
       if (event.status !== 'proposed') return false;
       
@@ -89,7 +95,7 @@ function FullScreenEventInvites() {
       // Show event if user hasn't accepted or declined
       return !isAccepted && !isDeclined;
     });
-  }, [allEvents, currentUser]);
+  }, [allEvents, currentUser, swipedEventIds]);
 
   // Open modal when there are pending events
   useEffect(() => {
@@ -131,23 +137,32 @@ function FullScreenEventInvites() {
   }, [pendingEvents.length, currentEventIndex]);
 
   // Handle event swiped
-  const handleEventSwiped = useCallback(() => {
-    console.log('Event swiped, closing modal and refreshing...');
+  const handleEventSwiped = useCallback((eventId) => {
+    console.log('Event swiped, marking as swiped locally:', eventId);
+    
+    // Mark this event as swiped locally immediately
+    // This prevents it from showing up even if queries refetch before backend updates
+    if (eventId) {
+      setSwipedEventIds(prev => new Set([...prev, eventId]));
+    }
+    
     // Close modal immediately - set all states synchronously
     setJustClosed(true);
     setIsOpen(false);
     setCurrentEventIndex(0);
     
-    // Invalidate and refetch queries to refresh data immediately
-    queryClient.invalidateQueries(['allEvents']);
-    queryClient.invalidateQueries(['events']);
-    queryClient.invalidateQueries(['hives']);
-    queryClient.invalidateQueries(['media']);
+    // Don't invalidate queries immediately - wait for the swipe mutation to complete
+    // The mutation will handle query invalidation when it succeeds
+    // This prevents the modal from reopening before the backend has processed the swipe
     
-    // Force refetch to update pending events list
+    // Only invalidate queries after a delay to allow backend to process
     setTimeout(() => {
-      queryClient.refetchQueries(['allEvents'], { exact: false });
-    }, 100);
+      console.log('Invalidating queries after swipe');
+      queryClient.invalidateQueries(['allEvents']);
+      queryClient.invalidateQueries(['events']);
+      queryClient.invalidateQueries(['hives']);
+      queryClient.invalidateQueries(['media']);
+    }, 2000); // Wait 2 seconds for backend to process
   }, [queryClient]);
 
   // Handle skip/close
@@ -237,7 +252,7 @@ function FullScreenEventInvites() {
               >
                 <FullScreenEventSwipe 
                   event={currentEvent} 
-                  onSwiped={handleEventSwiped}
+                  onSwiped={() => handleEventSwiped(currentEvent._id)}
                 />
               </motion.div>
             </div>
