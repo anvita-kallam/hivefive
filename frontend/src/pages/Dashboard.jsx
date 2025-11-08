@@ -45,12 +45,12 @@ function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen honey-gradient-bg honeycomb-pattern" style={{ background: 'linear-gradient(180deg, #FFF8DC 0%, rgba(255, 215, 0, 0.8) 50%, #FF8C00 100%)' }}>
+    <div className="min-h-screen honey-gradient-bg honeycomb-pattern">
       {/* Full Screen Event Invites - Shows first when there are pending events */}
       <FullScreenEventInvites />
 
       {/* Header */}
-      <header className="shadow-lg border-b-4" style={{ background: 'linear-gradient(to right, #FFF8DC, #FFC30B, #FF8C00)', borderColor: '#4A2C2A' }}>
+      <header className="shadow-lg border-b-4 relative z-20" style={{ background: 'linear-gradient(to right, rgba(255,248,220,0.95), rgba(255,195,11,0.9), rgba(255,140,0,0.85))', borderColor: '#4A2C2A', backdropFilter: 'blur(10px)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -95,7 +95,7 @@ function Dashboard() {
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
         {/* Calendar Sync */}
         <section className="mb-8">
           <CalendarSync />

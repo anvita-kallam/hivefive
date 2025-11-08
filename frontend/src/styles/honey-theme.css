@@ -91,25 +91,30 @@
   }
 }
 
-/* Honey Text Effect */
+/* Honey Text Effect with Glow */
 .honey-text {
   color: var(--honey-brown);
-  font-weight: 600;
+  font-weight: 700;
   text-shadow: 
-    0 1px 2px rgba(255, 195, 11, 0.3),
-    0 2px 4px rgba(255, 140, 0, 0.2);
+    0 2px 4px rgba(255, 195, 11, 0.4),
+    0 4px 8px rgba(255, 140, 0, 0.3),
+    0 1px 2px rgba(74, 44, 42, 0.2),
+    0 0 10px rgba(255, 215, 0, 0.2);
   position: relative;
   display: inline-block;
   background: linear-gradient(
     135deg,
-    var(--honey-brown) 0%,
-    var(--honey-amber-dark) 50%,
-    var(--honey-brown) 100%
+    #4A2C2A 0%,
+    #8B4513 25%,
+    #D2691E 50%,
+    #8B4513 75%,
+    #4A2C2A 100%
   );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   animation: honeyDripForm 3s ease-in-out infinite;
+  filter: drop-shadow(0 2px 4px rgba(255, 195, 11, 0.3));
 }
 
 .honey-text::after {
@@ -140,7 +145,7 @@
   align-items: center;
 }
 
-/* Hexagonal Shape */
+/* Hexagonal Shape with 3D Effect */
 .hexagon {
   position: relative;
   width: 100%;
@@ -156,11 +161,40 @@
   );
   background: linear-gradient(
     135deg,
-    rgba(255, 195, 11, 0.9) 0%,
-    rgba(255, 140, 0, 0.9) 100%
+    rgba(255, 248, 220, 0.95) 0%,
+    rgba(255, 235, 180, 0.9) 25%,
+    rgba(255, 215, 0, 0.85) 50%,
+    rgba(255, 195, 11, 0.8) 75%,
+    rgba(255, 140, 0, 0.75) 100%
   );
   transition: all 0.3s ease;
   margin: 0 auto;
+  filter: drop-shadow(0 4px 8px rgba(255, 195, 11, 0.3));
+  border: 2px solid rgba(255, 195, 11, 0.2);
+}
+
+.hexagon::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.4) 0%,
+    transparent 50%,
+    rgba(139, 69, 19, 0.1) 100%
+  );
+  clip-path: polygon(
+    30% 0%,
+    70% 0%,
+    100% 50%,
+    70% 100%,
+    30% 100%,
+    0% 50%
+  );
+  pointer-events: none;
 }
 
 .hexagon-content {
@@ -176,8 +210,10 @@
   padding: 1rem;
   background: linear-gradient(
     135deg,
-    rgba(255, 248, 220, 0.95) 0%,
-    rgba(255, 215, 0, 0.95) 100%
+    rgba(255, 248, 220, 0.98) 0%,
+    rgba(255, 235, 180, 0.95) 30%,
+    rgba(255, 215, 0, 0.92) 60%,
+    rgba(255, 195, 11, 0.9) 100%
   );
   clip-path: polygon(
     30% 0%,
@@ -187,6 +223,10 @@
     30% 100%,
     0% 50%
   );
+  border: 2px solid rgba(255, 195, 11, 0.3);
+  box-shadow: 
+    inset 0 2px 5px rgba(255, 255, 255, 0.6),
+    inset 0 -2px 5px rgba(139, 69, 19, 0.1);
 }
 
 /* Buzz Hover Effect */
@@ -284,19 +324,34 @@
   transform: scale(1.1);
 }
 
-/* Honey Background Gradient */
+/* Honey Background Gradient with Radial Glow */
 .honey-gradient-bg {
-  background: linear-gradient(
-    180deg,
-    #FFF8DC 0%,
-    rgba(255, 215, 0, 0.8) 50%,
-    #FF8C00 100%
-  ) !important;
+  background: 
+    radial-gradient(
+      ellipse at 20% 50%,
+      rgba(255, 255, 255, 0.9) 0%,
+      rgba(255, 248, 220, 0.8) 15%,
+      rgba(255, 235, 180, 0.7) 30%,
+      rgba(255, 215, 0, 0.6) 50%,
+      rgba(255, 195, 11, 0.5) 70%,
+      rgba(255, 140, 0, 0.4) 85%,
+      rgba(139, 69, 19, 0.3) 100%
+    ),
+    linear-gradient(
+      135deg,
+      #FFF8DC 0%,
+      #FFE4B5 25%,
+      #FFD700 50%,
+      #FFC30B 75%,
+      #FF8C00 100%
+    ) !important;
   min-height: 100vh;
   width: 100%;
+  position: relative;
+  overflow-x: hidden;
 }
 
-/* Honeycomb Pattern Overlay */
+/* Honeycomb Pattern Overlay - True Hexagonal Grid */
 .honeycomb-pattern {
   position: relative;
 }
@@ -309,45 +364,103 @@
   width: 100%;
   height: 100%;
   background-image: 
-    repeating-linear-gradient(
-      30deg,
-      transparent,
-      transparent 50px,
-      rgba(255, 195, 11, 0.03) 50px,
-      rgba(255, 195, 11, 0.03) 51px
-    ),
-    repeating-linear-gradient(
-      -30deg,
-      transparent,
-      transparent 50px,
-      rgba(255, 195, 11, 0.03) 50px,
-      rgba(255, 195, 11, 0.03) 51px
-    );
+    /* Hexagonal grid pattern using SVG */
+    url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cpattern id='hexagons' width='100' height='100' patternUnits='userSpaceOnUse' patternTransform='scale(0.5) rotate(0)'%3E%3Cpolygon id='hex' points='50,0 93.3,25 93.3,75 50,100 6.7,75 6.7,25' fill='none' stroke='rgba(255,195,11,0.15)' stroke-width='1'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='url(%23hexagons)'/%3E%3C/svg%3E");
+  background-size: 200px 173px;
   pointer-events: none;
-  opacity: 0.3;
+  opacity: 0.6;
+  z-index: 0;
 }
 
-/* Card with Honey Glow */
+.honeycomb-pattern::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  /* Bokeh/sparkle effects */
+  background-image: 
+    radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 60% 70%, rgba(255, 235, 180, 0.2) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(255, 215, 0, 0.25) 0%, transparent 50%),
+    radial-gradient(circle at 40% 80%, rgba(255, 195, 11, 0.2) 0%, transparent 50%),
+    radial-gradient(circle at 90% 60%, rgba(255, 140, 0, 0.15) 0%, transparent 50%);
+  background-size: 
+    300px 300px,
+    400px 400px,
+    250px 250px,
+    350px 350px,
+    200px 200px;
+  background-position:
+    10% 20%,
+    50% 60%,
+    70% 10%,
+    30% 70%,
+    80% 50%;
+  pointer-events: none;
+  opacity: 0.7;
+  z-index: 1;
+  animation: sparkle 8s ease-in-out infinite;
+}
+
+@keyframes sparkle {
+  0%, 100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.1);
+  }
+}
+
+/* Card with Honey Glow - 3D Effect */
 .honey-card {
   background: linear-gradient(
     135deg,
-    rgba(255, 248, 220, 0.95) 0%,
-    rgba(255, 215, 0, 0.9) 100%
+    rgba(255, 248, 220, 0.98) 0%,
+    rgba(255, 235, 180, 0.95) 30%,
+    rgba(255, 215, 0, 0.92) 60%,
+    rgba(255, 195, 11, 0.9) 100%
   );
-  border: 2px solid rgba(255, 195, 11, 0.3);
-  border-radius: 15px;
+  border: 2px solid rgba(255, 195, 11, 0.4);
+  border-radius: 20px;
   box-shadow: 
-    0 4px 15px rgba(255, 195, 11, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    0 8px 25px rgba(255, 195, 11, 0.3),
+    0 4px 10px rgba(255, 140, 0, 0.2),
+    inset 0 2px 5px rgba(255, 255, 255, 0.6),
+    inset 0 -2px 5px rgba(139, 69, 19, 0.1);
   transition: all 0.3s ease;
+  position: relative;
+  z-index: 2;
+  backdrop-filter: blur(5px);
+}
+
+.honey-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.3) 0%,
+    transparent 100%
+  );
+  border-radius: 20px 20px 0 0;
+  pointer-events: none;
 }
 
 .honey-card:hover {
-  border-color: var(--honey-gold);
+  border-color: rgba(255, 195, 11, 0.6);
   box-shadow: 
-    0 6px 20px rgba(255, 195, 11, 0.4),
-    inset 0 1px 0 rgba(255, 255, 255, 0.6);
-  transform: translateY(-2px);
+    0 12px 35px rgba(255, 195, 11, 0.5),
+    0 6px 15px rgba(255, 140, 0, 0.3),
+    inset 0 2px 5px rgba(255, 255, 255, 0.7),
+    inset 0 -2px 5px rgba(139, 69, 19, 0.15);
+  transform: translateY(-4px) scale(1.02);
 }
 
 /* Swipe Card Honey Style */
