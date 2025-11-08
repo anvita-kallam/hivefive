@@ -131,7 +131,8 @@ function EventDetail() {
 
         // Upload to Firebase Storage
         const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-        const fileRef = ref(storage, `hive-media/${event.hiveID}/${eventId}/${Date.now()}_${sanitizedFileName}`);
+        const hiveId = event?.hiveID || 'unknown';
+        const fileRef = ref(storage, `hive-media/${hiveId}/${eventId}/${Date.now()}_${sanitizedFileName}`);
         
         // Determine content type
         const contentType = file.type || (fileType === 'image' ? 'image/jpeg' : 'video/mp4');
@@ -140,7 +141,7 @@ function EventDetail() {
           contentType: contentType,
           customMetadata: {
             uploadedBy: currentUser.uid,
-            hiveId: event.hiveID,
+            hiveId: hiveId,
             eventId: eventId,
             uploadedAt: new Date().toISOString()
           }
