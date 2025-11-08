@@ -18,67 +18,36 @@ function ReactionRecorder({ onReactionRecorded, eventId, swipeDirection = null }
   // Load face-api models
   useEffect(() => {
     const loadModels = async () => {
+      // Try loading from jsdelivr CDN (most reliable for face-api.js models)
+      const CDN_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model';
+      
       try {
-        // Load models from local /models folder
-        const MODEL_URL = '/models';
-        console.log('Loading face-api models from:', MODEL_URL);
-        
-        // Load models sequentially to better handle errors
-        try {
-          await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
-          console.log('✓ Tiny face detector loaded');
-        } catch (e) {
-          console.error('Failed to load tinyFaceDetector:', e);
-          throw e;
-        }
-        
-        try {
-          await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
-          console.log('✓ Face landmarks loaded');
-        } catch (e) {
-          console.error('Failed to load faceLandmark68Net:', e);
-          throw e;
-        }
-        
-        try {
-          await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
-          console.log('✓ Face recognition loaded');
-        } catch (e) {
-          console.error('Failed to load faceRecognitionNet:', e);
-          throw e;
-        }
-        
-        try {
-          await faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL);
-          console.log('✓ Face expressions loaded');
-        } catch (e) {
-          console.error('Failed to load faceExpressionNet:', e);
-          throw e;
-        }
-        
-        console.log('✅ All face-api models loaded successfully');
+        console.log('Loading face-api models from jsdelivr CDN...');
+        await Promise.all([
+          faceapi.nets.tinyFaceDetector.loadFromUri(CDN_URL),
+          faceapi.nets.faceLandmark68Net.loadFromUri(CDN_URL),
+          faceapi.nets.faceRecognitionNet.loadFromUri(CDN_URL),
+          faceapi.nets.faceExpressionNet.loadFromUri(CDN_URL)
+        ]);
+        console.log('✅ All face-api models loaded successfully from CDN');
         setModelsLoaded(true);
-      } catch (localError) {
-        console.error('Error loading face-api models from local:', localError);
-        console.error('Error details:', {
-          message: localError.message,
-          stack: localError.stack
-        });
+      } catch (cdnError) {
+        console.error('Error loading face-api models from CDN:', cdnError);
         
-        // Try unpkg CDN as fallback (more reliable)
+        // Try local models as fallback
         try {
-          console.warn('Trying unpkg CDN fallback...');
-          const CDN_URL = 'https://unpkg.com/face-api.js@0.22.2/weights';
+          console.warn('Trying local models folder...');
+          const MODEL_URL = '/models';
           await Promise.all([
-            faceapi.nets.tinyFaceDetector.loadFromUri(CDN_URL),
-            faceapi.nets.faceLandmark68Net.loadFromUri(CDN_URL),
-            faceapi.nets.faceRecognitionNet.loadFromUri(CDN_URL),
-            faceapi.nets.faceExpressionNet.loadFromUri(CDN_URL)
+            faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+            faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
+            faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL),
+            faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL)
           ]);
-          console.log('✅ Face-api models loaded from unpkg CDN');
+          console.log('✅ All face-api models loaded from local');
           setModelsLoaded(true);
-        } catch (cdnError) {
-          console.error('Error loading face-api models from CDN:', cdnError);
+        } catch (localError) {
+          console.error('Error loading face-api models from local:', localError);
           console.warn('⚠️ Continuing without emotion detection - recording will still work');
           // Allow component to continue even if models fail (users can still record)
           setModelsLoaded(false);
