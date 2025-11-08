@@ -347,29 +347,28 @@ function HiveDashboard() {
             </div>
           </div>
         </main>
+
+        {/* Modals */}
+        {showCreateEvent && (
+          <CreateEventModal
+            hiveId={hiveId}
+            onClose={() => setShowCreateEvent(false)}
+          />
+        )}
+
+        {showGallery && (
+          <Gallery
+            hiveId={hiveId}
+            eventId={selectedEvent?._id}
+            onClose={() => {
+              setShowGallery(false);
+              setSelectedEvent(null);
+            }}
+          />
+        )}
       </div>
-
-      {/* Modals */}
-      {showCreateEvent && (
-        <CreateEventModal
-          hiveId={hiveId}
-          onClose={() => setShowCreateEvent(false)}
-        />
-      )}
-
-      {showGallery && (
-        <Gallery
-          hiveId={hiveId}
-          eventId={selectedEvent?._id}
-          onClose={() => {
-            setShowGallery(false);
-            setSelectedEvent(null);
-          }}
-        />
-      )}
-    </div>
-  );
-}
+    );
+  }
 
 function HexagonIcon() {
   return (
