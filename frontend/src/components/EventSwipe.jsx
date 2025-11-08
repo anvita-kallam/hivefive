@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import TinderCard from 'react-tinder-card';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import api from '../config/api';
 import { format } from 'date-fns';
 import { Calendar, MapPin, X, Check } from 'lucide-react';
@@ -17,6 +18,7 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
   const swipeRef = useRef(null);
   const recorderRef = useRef(null);
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const { user } = useAuthStore();
 
   const swipeMutation = useMutation({
@@ -125,12 +127,24 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
       // Also invalidate the event query to get updated swipe logs
       queryClient.invalidateQueries(['event', event._id]);
       
-      // Call onSwiped callback if provided (for full screen mode)
-      if (onSwiped) {
-        // Wait a bit to show the success state
+      // For full screen mode, navigate to dashboard after showing success message
+      if (fullScreen) {
+        // Wait a bit to show the success state, then navigate
         setTimeout(() => {
-          onSwiped();
-        }, fullScreen ? 1500 : 500);
+          // Call onSwiped callback if provided
+          if (onSwiped) {
+            onSwiped();
+          }
+          // Navigate to dashboard
+          navigate('/dashboard');
+        }, 2000); // 2 seconds to see the success message
+      } else {
+        // Call onSwiped callback if provided (for non-full screen mode)
+        if (onSwiped) {
+          setTimeout(() => {
+            onSwiped();
+          }, 500);
+        }
       }
     },
     onError: (error) => {
