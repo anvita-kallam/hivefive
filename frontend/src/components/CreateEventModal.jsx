@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../config/api';
 import { X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import LocationPicker from './LocationPicker';
 
 function CreateEventModal({ hiveId, onClose }) {
   const queryClient = useQueryClient();
@@ -117,33 +118,20 @@ function CreateEventModal({ hiveId, onClose }) {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Location Name
+                Event Location
               </label>
-              <input
-                type="text"
-                value={formData.location.name}
-                onChange={(e) => setFormData({
-                  ...formData,
-                  location: { ...formData.location, name: e.target.value }
-                })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                placeholder="e.g., Student Center, Coffee Shop"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Address
-              </label>
-              <input
-                type="text"
-                value={formData.location.address}
-                onChange={(e) => setFormData({
-                  ...formData,
-                  location: { ...formData.location, address: e.target.value }
-                })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                placeholder="Full address (optional)"
+              <LocationPicker
+                onLocationSelect={(location) => {
+                  setFormData({
+                    ...formData,
+                    location: {
+                      name: location.name || '',
+                      address: location.address || '',
+                      coordinates: location.coordinates || null
+                    }
+                  });
+                }}
+                initialLocation={formData.location.name || formData.location.address ? formData.location : null}
               />
             </div>
 
