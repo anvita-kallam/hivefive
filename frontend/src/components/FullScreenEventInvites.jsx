@@ -103,10 +103,22 @@ function FullScreenEventInvites() {
       const timer = setTimeout(() => {
         console.log('Resetting justClosed flag, can now reopen if needed');
         setJustClosed(false);
-      }, 3000); // Wait 3 seconds for queries to refetch
+      }, 5000); // Wait 5 seconds for queries to refetch and prevent flickering
       return () => clearTimeout(timer);
     }
   }, [justClosed]);
+  
+  // Close modal if no pending events after a short delay (in case of race condition)
+  useEffect(() => {
+    if (pendingEvents.length === 0 && isOpen && !justClosed) {
+      const timer = setTimeout(() => {
+        console.log('No pending events, closing modal');
+        setIsOpen(false);
+        setJustClosed(true);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [pendingEvents.length, isOpen, justClosed]);
 
   // Update current index if pending events change
   useEffect(() => {
@@ -118,17 +130,19 @@ function FullScreenEventInvites() {
   // Handle event swiped
   const handleEventSwiped = () => {
     console.log('Event swiped, closing modal and refreshing...');
-    // Set justClosed flag to prevent immediate reopening
-    setJustClosed(true);
-    // Close modal immediately
+    // Close modal immediately - don't wait
     setIsOpen(false);
     setCurrentEventIndex(0);
+    setJustClosed(true);
     
-    // Invalidate queries to refresh data
+    // Invalidate queries to refresh data immediately
     queryClient.invalidateQueries(['allEvents']);
     queryClient.invalidateQueries(['events']);
     queryClient.invalidateQueries(['hives']);
     queryClient.invalidateQueries(['media']);
+    
+    // Refetch immediately to update pending events
+    queryClient.refetchQueries(['allEvents']);
   };
 
   // Handle skip/close
@@ -145,7 +159,18 @@ function FullScreenEventInvites() {
     setIsOpen(false);
   };
 
-  if (!isOpen || pendingEvents.length === 0) {
+  // Don't render if modal is closed
+  if (!isOpen) {
+    return null;
+  }
+  
+  // Don't render if no pending events (but allow modal to stay open briefly during state update)
+  if (pendingEvents.length === 0 && !justClosed) {
+    return null;
+  }
+  
+  // If we just closed but still have events (edge case), don't show
+  if (justClosed) {
     return null;
   }
 
