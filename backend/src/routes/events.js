@@ -1,4 +1,5 @@
 import express from 'express';
+import mongoose from 'mongoose';
 import { authenticateToken } from '../middleware/auth.js';
 import Event from '../models/Event.js';
 import Hive from '../models/Hive.js';
@@ -130,6 +131,15 @@ router.post('/:id/swipe', authenticateToken, async (req, res) => {
 
     const { swipeDirection, responseTime, emotionData, reactionMediaId, gpsData } = req.body;
 
+    console.log('Swipe request body:', {
+      swipeDirection,
+      responseTime,
+      hasEmotionData: !!emotionData,
+      reactionMediaId,
+      reactionMediaIdType: typeof reactionMediaId,
+      hasGpsData: !!gpsData
+    });
+
     // Validate swipeDirection
     if (!swipeDirection || (swipeDirection !== 'left' && swipeDirection !== 'right')) {
       console.error('Invalid swipeDirection:', swipeDirection);
@@ -191,15 +201,56 @@ router.post('/:id/swipe', authenticateToken, async (req, res) => {
       event.swipeLogs.splice(existingSwipeIndex, 1);
     }
     
+    // Validate and convert reactionMediaId if provided
+    let validReactionMediaId = null;
+    if (reactionMediaId) {
+      try {
+        // Check if it's a valid ObjectId string
+        if (typeof reactionMediaId === 'string' && mongoose.Types.ObjectId.isValid(reactionMediaId)) {
+          validReactionMediaId = new mongoose.Types.ObjectId(reactionMediaId);
+        } else if (reactionMediaId instanceof mongoose.Types.ObjectId) {
+          validReactionMediaId = reactionMediaId;
+        } else {
+          console.warn('Invalid reactionMediaId format:', reactionMediaId, typeof reactionMediaId);
+          // Don't fail, just don't use it
+          validReactionMediaId = null;
+        }
+      } catch (error) {
+        console.warn('Error validating reactionMediaId:', error);
+        validReactionMediaId = null;
+      }
+    }
+    
+    // Clean emotionData - ensure it's a plain object or null
+    let cleanEmotionData = null;
+    if (emotionData) {
+      try {
+        // Convert to plain object if it's not already
+        cleanEmotionData = typeof emotionData === 'object' ? JSON.parse(JSON.stringify(emotionData)) : null;
+      } catch (error) {
+        console.warn('Error cleaning emotionData:', error);
+        cleanEmotionData = null;
+      }
+    }
+    
     // Add new/updated swipe log
     const swipeLog = {
       userID: user._id,
       swipeDirection,
       responseTime: responseTime || 0,
-      emotionData: emotionData || null,
-      reactionMediaId: reactionMediaId || null,
+      emotionData: cleanEmotionData,
+      reactionMediaId: validReactionMediaId,
       timestamp: new Date()
     };
+    
+    console.log('Adding swipe log:', {
+      userID: user._id.toString(),
+      swipeDirection,
+      responseTime,
+      hasEmotionData: !!cleanEmotionData,
+      hasReactionMediaId: !!validReactionMediaId
+    });
+    
     event.swipeLogs.push(swipeLog);
 
     // Update accepted/declined arrays
