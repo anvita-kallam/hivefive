@@ -1,7 +1,7 @@
 import { Smile, Frown, Meh } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-function EventReactions({ event }) {
+function EventReactions({ event, showTitle = true }) {
   // Use event data directly instead of making a separate API call
   const reactions = event?.swipeLogs || [];
 
@@ -53,8 +53,10 @@ function EventReactions({ event }) {
   };
 
   return (
-    <div className="mt-4">
-      <h4 className="text-sm font-medium text-[#2D1B00] mb-3">Reactions</h4>
+    <div className={showTitle !== false ? "mt-4" : ""}>
+      {showTitle !== false && (
+        <h4 className="text-sm font-medium text-[#2D1B00] mb-3">Reactions</h4>
+      )}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
         {reactionsWithMedia.map((log) => {
           // Handle both populated and non-populated userID

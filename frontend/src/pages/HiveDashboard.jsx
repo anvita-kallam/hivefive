@@ -246,7 +246,8 @@ function HiveDashboard() {
                       key={event._id}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
-                          className="honey-card border-l-4 border-[#C17D3A] pl-4 py-3 mb-3"
+                          className="honey-card border-l-4 border-[#C17D3A] pl-4 py-3 mb-3 cursor-pointer hover:shadow-lg transition-shadow"
+                          onClick={() => navigate(`/event/${event._id}`)}
                         >
                              <div className="flex items-center justify-between mb-2">
                                <h3 className="font-medium text-[#2D1B00]">{event.title}</h3>
@@ -341,7 +342,17 @@ function HiveDashboard() {
                       
                           <div className="flex gap-2 mt-2">
                             <button
-                              onClick={() => {
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(`/event/${event._id}`);
+                              }}
+                              className="text-sm text-[#C17D3A] hover:text-[#6B4E00] font-medium transition-colors underline"
+                            >
+                              View Details
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
                                 setSelectedEvent(event);
                                 setShowGallery(true);
                               }}
@@ -351,7 +362,7 @@ function HiveDashboard() {
                             </button>
                           </div>
 
-                          {/* Event Reactions */}
+                          {/* Event Reactions Preview */}
                           <EventReactions event={event} />
                     </motion.div>
                   ))

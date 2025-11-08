@@ -107,8 +107,8 @@ function Dashboard() {
                     key={event._id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="honey-card p-4 cursor-pointer"
-                    onClick={() => navigate(`/hive/${event.hiveID}`)}
+                    className="honey-card p-4 cursor-pointer hover:shadow-lg transition-shadow"
+                    onClick={() => navigate(`/event/${event._id}`)}
                   >
                     <div className="flex items-start gap-3">
                       <Calendar className="w-5 h-5 text-[#2D1B00] mt-0.5" />

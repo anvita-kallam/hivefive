@@ -5,6 +5,7 @@ import EditProfile from './pages/EditProfile';
 import Dashboard from './pages/Dashboard';
 import HiveDashboard from './pages/HiveDashboard';
 import CreateHive from './pages/CreateHive';
+import EventDetail from './pages/EventDetail';
 import Login from './pages/Login';
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -55,6 +56,14 @@ function App() {
         element={
           <ProtectedRoute>
             <HiveDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/event/:eventId"
+        element={
+          <ProtectedRoute>
+            <EventDetail />
           </ProtectedRoute>
         }
       />
