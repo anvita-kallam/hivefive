@@ -130,10 +130,13 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
       // For full screen mode, close modal immediately
       if (fullScreen) {
         // Close modal immediately (don't wait for success message)
-        if (onSwiped) {
-          // Call immediately to close the modal
-          onSwiped();
-        }
+        // Use setTimeout with 0 to ensure state updates are processed
+        setTimeout(() => {
+          if (onSwiped) {
+            // Call immediately to close the modal
+            onSwiped();
+          }
+        }, 0);
       } else {
         // Call onSwiped callback if provided (for non-full screen mode)
         if (onSwiped) {

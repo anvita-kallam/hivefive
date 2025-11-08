@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import api from '../config/api';
 import EventSwipe from './EventSwipe';
@@ -128,22 +128,24 @@ function FullScreenEventInvites() {
   }, [pendingEvents.length, currentEventIndex]);
 
   // Handle event swiped
-  const handleEventSwiped = () => {
+  const handleEventSwiped = useCallback(() => {
     console.log('Event swiped, closing modal and refreshing...');
-    // Close modal immediately - don't wait
+    // Close modal immediately - set all states synchronously
+    setJustClosed(true);
     setIsOpen(false);
     setCurrentEventIndex(0);
-    setJustClosed(true);
     
-    // Invalidate queries to refresh data immediately
+    // Invalidate and refetch queries to refresh data immediately
     queryClient.invalidateQueries(['allEvents']);
     queryClient.invalidateQueries(['events']);
     queryClient.invalidateQueries(['hives']);
     queryClient.invalidateQueries(['media']);
     
-    // Refetch immediately to update pending events
-    queryClient.refetchQueries(['allEvents']);
-  };
+    // Force refetch to update pending events list
+    setTimeout(() => {
+      queryClient.refetchQueries(['allEvents'], { exact: false });
+    }, 100);
+  }, [queryClient]);
 
   // Handle skip/close
   const handleSkip = () => {
@@ -156,11 +158,18 @@ function FullScreenEventInvites() {
 
   // Handle close all
   const handleClose = () => {
+    setJustClosed(true);
     setIsOpen(false);
+    setCurrentEventIndex(0);
   };
 
-  // Don't render if modal is closed or just closed
-  if (!isOpen || justClosed) {
+  // Early return if modal should be closed - this prevents any rendering
+  // This check happens before any other logic to ensure immediate closure
+  if (justClosed) {
+    return null;
+  }
+  
+  if (!isOpen) {
     return null;
   }
   
@@ -170,7 +179,7 @@ function FullScreenEventInvites() {
   }
   
   // Safety check - don't render if current event doesn't exist
-  if (!pendingEvents[currentEventIndex]) {
+  if (currentEventIndex >= pendingEvents.length || !pendingEvents[currentEventIndex]) {
     return null;
   }
 
@@ -179,8 +188,8 @@ function FullScreenEventInvites() {
   const totalEvents = pendingEvents.length;
 
   return (
-    <AnimatePresence mode="wait">
-      {isOpen && !justClosed && pendingEvents.length > 0 && (
+    <AnimatePresence>
+      {isOpen && (
             <motion.div
               key={`modal-${currentEvent._id}`}
               initial={{ opacity: 0 }}

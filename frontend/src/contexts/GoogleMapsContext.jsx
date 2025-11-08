@@ -2,6 +2,9 @@ import { createContext, useContext, useState, useEffect } from 'react';
 import { LoadScript } from '@react-google-maps/api';
 import { GOOGLE_MAPS_API_KEY } from '../config/maps';
 
+// Define libraries array as a constant outside component to prevent re-renders
+const GOOGLE_MAPS_LIBRARIES = ['places'];
+
 const GoogleMapsContext = createContext({ 
   isLoaded: false, 
   loadError: null,
