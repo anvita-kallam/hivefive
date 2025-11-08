@@ -61,7 +61,7 @@ function HexagonPath({ x, y }) {
 export function BeeLogo({ className = "", width = 32, height = 32 }) {
   return (
     <img 
-      src="/logo.png" 
+      src="/bee_logo.png" 
       alt="HiveFive Logo" 
       className={className}
       style={{ 
