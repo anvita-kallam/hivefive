@@ -147,17 +147,28 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
   });
 
   const handleReactionRecorded = (reaction) => {
-    console.log('✅ Reaction recorded, submitting swipe in background:', reaction);
+    console.log('✅ Reaction recorded, processing and uploading:', {
+      hasFile: !!reaction.file,
+      fileSize: reaction.file?.size,
+      swipeDirection: reaction.swipeDirection,
+      hasEmotion: !!reaction.emotion
+    });
     setReactionData(reaction);
     // Mark as swiped (already set, but ensure it's set)
     setSwiped(true);
     
     // Auto-submit swipe after reaction is recorded
-    // This happens in the background - modal is already closed
     const responseTime = Date.now() - startTime;
     
-    // Submit swipe mutation in background
-    // Modal is already closed, so we don't need to call onSwiped again
+    // For full screen mode, close modal after recording is processed
+    // but before upload starts (so user sees dashboard)
+    if (fullScreen && onSwiped) {
+      // Close modal immediately so user sees dashboard
+      // Upload will continue in background
+      onSwiped();
+    }
+    
+    // Submit swipe mutation - this will upload the video
     swipeMutation.mutate({
       direction: reaction.swipeDirection,
       responseTime,
@@ -175,35 +186,41 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
     // Mark as swiped immediately to prevent duplicate interactions
     setSwiped(true);
     
-    // For full screen mode, close modal immediately and handle recording/API in background
+    // For full screen mode, stop recording first, then close modal after recording stops
     if (fullScreen) {
       const swipeDirection = direction === 'right' ? 'right' : 'left';
-      console.log('🛑 Swipe detected, closing modal immediately, direction:', swipeDirection);
-      
-      // Close modal immediately - don't wait for anything
-      if (onSwiped) {
-        onSwiped();
-      }
+      console.log('🛑 Swipe detected, stopping recording, direction:', swipeDirection);
       
       // Stop recording with the swipe direction (if recorder exists)
-      // This will process in the background and call handleReactionRecorded
-      if (recorderRef.current) {
+      // This will process and call handleReactionRecorded when done
+      if (recorderRef.current && recorderRef.current.isRecording()) {
         try {
+          // Stop recording - this will trigger onReactionRecorded callback
           recorderRef.current.stopRecording(swipeDirection);
+          // Don't close modal yet - wait for recording to finish processing
+          // The modal will close in handleReactionRecorded
+          return;
         } catch (error) {
           console.error('Error stopping recording:', error);
-          // If recording fails, still submit the swipe without video
+          // If recording fails, close modal and submit swipe without video
+          if (onSwiped) {
+            onSwiped();
+          }
           const responseTime = Date.now() - startTime;
-          // Submit swipe in background - don't block UI
           swipeMutation.mutate({
             direction: swipeDirection,
             responseTime,
             emotionData: null,
             reactionFile: null
           });
+          return;
         }
       } else {
-        // No recorder, submit swipe directly in background
+        // No recorder or not recording, close modal immediately and submit swipe
+        console.log('No active recording, closing modal and submitting swipe');
+        if (onSwiped) {
+          onSwiped();
+        }
         const responseTime = Date.now() - startTime;
         swipeMutation.mutate({
           direction: swipeDirection,
@@ -211,8 +228,8 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
           emotionData: null,
           reactionFile: null
         });
+        return;
       }
-      return; // Modal is already closed, exit
     }
     
     // For non-full screen, proceed without reaction
@@ -349,42 +366,41 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
 
   // For full screen mode, show recorder with card overlay
   if (fullScreen) {
-    // If swiped, return null (modal will close via onSwiped callback)
-    if (swiped) {
-      return null;
-    }
-    
-    // Show card with recording
+    // If swiped, still show recorder briefly to allow recording to finish
+    // Only return null if we've confirmed recording is done
+    // Keep the component mounted so recording can complete
     return (
       <div className={containerClass}>
         <ReactionRecorder
           ref={recorderRef}
           onReactionRecorded={handleReactionRecorded}
           eventId={event._id}
-          showVideo={true}
+          showVideo={!swiped} // Hide video after swipe, but keep component mounted
           overlayContent={
-            <div className="absolute inset-0 flex items-center justify-center z-30 pointer-events-none">
-              <div className="w-full max-w-3xl mx-auto px-4 pointer-events-auto" style={{ height: '80%' }}>
-                <TinderCard
-                  ref={swipeRef}
-                  className="w-full h-full"
-                  onSwipe={handleSwipe}
-                  preventSwipe={['up', 'down']}
-                  swipeThreshold={50}
-                  onCardLeftScreen={(dir) => {
-                    // Handle card leaving screen
-                    console.log('Card left screen:', dir);
-                    if (!swiped) {
-                      handleSwipe(dir);
-                    }
-                  }}
-                >
-                  <div className="relative w-full h-full">
-                    {swipeCardContent}
-                  </div>
-                </TinderCard>
+            !swiped ? (
+              <div className="absolute inset-0 flex items-center justify-center z-30 pointer-events-none">
+                <div className="w-full max-w-3xl mx-auto px-4 pointer-events-auto" style={{ height: '80%' }}>
+                  <TinderCard
+                    ref={swipeRef}
+                    className="w-full h-full"
+                    onSwipe={handleSwipe}
+                    preventSwipe={['up', 'down']}
+                    swipeThreshold={50}
+                    onCardLeftScreen={(dir) => {
+                      // Handle card leaving screen
+                      console.log('Card left screen:', dir);
+                      if (!swiped) {
+                        handleSwipe(dir);
+                      }
+                    }}
+                  >
+                    <div className="relative w-full h-full">
+                      {swipeCardContent}
+                    </div>
+                  </TinderCard>
+                </div>
               </div>
-            </div>
+            ) : null // Hide overlay after swipe, but keep recorder mounted
           }
         />
       </div>
