@@ -58,24 +58,14 @@ function HexagonPath({ x, y }) {
   );
 }
 
-export function BeeLogo() {
+export function BeeLogo({ className = "", width = 32, height = 32 }) {
   return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" style={{ color: '#2D1B00' }}>
-      {/* Bee body */}
-      <ellipse cx="12" cy="14" rx="5" ry="6" fill="#2D1B00" />
-      {/* Stripes */}
-      <path d="M 7 12 Q 12 11 17 12" stroke="#E6C896" strokeWidth="1.5" />
-      <path d="M 7 14 Q 12 13 17 14" stroke="#E6C896" strokeWidth="1.5" />
-      <path d="M 7 16 Q 12 15 17 16" stroke="#E6C896" strokeWidth="1.5" />
-      {/* Wings */}
-      <ellipse cx="8" cy="10" rx="4" ry="3" fill="currentColor" opacity="0.3" />
-      <ellipse cx="16" cy="10" rx="4" ry="3" fill="currentColor" opacity="0.3" />
-      {/* Head */}
-      <circle cx="12" cy="8" r="3" fill="#2D1B00" />
-      {/* Antennae */}
-      <path d="M 11 6 Q 10 4 9 3" stroke="#2D1B00" strokeWidth="1" fill="none" />
-      <path d="M 13 6 Q 14 4 15 3" stroke="#2D1B00" strokeWidth="1" fill="none" />
-    </svg>
+    <img 
+      src="/logo.png" 
+      alt="HiveFive Logo" 
+      className={className}
+      style={{ width: `${width}px`, height: `${height}px`, objectFit: 'contain' }}
+    />
   );
 }
 
