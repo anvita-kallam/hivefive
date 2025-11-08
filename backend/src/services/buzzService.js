@@ -1,4 +1,5 @@
 import { VertexAI } from '@google-cloud/vertexai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import dotenv from 'dotenv';
 import Hive from '../models/Hive.js';
 import Event from '../models/Event.js';
@@ -8,10 +9,29 @@ import Media from '../models/Media.js';
 dotenv.config();
 
 let generativeModel = null;
+let useApiKey = false;
 
-// Initialize Vertex AI client
+// Initialize Gemini/Vertex AI client
+// Priority 1: Google Generative AI API (uses API key) - simpler for development
+// Priority 2: Vertex AI (uses service account) - for production with Vertex AI
 try {
-  if (process.env.VERTEX_AI_PROJECT_ID && process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+  // Option 1: Use Google Generative AI API with API key (simpler)
+  if (process.env.GEMINI_API_KEY) {
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+    generativeModel = genAI.getGenerativeModel({
+      model: 'gemini-2.0-flash-exp',
+      generationConfig: {
+        maxOutputTokens: 1024,
+        temperature: 0.7,
+        topP: 0.95,
+        topK: 40,
+      },
+    });
+    useApiKey = true;
+    console.log('✅ Gemini API initialized with API key (Gemini 2.0 Flash)');
+  }
+  // Option 2: Use Vertex AI with service account (production)
+  else if (process.env.VERTEX_AI_PROJECT_ID && process.env.GOOGLE_APPLICATION_CREDENTIALS) {
     const vertexAI = new VertexAI({
       project: process.env.VERTEX_AI_PROJECT_ID,
       location: process.env.VERTEX_AI_LOCATION || 'us-central1',
@@ -28,12 +48,14 @@ try {
       },
     });
     
+    useApiKey = false;
     console.log('✅ Vertex AI Buzz service initialized with Gemini 2.0 Flash');
   } else {
-    console.warn('⚠️ Vertex AI credentials not found. Buzz will use enhanced mock responses.');
+    console.warn('⚠️ No Gemini/Vertex AI credentials found. Buzz will use enhanced mock responses.');
+    console.warn('💡 Set GEMINI_API_KEY (for API key) or VERTEX_AI_PROJECT_ID + GOOGLE_APPLICATION_CREDENTIALS (for Vertex AI)');
   }
 } catch (error) {
-  console.warn('⚠️ Vertex AI initialization failed:', error.message);
+  console.warn('⚠️ Gemini/Vertex AI initialization failed:', error.message);
   console.warn('Buzz will use enhanced mock responses.');
 }
 
@@ -200,23 +222,35 @@ USER MESSAGE: ${userName}: ${userMessage}
 
 Generate a helpful, context-aware response as Buzz. If the message is about event planning, ask clarifying questions or make suggestions based on the hive's preferences.`;
 
-    // Use Vertex AI if available, otherwise use enhanced mock
+    // Use Gemini/Vertex AI if available, otherwise use enhanced mock
     if (generativeModel) {
       try {
-        const result = await generativeModel.generateContent({
-          contents: [{
-            role: 'user',
-            parts: [{ text: systemPrompt }]
-          }]
-        });
+        let result;
+        
+        if (useApiKey) {
+          // Google Generative AI API (API key authentication)
+          result = await generativeModel.generateContent(systemPrompt);
+          const response = result.response;
+          const buzzMessage = response.text() || 
+            generateEnhancedMockResponse(userMessage, context, conversationHistory);
+          return buzzMessage.trim();
+        } else {
+          // Vertex AI (service account authentication)
+          result = await generativeModel.generateContent({
+            contents: [{
+              role: 'user',
+              parts: [{ text: systemPrompt }]
+            }]
+          });
 
-        const response = result.response;
-        const buzzMessage = response.candidates?.[0]?.content?.parts?.[0]?.text || 
-          generateEnhancedMockResponse(userMessage, context, conversationHistory);
+          const response = result.response;
+          const buzzMessage = response.candidates?.[0]?.content?.parts?.[0]?.text || 
+            generateEnhancedMockResponse(userMessage, context, conversationHistory);
 
-        return buzzMessage.trim();
+          return buzzMessage.trim();
+        }
       } catch (aiError) {
-        console.error('Error calling Vertex AI:', aiError);
+        console.error('Error calling Gemini/Vertex AI:', aiError.message);
         // Fallback to mock response
         return generateEnhancedMockResponse(userMessage, context, conversationHistory);
       }
