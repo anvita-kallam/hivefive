@@ -299,6 +299,30 @@ router.post('/:id/swipe', authenticateToken, async (req, res) => {
   }
 });
 
+// Delete event
+router.delete('/:id', authenticateToken, async (req, res) => {
+  try {
+    const event = await Event.findById(req.params.id);
+    if (!event) {
+      return res.status(404).json({ error: 'Event not found' });
+    }
+
+    // Verify user is creator of the event
+    const user = await User.findOne({ email: req.user.email });
+    if (event.createdBy.toString() !== user._id.toString()) {
+      return res.status(403).json({ error: 'Only the event creator can delete this event' });
+    }
+
+    // Delete associated media (optional - you may want to keep media)
+    // For now, we'll just delete the event and let media remain
+
+    await Event.findByIdAndDelete(req.params.id);
+    res.json({ message: 'Event deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Update event
 router.put('/:id', authenticateToken, async (req, res) => {
   try {

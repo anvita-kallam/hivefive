@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../config/api';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
-import { ArrowLeft, Calendar, MapPin, Users, Plus, LogOut as LeaveIcon, Check, X } from 'lucide-react';
+import { ArrowLeft, Calendar, MapPin, Users, Plus, LogOut as LeaveIcon, Check, X, Trash2 } from 'lucide-react';
 import EventSwipe from '../components/EventSwipe';
 import Gallery from '../components/Gallery';
 import CreateEventModal from '../components/CreateEventModal';
@@ -56,6 +56,28 @@ function HiveDashboard() {
   });
 
   const queryClient = useQueryClient();
+
+  // Delete event mutation
+  const deleteEventMutation = useMutation({
+    mutationFn: async (eventId) => {
+      return api.delete(`/events/${eventId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['events', hiveId]);
+      queryClient.invalidateQueries(['hive', hiveId]);
+    },
+    onError: (error) => {
+      console.error('Error deleting event:', error);
+      alert(error.response?.data?.error || 'Failed to delete event');
+    }
+  });
+
+  const handleDeleteEvent = async (event) => {
+    if (!window.confirm(`Are you sure you want to delete "${event.title}"? This action cannot be undone.`)) {
+      return;
+    }
+    deleteEventMutation.mutate(event._id);
+  };
 
   // Leave hive mutation
   const leaveHiveMutation = useMutation({
@@ -228,13 +250,29 @@ function HiveDashboard() {
                         >
                              <div className="flex items-center justify-between mb-2">
                                <h3 className="font-medium text-[#2D1B00]">{event.title}</h3>
-                               <span className={`hexagon-badge px-3 py-1 text-xs font-medium ${
-                                 event.status === 'confirmed' ? 'bg-green-100 text-green-800' :
-                                 event.status === 'cancelled' ? 'bg-red-100 text-red-800' :
-                                 'text-[#2D1B00]'
-                               }`}>
-                                 {event.status}
-                               </span>
+                               <div className="flex items-center gap-2">
+                                 <span className={`px-3 py-1 text-xs font-medium rounded-full ${
+                                   event.status === 'confirmed' ? 'bg-green-100 text-green-800' :
+                                   event.status === 'cancelled' ? 'bg-red-100 text-red-800' :
+                                   'bg-yellow-100 text-yellow-800'
+                                 }`}>
+                                   {event.status}
+                                 </span>
+                                 {/* Delete button - only show for event creator */}
+                                 {currentUser && event.createdBy && 
+                                  (typeof event.createdBy === 'object' 
+                                    ? event.createdBy._id?.toString() === currentUser._id?.toString()
+                                    : event.createdBy?.toString() === currentUser._id?.toString()) && (
+                                   <button
+                                     onClick={() => handleDeleteEvent(event)}
+                                     disabled={deleteEventMutation.isLoading}
+                                     className="p-1.5 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                                     title="Delete event"
+                                   >
+                                     <Trash2 className="w-4 h-4" />
+                                   </button>
+                                 )}
+                               </div>
                              </div>
                           {event.description && (
                             <p className="text-sm text-[#6B4E00] mb-2">{event.description}</p>
