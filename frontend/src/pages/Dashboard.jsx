@@ -50,7 +50,7 @@ function Dashboard() {
       <FullScreenEventInvites />
 
       {/* Header */}
-      <header className="shadow-lg border-b-4 relative z-20" style={{ background: 'linear-gradient(to right, rgba(255,248,220,0.95), rgba(255,195,11,0.9), rgba(255,140,0,0.85))', borderColor: '#4A2C2A', backdropFilter: 'blur(10px)' }}>
+      <header className="shadow-lg border-b relative z-20" style={{ background: 'rgba(255, 255, 255, 0.3)', borderColor: 'rgba(255, 220, 150, 0.3)', backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)', borderBottomWidth: '1px' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
