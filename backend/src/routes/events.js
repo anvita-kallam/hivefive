@@ -140,11 +140,21 @@ router.post('/:id/swipe', authenticateToken, async (req, res) => {
       hasGpsData: !!gpsData
     });
 
-    // Validate swipeDirection
-    if (!swipeDirection || (swipeDirection !== 'left' && swipeDirection !== 'right')) {
-      console.error('Invalid swipeDirection:', swipeDirection);
-      return res.status(400).json({ error: 'swipeDirection must be "left" or "right"' });
-    }
+          // Validate swipeDirection
+          console.log('🔍 Validating swipeDirection:', {
+            swipeDirection: swipeDirection,
+            type: typeof swipeDirection,
+            isLeft: swipeDirection === 'left',
+            isRight: swipeDirection === 'right',
+            trimmed: typeof swipeDirection === 'string' ? swipeDirection.trim() : swipeDirection
+          });
+          
+          if (!swipeDirection || (swipeDirection !== 'left' && swipeDirection !== 'right')) {
+            console.error('❌ Invalid swipeDirection:', swipeDirection, typeof swipeDirection);
+            return res.status(400).json({ error: 'swipeDirection must be "left" or "right"' });
+          }
+          
+          console.log('✅ swipeDirection validated:', swipeDirection, 'action:', swipeDirection === 'right' ? 'ACCEPT' : 'DECLINE');
 
     const event = await Event.findById(req.params.id);
     if (!event) {
@@ -254,29 +264,62 @@ router.post('/:id/swipe', authenticateToken, async (req, res) => {
     event.swipeLogs.push(swipeLog);
 
     // Update accepted/declined arrays
+    console.log('📋 Updating event arrays with swipeDirection:', swipeDirection, 'action:', swipeDirection === 'right' ? 'ACCEPT' : 'DECLINE');
+    
     if (swipeDirection === 'right') {
       // Accept: add to acceptedBy, remove from declinedBy
+      console.log('✅ Processing ACCEPT (right swipe)');
       const userAccepted = event.acceptedBy.some(id => id.toString() === user._id.toString());
       const userDeclined = event.declinedBy.some(id => id.toString() === user._id.toString());
+      
+      console.log('Before update:', {
+        userAccepted: userAccepted,
+        userDeclined: userDeclined,
+        acceptedByCount: event.acceptedBy.length,
+        declinedByCount: event.declinedBy.length
+      });
       
       if (!userAccepted) {
         event.acceptedBy.push(user._id);
+        console.log('✅ Added user to acceptedBy');
       }
       if (userDeclined) {
         event.declinedBy = event.declinedBy.filter(id => id.toString() !== user._id.toString());
+        console.log('✅ Removed user from declinedBy');
       }
+      
+      console.log('After update:', {
+        acceptedByCount: event.acceptedBy.length,
+        declinedByCount: event.declinedBy.length
+      });
     } else if (swipeDirection === 'left') {
       // Decline: add to declinedBy, remove from acceptedBy
+      console.log('❌ Processing DECLINE (left swipe)');
       const userAccepted = event.acceptedBy.some(id => id.toString() === user._id.toString());
       const userDeclined = event.declinedBy.some(id => id.toString() === user._id.toString());
       
+      console.log('Before update:', {
+        userAccepted: userAccepted,
+        userDeclined: userDeclined,
+        acceptedByCount: event.acceptedBy.length,
+        declinedByCount: event.declinedBy.length
+      });
+      
       if (!userDeclined) {
         event.declinedBy.push(user._id);
+        console.log('✅ Added user to declinedBy');
       }
       if (userAccepted) {
         event.acceptedBy = event.acceptedBy.filter(id => id.toString() !== user._id.toString());
+        console.log('✅ Removed user from acceptedBy');
       }
+      
+      console.log('After update:', {
+        acceptedByCount: event.acceptedBy.length,
+        declinedByCount: event.declinedBy.length
+      });
     } else {
+      console.error('❌ Invalid swipeDirection in update logic:', swipeDirection);
       return res.status(400).json({ error: 'Invalid swipeDirection. Must be "left" or "right".' });
     }
 
