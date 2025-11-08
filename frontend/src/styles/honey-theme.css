@@ -1,15 +1,25 @@
 /* Honey and Hive Theme Styles */
 
-/* Color Variables */
+/* Color Variables - Based on Figma Design */
 :root {
+  --background: #D4A574;
+  --foreground: #2D1B00;
+  --card: rgba(245, 230, 211, 0.4);
+  --card-foreground: #2D1B00;
+  --primary: #C17D3A;
+  --primary-foreground: #2D1B00;
+  --secondary: #E6C896;
+  --secondary-foreground: #2D1B00;
+  --muted: #E6C896;
+  --muted-foreground: #6B4E00;
+  --accent: #D9A566;
+  --border: rgba(45, 27, 0, 0.2);
   --honey-gold: #FFC30B;
   --honey-amber: #FF8C00;
-  --honey-brown: #4A2C2A;
-  --honey-light: #FFF8DC;
+  --honey-brown: #2D1B00;
+  --honey-light: #F5E6D3;
   --honey-dark: #8B4513;
-  --honey-gradient-start: #FFF8DC;
-  --honey-gradient-end: #FFD700;
-  --honey-amber-dark: #D2691E;
+  --honey-amber-dark: #C17D3A;
 }
 
 /* Honey Drip Text Animation */
@@ -324,17 +334,10 @@
   transform: scale(1.1);
 }
 
-/* Light Warm Yellow Background Gradient */
+/* Background - Based on Figma Design */
 .honey-gradient-bg {
-  background: linear-gradient(
-    180deg,
-    #FFFAE6 0%,
-    #FFF5D6 25%,
-    #FFF0C2 50%,
-    #FFEBB5 75%,
-    #FFE6A8 100%
-  ) !important;
-  background-color: #FFF5D6 !important; /* Fallback color */
+  background: #D4A574 !important;
+  background-color: #D4A574 !important;
   min-height: 100vh;
   width: 100%;
   position: relative;
@@ -346,18 +349,12 @@ html.honey-gradient-bg,
 html,
 body.honey-gradient-bg,
 body {
-  background: linear-gradient(
-    180deg,
-    #FFFAE6 0%,
-    #FFF5D6 25%,
-    #FFF0C2 50%,
-    #FFEBB5 75%,
-    #FFE6A8 100%
-  ) !important;
-  background-color: #FFF5D6 !important;
+  background: #D4A574 !important;
+  background-color: #D4A574 !important;
   margin: 0 !important;
   padding: 0 !important;
   min-height: 100vh !important;
+  color: #2D1B00 !important;
 }
 
 /* Subtle Honeycomb Pattern Overlay */
@@ -381,81 +378,33 @@ body {
   z-index: 0;
 }
 
-/* Clear Glass Effect Card */
+/* Glass Effect Card - Based on Figma Design */
 .honey-card {
-  background: rgba(255, 255, 255, 0.25);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  border-radius: 20px;
-  box-shadow: 
-    0 8px 32px rgba(255, 220, 150, 0.2),
-    0 2px 8px rgba(255, 200, 100, 0.15),
-    inset 0 1px 0 rgba(255, 255, 255, 0.6),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.2);
+  background: rgba(245, 230, 211, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(45, 27, 0, 0.2);
+  border-radius: 0.625rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
   position: relative;
   z-index: 2;
 }
 
-.honey-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 50%;
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.5) 0%,
-    rgba(255, 255, 255, 0.1) 100%
-  );
-  border-radius: 20px 20px 0 0;
-  pointer-events: none;
-  z-index: -1;
-}
-
 .honey-card:hover {
-  background: rgba(255, 255, 255, 0.35);
-  border-color: rgba(255, 255, 255, 0.5);
-  box-shadow: 
-    0 12px 40px rgba(255, 220, 150, 0.3),
-    0 4px 12px rgba(255, 200, 100, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.7),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.3);
+  background: rgba(245, 230, 211, 0.5);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.15), 0 4px 6px -4px rgba(0, 0, 0, 0.15);
   transform: translateY(-2px);
 }
 
-/* Swipe Card Glass Style */
+/* Swipe Card Glass Style - Based on Figma Design */
 .honey-swipe-card {
-  background: rgba(255, 255, 255, 0.3);
-  backdrop-filter: blur(25px) saturate(180%);
-  -webkit-backdrop-filter: blur(25px) saturate(180%);
-  border: 2px solid rgba(255, 255, 255, 0.5);
-  box-shadow: 
-    0 12px 40px rgba(255, 220, 150, 0.25),
-    0 4px 12px rgba(255, 200, 100, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.7),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.3);
+  background: rgba(245, 230, 211, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 2px solid rgba(45, 27, 0, 0.2);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
   position: relative;
-}
-
-.honey-swipe-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.4) 0%,
-    rgba(255, 255, 255, 0.1) 50%,
-    transparent 100%
-  );
-  pointer-events: none;
-  border-radius: inherit;
-  z-index: -1;
 }
 
 /* Bee Icon Glow */

@@ -120,51 +120,50 @@ function SimpleCalendar() {
   const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
   return (
-    <div className="honey-card p-6">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-4">
-          <Hexagon className="w-6 h-6 text-honey-brown bee-icon" />
-          <Calendar className="w-6 h-6 text-honey-amber" />
-          <h2 className="text-2xl font-bold honey-text text-honey-brown">My Calendar</h2>
+      <div className="honey-card p-6 mb-6">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <HexagonIcon />
+            <Calendar className="w-5 h-5 text-[#2D1B00]" />
+            <h2 className="text-[#2D1B00] text-xl font-medium">My Calendar</h2>
+          </div>
+          <button
+            onClick={() => {
+              setSelectedDate(new Date());
+              setEditingEvent(null);
+              setShowAddModal(true);
+            }}
+            className="bg-[rgba(245,230,211,0.6)] backdrop-blur-sm hover:bg-[rgba(245,230,211,0.8)] text-[#2D1B00] border border-[#2D1B00]/20 px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
+          >
+            <Plus className="w-4 h-4" />
+            Add Event
+          </button>
         </div>
-        <button
-          onClick={() => {
-            setSelectedDate(new Date());
-            setEditingEvent(null);
-            setShowAddModal(true);
-          }}
-          className="honey-drop-button buzz-hover flex items-center gap-2"
-        >
-          <Plus className="w-5 h-5" />
-          <Hexagon className="w-4 h-4" />
-          Add Event
-        </button>
-      </div>
 
       {/* Calendar Header */}
-      <div className="flex items-center justify-between mb-4">
-        <button
-          onClick={handlePreviousMonth}
-          className="buzz-hover p-2 bg-honey-gold hover:bg-honey-amber rounded-lg border-2 border-honey-brown"
-        >
-          <ChevronLeft className="w-5 h-5 text-honey-brown" />
-        </button>
-        <h3 className="text-xl font-bold honey-text text-honey-brown">
-          {format(currentDate, 'MMMM yyyy')}
-        </h3>
-        <button
-          onClick={handleNextMonth}
-          className="buzz-hover p-2 bg-honey-gold hover:bg-honey-amber rounded-lg border-2 border-honey-brown"
-        >
-          <ChevronRight className="w-5 h-5 text-honey-brown" />
-        </button>
-      </div>
+        <div className="mb-4 flex items-center justify-center gap-4">
+          <button
+            onClick={handlePreviousMonth}
+            className="text-[#2D1B00] hover:text-[#6B4E00] transition-colors"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <h3 className="text-[#2D1B00] min-w-[200px] text-center font-medium">
+            {format(currentDate, 'MMMM yyyy')}
+          </h3>
+          <button
+            onClick={handleNextMonth}
+            className="text-[#2D1B00] hover:text-[#6B4E00] transition-colors"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+        </div>
 
       {/* Calendar Grid */}
       <div className="grid grid-cols-7 gap-1">
         {/* Week day headers */}
         {weekDays.map(day => (
-          <div key={day} className="text-center text-sm font-bold text-honey-brown py-2">
+          <div key={day} className="text-center text-[#2D1B00] py-2 text-sm font-medium">
             {day}
           </div>
         ))}
@@ -175,43 +174,45 @@ function SimpleCalendar() {
           const isCurrentMonth = isSameMonth(day, currentDate);
           const isToday = isSameDay(day, new Date());
 
-          return (
-            <div
-              key={day.toISOString()}
-              onClick={() => handleDayClick(day)}
-              className={`
-                min-h-[80px] p-2 border-2 border-honey-gold rounded-lg cursor-pointer
-                buzz-hover transition-colors
-                ${isCurrentMonth ? 'bg-honey-light' : 'bg-honey-light bg-opacity-50'}
-                ${isToday ? 'ring-4 ring-honey-gold bg-honey-gold bg-opacity-30' : ''}
-              `}
-            >
-              <div className={`text-sm font-bold mb-1 ${isCurrentMonth ? 'text-honey-brown' : 'text-honey-amber-dark opacity-50'}`}>
-                {format(day, 'd')}
-              </div>
-              <div className="space-y-1">
-                {dayEvents.slice(0, 2).map(eventItem => (
-                  <div
-                    key={eventItem._id}
-                    className="text-xs px-2 py-1 rounded text-white truncate cursor-pointer hover:opacity-80 font-semibold border border-white border-opacity-30"
-                    style={{ backgroundColor: eventItem.color || '#FFC30B' }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleEditEvent(eventItem, e);
-                    }}
-                    title={`${eventItem.title} - Click to edit`}
-                  >
-                    {format(new Date(eventItem.startTime), 'h:mm a')} - {eventItem.title}
+              return (
+                <div
+                  key={day.toISOString()}
+                  onClick={() => handleDayClick(day)}
+                  className={`
+                    min-h-[80px] p-2 rounded-lg border cursor-pointer backdrop-blur-sm transition-colors
+                    ${isCurrentMonth 
+                      ? dayEvents.length > 0
+                        ? 'bg-[rgba(245,230,211,0.6)] border-[#C17D3A] border-2 shadow-md'
+                        : 'bg-[rgba(245,230,211,0.5)] border-[#2D1B00]/20'
+                      : 'bg-[rgba(230,200,150,0.3)] border-[#2D1B00]/10 opacity-50'
+                    }
+                  `}
+                >
+                  <div className={`text-[#2D1B00] text-sm mb-1 ${!isCurrentMonth ? 'opacity-50' : ''}`}>
+                    {format(day, 'd')}
                   </div>
-                ))}
-                {dayEvents.length > 2 && (
-                  <div className="text-xs text-honey-amber-dark font-semibold">
-                    +{dayEvents.length - 2} more
+                  <div className="space-y-1">
+                    {dayEvents.slice(0, 2).map(eventItem => (
+                      <div
+                        key={eventItem._id}
+                        className="bg-[rgba(193,125,58,0.8)] backdrop-blur-sm text-[#2D1B00] text-xs px-2 py-1 rounded cursor-pointer hover:opacity-80"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEditEvent(eventItem, e);
+                        }}
+                        title={`${eventItem.title} - Click to edit`}
+                      >
+                        {format(new Date(eventItem.startTime), 'h:mm a')} - {eventItem.title}
+                      </div>
+                    ))}
+                    {dayEvents.length > 2 && (
+                      <div className="text-xs text-[#6B4E00]">
+                        +{dayEvents.length - 2} more
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-            </div>
-          );
+                </div>
+              );
         })}
       </div>
 
@@ -313,141 +314,154 @@ function EventModal({ selectedDate, event, onClose, onSubmit, isLoading }) {
         exit={{ opacity: 0, scale: 0.95 }}
         className="honey-card rounded-lg shadow-xl p-6 max-w-md w-full mx-4"
       >
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <Hexagon className="w-5 h-5 text-honey-brown bee-icon" />
-            <h3 className="text-xl font-bold honey-text text-honey-brown">
-              {event ? 'Edit Event' : 'Add Event'}
-            </h3>
-          </div>
-          <button
-            onClick={onClose}
-            className="buzz-hover p-2 bg-honey-gold hover:bg-honey-amber rounded-lg border-2 border-honey-brown"
-          >
-            <X className="w-5 h-5 text-honey-brown" />
-          </button>
-        </div>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-[#2D1B00] text-xl font-medium">
+                {event ? 'Edit Event' : 'Add Event'}
+              </h3>
+              <button
+                onClick={onClose}
+                className="text-[#2D1B00] hover:text-[#6B4E00] transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-bold text-honey-brown mb-1">
-              Title *
-            </label>
-            <input
-              type="text"
-              value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              required
-              className="w-full px-4 py-2 border-2 border-honey-gold rounded-lg focus:ring-2 focus:ring-honey-amber focus:border-honey-brown bg-honey-light"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-bold text-honey-brown mb-1">
-              Description
-            </label>
-            <textarea
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              rows={3}
-              className="w-full px-4 py-2 border-2 border-honey-gold rounded-lg focus:ring-2 focus:ring-honey-amber focus:border-honey-brown bg-honey-light"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-bold text-honey-brown mb-1">
-                Start Time *
-              </label>
-              <input
-                type="datetime-local"
-                value={formData.startTime}
-                onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
-                required
-                className="w-full px-4 py-2 border-2 border-honey-gold rounded-lg focus:ring-2 focus:ring-honey-amber focus:border-honey-brown bg-honey-light"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-bold text-honey-brown mb-1">
-                End Time *
-              </label>
-              <input
-                type="datetime-local"
-                value={formData.endTime}
-                onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
-                required
-                className="w-full px-4 py-2 border-2 border-honey-gold rounded-lg focus:ring-2 focus:ring-honey-amber focus:border-honey-brown bg-honey-light"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-bold text-honey-brown mb-1">
-              Location
-            </label>
-            <input
-              type="text"
-              value={formData.location}
-              onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-              className="w-full px-4 py-2 border-2 border-honey-gold rounded-lg focus:ring-2 focus:ring-honey-amber focus:border-honey-brown bg-honey-light"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-bold text-honey-brown mb-1">
-              Color
-            </label>
-            <div className="flex gap-2">
-              {['#FFC30B', '#FF8C00', '#FFD700', '#10B981', '#EF4444', '#8B5CF6'].map(color => (
-                <button
-                  key={color}
-                  type="button"
-                  onClick={() => setFormData({ ...formData, color })}
-                  className={`w-8 h-8 rounded-full border-2 ${formData.color === color ? 'ring-2 ring-honey-brown border-honey-brown' : 'border-honey-gold'}`}
-                  style={{ backgroundColor: color }}
+              <div>
+                <label className="block text-sm text-[#2D1B00] mb-1 font-medium">
+                  Title *
+                </label>
+                <input
+                  type="text"
+                  value={formData.title}
+                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  required
+                  className="w-full px-4 py-2 border border-[#2D1B00]/20 rounded-lg bg-[rgba(255,249,230,0.6)] text-[#2D1B00] focus:outline-none focus:ring-2 focus:ring-[#C17D3A]/50"
                 />
-              ))}
-              <input
-                type="color"
-                value={formData.color}
-                onChange={(e) => setFormData({ ...formData, color: e.target.value })}
-                className="w-8 h-8 rounded-full border-2 border-honey-gold cursor-pointer"
-              />
-            </div>
-          </div>
+              </div>
 
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              id="allDay"
-              checked={formData.allDay}
-              onChange={(e) => setFormData({ ...formData, allDay: e.target.checked })}
-              className="w-4 h-4 text-honey-gold border-honey-gold rounded focus:ring-honey-amber"
-            />
-            <label htmlFor="allDay" className="ml-2 text-sm font-semibold text-honey-brown">
-              All day event
-            </label>
-          </div>
+              <div>
+                <label className="block text-sm text-[#2D1B00] mb-1 font-medium">
+                  Description
+                </label>
+                <textarea
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  rows={3}
+                  className="w-full px-4 py-2 border border-[#2D1B00]/20 rounded-lg bg-[rgba(255,249,230,0.6)] text-[#2D1B00] focus:outline-none focus:ring-2 focus:ring-[#C17D3A]/50"
+                />
+              </div>
 
-          <div className="flex gap-4">
-            <button
-              type="button"
-              onClick={onClose}
-              className="buzz-hover flex-1 px-4 py-2 border-2 border-honey-brown text-honey-brown rounded-lg hover:bg-honey-light font-semibold"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="honey-drop-button buzz-hover flex-1 disabled:bg-gray-400 disabled:cursor-not-allowed font-semibold"
-            >
-              {isLoading ? 'Saving...' : event ? 'Update' : 'Add Event'}
-            </button>
-          </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm text-[#2D1B00] mb-1 font-medium">
+                    Start Time *
+                  </label>
+                  <input
+                    type="datetime-local"
+                    value={formData.startTime}
+                    onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
+                    required
+                    className="w-full px-4 py-2 border border-[#2D1B00]/20 rounded-lg bg-[rgba(255,249,230,0.6)] text-[#2D1B00] focus:outline-none focus:ring-2 focus:ring-[#C17D3A]/50"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm text-[#2D1B00] mb-1 font-medium">
+                    End Time *
+                  </label>
+                  <input
+                    type="datetime-local"
+                    value={formData.endTime}
+                    onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
+                    required
+                    className="w-full px-4 py-2 border border-[#2D1B00]/20 rounded-lg bg-[rgba(255,249,230,0.6)] text-[#2D1B00] focus:outline-none focus:ring-2 focus:ring-[#C17D3A]/50"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm text-[#2D1B00] mb-1 font-medium">
+                  Location
+                </label>
+                <input
+                  type="text"
+                  value={formData.location}
+                  onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                  className="w-full px-4 py-2 border border-[#2D1B00]/20 rounded-lg bg-[rgba(255,249,230,0.6)] text-[#2D1B00] focus:outline-none focus:ring-2 focus:ring-[#C17D3A]/50"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm text-[#2D1B00] mb-1 font-medium">
+                  Color
+                </label>
+                <div className="flex gap-2">
+                  {['#C17D3A', '#D4A574', '#E6C896', '#10B981', '#EF4444', '#8B5CF6'].map(color => (
+                    <button
+                      key={color}
+                      type="button"
+                      onClick={() => setFormData({ ...formData, color })}
+                      className={`w-8 h-8 rounded-full border-2 ${formData.color === color ? 'ring-2 ring-[#C17D3A] border-[#C17D3A]' : 'border-[#2D1B00]/20'}`}
+                      style={{ backgroundColor: color }}
+                    />
+                  ))}
+                  <input
+                    type="color"
+                    value={formData.color}
+                    onChange={(e) => setFormData({ ...formData, color: e.target.value })}
+                    className="w-8 h-8 rounded-full border-2 border-[#2D1B00]/20 cursor-pointer"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="allDay"
+                  checked={formData.allDay}
+                  onChange={(e) => setFormData({ ...formData, allDay: e.target.checked })}
+                  className="w-4 h-4 text-[#C17D3A] border-[#2D1B00]/20 rounded focus:ring-[#C17D3A]"
+                />
+                <label htmlFor="allDay" className="ml-2 text-sm text-[#2D1B00] font-medium">
+                  All day event
+                </label>
+              </div>
+
+              <div className="flex gap-4">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="flex-1 px-4 py-2 border border-[#2D1B00]/20 text-[#2D1B00] rounded-lg hover:bg-[rgba(245,230,211,0.8)] font-medium transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="flex-1 px-4 py-2 bg-[rgba(193,125,58,0.8)] hover:bg-[rgba(193,125,58,0.9)] text-[#2D1B00] border border-[#2D1B00]/20 backdrop-blur-sm rounded-lg font-medium transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                >
+                  {isLoading ? 'Saving...' : event ? 'Update' : 'Add Event'}
+                </button>
+              </div>
         </form>
       </motion.div>
     </div>
+  );
+}
+
+function HexagonIcon() {
+  return (
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 20 20"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className="text-[#2D1B00]"
+      style={{ color: '#2D1B00' }}
+    >
+      <circle cx="10" cy="10" r="9" stroke="currentColor" strokeWidth="2" fill="none" />
+    </svg>
   );
 }
 

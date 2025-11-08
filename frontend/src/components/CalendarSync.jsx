@@ -55,38 +55,54 @@ function CalendarSync() {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="honey-card p-6"
+      className="honey-card p-6 mb-6"
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Hexagon className="w-6 h-6 text-honey-brown bee-icon" />
-          <Calendar className="w-6 h-6 text-honey-amber" />
+          <HexagonIcon />
+          <Calendar className="w-5 h-5 text-[#2D1B00]" />
           <div>
-            <h3 className="font-bold honey-text text-honey-brown">Google Calendar Sync</h3>
-            <p className="text-sm text-honey-amber-dark font-medium">
-              {isConnected 
+            <h3 className="text-[#2D1B00] font-medium">Google Calendar Sync</h3>
+            <p className="text-sm text-[#6B4E00]">
+              {isConnected
                 ? 'Connected - Your availability will be used for event planning'
                 : 'Connect to sync your calendar. Note: Requires Google app verification. Use the calendar below to manage events in the meantime.'}
             </p>
           </div>
         </div>
-        
+
         {isConnected ? (
           <div className="flex items-center gap-2 text-green-600">
             <Check className="w-5 h-5" />
-            <span className="font-bold">Connected</span>
+            <span className="font-medium">Connected</span>
           </div>
         ) : (
           <button
             onClick={handleConnectCalendar}
             disabled={connecting}
-            className="buzz-hover px-4 py-2 bg-honey-gold text-honey-brown rounded-lg hover:bg-honey-amber disabled:bg-gray-400 disabled:cursor-not-allowed font-semibold shadow-honey border-2 border-honey-brown"
+            className="bg-[rgba(245,230,211,0.6)] backdrop-blur-sm hover:bg-[rgba(245,230,211,0.8)] text-[#2D1B00] border border-[#2D1B00]/20 px-4 py-2 rounded-lg font-medium transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
           >
             {connecting ? 'Connecting...' : 'Connect Calendar'}
           </button>
         )}
       </div>
     </motion.div>
+  );
+}
+
+function HexagonIcon() {
+  return (
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 20 20"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className="text-[#2D1B00]"
+      style={{ color: '#2D1B00' }}
+    >
+      <circle cx="10" cy="10" r="9" stroke="currentColor" strokeWidth="2" fill="none" />
+    </svg>
   );
 }
 

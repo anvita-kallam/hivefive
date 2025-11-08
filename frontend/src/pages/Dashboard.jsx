@@ -45,49 +45,35 @@ function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen honey-gradient-bg honeycomb-pattern">
+    <div className="min-h-screen honey-gradient-bg relative overflow-hidden">
+      {/* Honeycomb Decorations */}
+      <BeeDecor />
+
       {/* Full Screen Event Invites - Shows first when there are pending events */}
       <FullScreenEventInvites />
 
       {/* Header */}
-      <header className="shadow-lg border-b relative z-20" style={{ background: 'rgba(255, 255, 255, 0.3)', borderColor: 'rgba(255, 220, 150, 0.3)', backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)', borderBottomWidth: '1px' }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <header className="bg-[rgba(212,165,116,0.8)] backdrop-blur-md border-b border-[#2D1B00]/20 relative z-20 shadow-lg">
+        <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Hexagon className="w-8 h-8 bee-icon" style={{ color: '#4A2C2A' }} />
+            <div className="flex items-center gap-3">
+              <BeeLogo />
               <div>
-                <h1 className="text-3xl font-bold honey-text" style={{ color: '#4A2C2A' }}>HiveFive</h1>
-                <p className="text-sm font-medium" style={{ color: '#4A2C2A' }}>Welcome back, {user?.name || user?.email}</p>
+                <h1 className="text-[#2D1B00] text-2xl font-medium">HiveFive</h1>
+                <p className="text-sm text-[#6B4E00]">Welcome back, {user?.name || user?.email}</p>
               </div>
-              {user?.profilePhoto && (
-                <div className="buzz-hover">
-                  <img
-                    src={user.profilePhoto}
-                    alt={user.name}
-                    className="w-12 h-12 rounded-full object-cover border-4"
-                    style={{ borderColor: '#FFC30B', boxShadow: '0 4px 15px rgba(255, 195, 11, 0.4)' }}
-                  />
-                </div>
-              )}
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
               <button
                 onClick={() => navigate('/edit-profile')}
-                className="buzz-hover px-4 py-2 rounded-lg font-semibold transition-colors"
-                style={{ backgroundColor: '#FFC30B', color: '#4A2C2A', boxShadow: '0 4px 15px rgba(255, 195, 11, 0.4)' }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#FF8C00'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#FFC30B'}
+                className="text-[#2D1B00] hover:text-[#6B4E00] underline transition-colors"
               >
                 Edit Profile
               </button>
               <button
                 onClick={logout}
-                className="buzz-hover flex items-center gap-2 px-4 py-2 rounded-lg transition-colors"
-                style={{ backgroundColor: '#4A2C2A', color: 'white' }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#8B4513'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#4A2C2A'}
+                className="bg-[rgba(193,125,58,0.8)] hover:bg-[rgba(193,125,58,0.9)] text-[#2D1B00] border border-[#2D1B00]/20 backdrop-blur-sm px-4 py-2 rounded-lg font-medium transition-colors"
               >
-                <LogOut className="w-5 h-5" />
                 Logout
               </button>
             </div>
@@ -95,105 +81,105 @@ function Dashboard() {
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
+      <main className="max-w-7xl mx-auto px-6 py-6 relative z-10">
         {/* Calendar Sync */}
-        <section className="mb-8">
+        <section className="mb-6">
           <CalendarSync />
         </section>
 
         {/* Simple Calendar */}
-        <section className="mb-8">
+        <section className="mb-6">
           <SimpleCalendar />
         </section>
 
         {/* Upcoming Events */}
         {events && events.length > 0 && (
-          <section className="mb-8">
-            <div className="flex items-center gap-3 mb-6">
-              <Hexagon className="w-6 h-6 bee-icon" style={{ color: '#4A2C2A' }} />
-              <h2 className="text-2xl font-bold honey-text" style={{ color: '#4A2C2A' }}>Upcoming Events</h2>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {events.slice(0, 6).map((event) => (
-                <motion.div
-                  key={event._id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="honey-card buzz-hover p-4 cursor-pointer"
-                  onClick={() => navigate(`/hive/${event.hiveID}`)}
-                >
-                  <div className="flex items-center gap-2 mb-2">
-                    <Calendar className="w-5 h-5" style={{ color: '#4A2C2A' }} />
-                    <span className="text-sm font-semibold" style={{ color: '#4A2C2A' }}>{event.title}</span>
-                  </div>
-                  {event.confirmedTime && (
-                    <p className="text-sm mb-2 font-medium" style={{ color: '#D2691E' }}>
-                      {format(new Date(event.confirmedTime), 'MMM d, h:mm a')}
-                    </p>
-                  )}
-                  <div className="flex items-center gap-2 text-xs" style={{ color: '#4A2C2A' }}>
-                    <Users className="w-4 h-4" />
-                    <span className="font-semibold">{event.acceptedBy?.length || 0} accepted</span>
-                  </div>
-                </motion.div>
-              ))}
+          <section className="mb-6">
+            <div className="honey-card p-6 mb-4">
+              <div className="flex items-center gap-3 mb-4">
+                <HexagonIcon />
+                <h2 className="text-[#2D1B00] text-xl font-medium">Upcoming Events</h2>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {events.slice(0, 6).map((event) => (
+                  <motion.div
+                    key={event._id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-[rgba(245,230,211,0.5)] backdrop-blur-sm rounded-lg p-4 border border-[#2D1B00]/20 shadow-md cursor-pointer hover:bg-[rgba(245,230,211,0.6)] transition-colors"
+                    onClick={() => navigate(`/hive/${event.hiveID}`)}
+                  >
+                    <div className="flex items-start gap-3">
+                      <Calendar className="w-5 h-5 text-[#2D1B00] mt-0.5" />
+                      <div className="flex-1">
+                        <h4 className="text-[#2D1B00] mb-1 font-medium">{event.title}</h4>
+                        {event.confirmedTime && (
+                          <p className="text-sm text-[#6B4E00] mb-2">
+                            {format(new Date(event.confirmedTime), 'MMM d, h:mm a')}
+                          </p>
+                        )}
+                        <div className="flex items-center gap-2 text-sm text-[#6B4E00]">
+                          <Users className="w-4 h-4" />
+                          <span>{event.acceptedBy?.length || 0} accepted</span>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
             </div>
           </section>
         )}
 
         {/* Hives */}
         <section>
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <Hexagon className="w-6 h-6 bee-icon" style={{ color: '#4A2C2A' }} />
-              <h2 className="text-2xl font-bold honey-text" style={{ color: '#4A2C2A' }}>My Hives</h2>
-            </div>
-            <button
-              onClick={() => navigate('/create-hive')}
-              className="honey-drop-button buzz-hover flex items-center gap-2"
-            >
-              <Plus className="w-6 h-6" />
-              <Hexagon className="w-5 h-5" />
-              Create Hive
-            </button>
-          </div>
-
-          {!hives || hives.length === 0 ? (
-            <div className="honey-card p-12 text-center">
-              <Hexagon className="w-20 h-20 mx-auto mb-4 bee-icon" style={{ color: '#4A2C2A' }} />
-              <h3 className="text-2xl font-bold honey-text mb-2" style={{ color: '#4A2C2A' }}>No hives yet</h3>
-              <p className="mb-6 font-medium" style={{ color: '#D2691E' }}>Create or join a hive to get started</p>
+          <div className="honey-card p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <HexagonIcon />
+                <h2 className="text-[#2D1B00] text-xl font-medium">My Hives</h2>
+              </div>
               <button
                 onClick={() => navigate('/create-hive')}
-                className="honey-drop-button buzz-hover"
+                className="bg-[rgba(245,230,211,0.6)] backdrop-blur-sm hover:bg-[rgba(245,230,211,0.8)] text-[#2D1B00] border border-[#2D1B00]/20 px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
               >
-                <Hexagon className="w-5 h-5 inline mr-2" />
-                Create Your First Hive
+                <Plus className="w-4 h-4" />
+                Create Hive
               </button>
             </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 p-4">
-              {hives.map((hive) => (
-                <motion.div
-                  key={hive._id}
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="buzz-hover max-w-xs mx-auto"
-                  onClick={() => navigate(`/hive/${hive._id}`)}
+
+            {!hives || hives.length === 0 ? (
+              <div className="text-center py-12">
+                <h3 className="text-[#2D1B00] text-xl font-medium mb-2">No hives yet</h3>
+                <p className="text-[#6B4E00] mb-6">Create or join a hive to get started</p>
+                <button
+                  onClick={() => navigate('/create-hive')}
+                  className="bg-[rgba(245,230,211,0.6)] backdrop-blur-sm hover:bg-[rgba(245,230,211,0.8)] text-[#2D1B00] border border-[#2D1B00]/20 px-4 py-2 rounded-lg font-medium transition-colors"
                 >
-                  <div className="honey-card p-6 rounded-2xl min-h-[200px] flex flex-col items-center justify-center">
-                    <Hexagon className="w-12 h-12 mb-3 bee-icon" style={{ color: '#4A2C2A' }} />
-                    <h3 className="text-xl font-bold honey-text text-center mb-3" style={{ color: '#4A2C2A' }}>{hive.name}</h3>
-                    <div className="flex items-center gap-2 mb-4" style={{ color: '#D2691E' }}>
-                      <Users className="w-5 h-5" />
-                      <span className="font-semibold text-lg">{hive.members?.length || 0} members</span>
+                  Create Your First Hive
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {hives.map((hive) => (
+                  <motion.div
+                    key={hive._id}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="bg-[rgba(245,230,211,0.5)] backdrop-blur-sm rounded-lg p-4 border border-[#2D1B00]/20 shadow-md cursor-pointer hover:bg-[rgba(245,230,211,0.6)] transition-colors"
+                    onClick={() => navigate(`/hive/${hive._id}`)}
+                  >
+                    <h3 className="text-[#2D1B00] font-medium mb-2">{hive.name}</h3>
+                    <div className="flex items-center gap-2 text-sm text-[#6B4E00] mb-3">
+                      <Users className="w-4 h-4" />
+                      <span>{hive.members?.length || 0} members</span>
                     </div>
                     
                     {/* Next Event */}
                     {events && events.find(e => e.hiveID === hive._id && e.status === 'confirmed') && (
-                      <div className="mt-3 pt-3 border-t w-full" style={{ borderColor: 'rgba(74, 44, 42, 0.3)' }}>
-                        <p className="text-sm font-semibold mb-1" style={{ color: '#D2691E' }}>Next Event:</p>
-                        <p className="text-sm font-bold" style={{ color: '#4A2C2A' }}>
+                      <div className="mt-3 pt-3 border-t border-[#2D1B00]/20">
+                        <p className="text-xs text-[#6B4E00] mb-1">Next Event:</p>
+                        <p className="text-sm text-[#2D1B00] font-medium">
                           {events.find(e => e.hiveID === hive._id && e.status === 'confirmed')?.title}
                         </p>
                       </div>
@@ -201,31 +187,46 @@ function Dashboard() {
 
                     {/* Member Avatars */}
                     {hive.members && hive.members.length > 0 && (
-                      <div className="flex -space-x-2 mt-4">
+                      <div className="flex -space-x-2 mt-3">
                         {hive.members.slice(0, 5).map((member) => (
                           <img
                             key={member._id}
                             src={member.profilePhoto || `https://ui-avatars.com/api/?name=${member.name}`}
                             alt={member.name}
-                            className="w-8 h-8 rounded-full border-2"
-                            style={{ borderColor: '#FFC30B' }}
+                            className="w-6 h-6 rounded-full border-2 border-[#D4A574]"
                           />
                         ))}
                         {hive.members.length > 5 && (
-                          <div className="w-8 h-8 rounded-full border-2 flex items-center justify-center text-xs font-bold" style={{ borderColor: '#FFC30B', backgroundColor: '#FF8C00', color: '#4A2C2A' }}>
+                          <div className="w-6 h-6 rounded-full border-2 border-[#D4A574] bg-[rgba(193,125,58,0.8)] flex items-center justify-center text-xs text-[#2D1B00] font-medium">
                             +{hive.members.length - 5}
                           </div>
                         )}
                       </div>
                     )}
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          )}
+                  </motion.div>
+                ))}
+              </div>
+            )}
+          </div>
         </section>
-      </div>
+      </main>
     </div>
+  );
+}
+
+function HexagonIcon() {
+  return (
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 20 20"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className="text-[#2D1B00]"
+      style={{ color: '#2D1B00' }}
+    >
+      <circle cx="10" cy="10" r="9" stroke="currentColor" strokeWidth="2" fill="none" />
+    </svg>
   );
 }
 

@@ -12,42 +12,22 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: linear-gradient(
-    180deg,
-    #FFFAE6 0%,
-    #FFF5D6 25%,
-    #FFF0C2 50%,
-    #FFEBB5 75%,
-    #FFE6A8 100%
-  ) !important;
-  background-color: #FFF5D6 !important;
+  background: #D4A574 !important;
+  background-color: #D4A574 !important;
+  color: #2D1B00 !important;
   min-height: 100vh;
 }
 
 html {
-  background: linear-gradient(
-    180deg,
-    #FFFAE6 0%,
-    #FFF5D6 25%,
-    #FFF0C2 50%,
-    #FFEBB5 75%,
-    #FFE6A8 100%
-  ) !important;
-  background-color: #FFF5D6 !important;
+  background: #D4A574 !important;
+  background-color: #D4A574 !important;
   min-height: 100vh;
 }
 
 #root {
   min-height: 100vh;
-  background: linear-gradient(
-    180deg,
-    #FFFAE6 0%,
-    #FFF5D6 25%,
-    #FFF0C2 50%,
-    #FFEBB5 75%,
-    #FFE6A8 100%
-  ) !important;
-  background-color: #FFF5D6 !important;
+  background: #D4A574 !important;
+  background-color: #D4A574 !important;
 }
 
 code {
