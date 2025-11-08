@@ -19,18 +19,34 @@ function ReactionRecorder({ onReactionRecorded, eventId, swipeDirection = null }
   useEffect(() => {
     const loadModels = async () => {
       try {
-        const MODEL_URL = '/models'; // Models will be in public/models folder
-        await Promise.all([
-          faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
-          faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
-          faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL),
-          faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL)
-        ]);
+        // Try loading from local /models folder first, fallback to CDN
+        const MODEL_URL = '/models';
+        try {
+          await Promise.all([
+            faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+            faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
+            faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL),
+            faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL)
+          ]);
+          console.log('Face-api models loaded from local');
+        } catch (localError) {
+          console.warn('Failed to load models from local, trying CDN:', localError);
+          // Fallback to CDN
+          const CDN_URL = 'https://raw.githubusercontent.com/justadudewhohacks/face-api.js-models/master';
+          await Promise.all([
+            faceapi.nets.tinyFaceDetector.loadFromUri(CDN_URL),
+            faceapi.nets.faceLandmark68Net.loadFromUri(CDN_URL),
+            faceapi.nets.faceRecognitionNet.loadFromUri(CDN_URL),
+            faceapi.nets.faceExpressionNet.loadFromUri(CDN_URL)
+          ]);
+          console.log('Face-api models loaded from CDN');
+        }
         setModelsLoaded(true);
-        console.log('Face-api models loaded');
       } catch (err) {
         console.error('Error loading face-api models:', err);
-        setError('Failed to load face detection models. Please refresh the page.');
+        setError('Failed to load face detection models. Camera features will be limited. Please refresh the page.');
+        // Allow component to continue even if models fail (users can still record)
+        setModelsLoaded(false);
       }
     };
 
@@ -69,10 +85,12 @@ function ReactionRecorder({ onReactionRecorded, eventId, swipeDirection = null }
         await videoRef.current.play();
       }
 
-      // Start emotion detection
+      // Start emotion detection (if models are loaded)
       if (modelsLoaded && canvasRef.current && videoRef.current) {
         detectEmotions();
         emotionIntervalRef.current = setInterval(detectEmotions, 500); // Check every 500ms
+      } else {
+        console.warn('Models not loaded, recording without emotion detection');
       }
 
       // Start video recording
@@ -93,10 +111,13 @@ function ReactionRecorder({ onReactionRecorded, eventId, swipeDirection = null }
         // Convert to file
         const file = new File([blob], `reaction-${Date.now()}.webm`, { type: 'video/webm' });
         
-        // Get the final emotion detection
-        const finalEmotion = await detectEmotionsOnce();
+        // Get the final emotion detection (if models are loaded)
+        let finalEmotion = null;
+        if (modelsLoaded) {
+          finalEmotion = await detectEmotionsOnce();
+        }
         
-        // Call callback with reaction data
+        // Call callback with reaction data (emotion may be null if models aren't loaded)
         if (onReactionRecorded) {
           onReactionRecorded({
             file,
