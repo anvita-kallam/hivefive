@@ -10,29 +10,91 @@ dotenv.config();
 
 let generativeModel = null;
 let useApiKey = false;
+let useVertexAI = false;
 
 // Initialize Gemini/Vertex AI client
-// Priority 1: Google Generative AI API (uses API key) - simpler for development
-// Priority 2: Vertex AI (uses service account) - for production with Vertex AI
+// Priority 1: Vertex AI with API key (if VERTEX_AI_API_KEY is set)
+// Priority 2: Google Generative AI API (uses API key from AI Studio) - simpler for development
+// Priority 3: Vertex AI (uses service account) - for production with Vertex AI
 try {
-  // Option 1: Use Google Generative AI API with API key (simpler)
-  if (process.env.GEMINI_API_KEY) {
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    // Try gemini-1.5-flash first (most common), fallback to gemini-pro
-    const modelName = 'gemini-1.5-flash'; // Fast and efficient model available via API key
-    generativeModel = genAI.getGenerativeModel({
-      model: modelName,
-      generationConfig: {
-        maxOutputTokens: 1024,
-        temperature: 0.7,
-        topP: 0.95,
-        topK: 40,
-      },
-    });
-    useApiKey = true;
-    console.log(`✅ Gemini API initialized with API key (${modelName})`);
+  // Option 1: Use Vertex AI with API key (if provided)
+  if (process.env.VERTEX_AI_API_KEY && process.env.VERTEX_AI_PROJECT_ID) {
+    try {
+      const apiKey = process.env.VERTEX_AI_API_KEY.trim();
+      const projectId = process.env.VERTEX_AI_PROJECT_ID;
+      const location = process.env.VERTEX_AI_LOCATION || 'us-central1';
+      
+      console.log('🔑 Attempting to initialize Vertex AI with API key...');
+      
+      // For Vertex AI, we still need to use the VertexAI client
+      // But we can set the API key in the environment
+      process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON = JSON.stringify({
+        type: 'service_account',
+        project_id: projectId,
+        private_key_id: apiKey,
+        // This is a workaround - Vertex AI typically needs service account JSON
+      });
+      
+      const vertexAI = new VertexAI({
+        project: projectId,
+        location: location,
+      });
+      
+      generativeModel = vertexAI.preview.getGenerativeModel({
+        model: 'gemini-1.5-flash',
+        generationConfig: {
+          maxOutputTokens: 1024,
+          temperature: 0.7,
+          topP: 0.95,
+          topK: 40,
+        },
+      });
+      
+      useVertexAI = true;
+      useApiKey = false;
+      console.log(`✅ Vertex AI initialized with API key (gemini-1.5-flash)`);
+    } catch (initError) {
+      console.error('❌ Failed to initialize Vertex AI with API key:', initError.message);
+      generativeModel = null;
+    }
   }
-  // Option 2: Use Vertex AI with service account (production)
+  // Option 2: Use Google Generative AI API with API key from AI Studio (simpler)
+  else if (process.env.GEMINI_API_KEY) {
+    try {
+      const apiKey = process.env.GEMINI_API_KEY.trim();
+      console.log('🔑 Attempting to initialize Gemini API with key:', apiKey.substring(0, 10) + '...');
+      
+      // Check if it's a valid Gemini API key (should start with AIza)
+      if (!apiKey.startsWith('AIza')) {
+        console.warn('⚠️ API key format looks incorrect. Gemini API keys from Google AI Studio typically start with "AIza"');
+        console.warn('⚠️ The provided key might be for Vertex AI instead. Falling back to enhanced mock responses.');
+        console.warn('💡 Get a Gemini API key from: https://makersuite.google.com/app/apikey');
+        console.warn('💡 Or use Vertex AI with VERTEX_AI_PROJECT_ID and service account credentials');
+        generativeModel = null;
+        useApiKey = false;
+      } else {
+        const genAI = new GoogleGenerativeAI(apiKey);
+        const modelName = 'gemini-1.5-flash';
+        generativeModel = genAI.getGenerativeModel({
+          model: modelName,
+          generationConfig: {
+            maxOutputTokens: 1024,
+            temperature: 0.7,
+            topP: 0.95,
+            topK: 40,
+          },
+        });
+        useApiKey = true;
+        useVertexAI = false;
+        console.log(`✅ Gemini API initialized with API key (${modelName})`);
+      }
+    } catch (initError) {
+      console.error('❌ Failed to initialize Gemini API:', initError.message);
+      generativeModel = null;
+      useApiKey = false;
+    }
+  }
+  // Option 3: Use Vertex AI with service account (production)
   else if (process.env.VERTEX_AI_PROJECT_ID && process.env.GOOGLE_APPLICATION_CREDENTIALS) {
     const vertexAI = new VertexAI({
       project: process.env.VERTEX_AI_PROJECT_ID,
@@ -50,11 +112,16 @@ try {
       },
     });
     
-    useApiKey = false;
-    console.log('✅ Vertex AI Buzz service initialized with Gemini 2.0 Flash');
+      useApiKey = false;
+      useVertexAI = true;
+      console.log('✅ Vertex AI Buzz service initialized with Gemini 2.0 Flash');
   } else {
     console.warn('⚠️ No Gemini/Vertex AI credentials found. Buzz will use enhanced mock responses.');
-    console.warn('💡 Set GEMINI_API_KEY (for API key) or VERTEX_AI_PROJECT_ID + GOOGLE_APPLICATION_CREDENTIALS (for Vertex AI)');
+    console.warn('💡 Options:');
+    console.warn('   1. Get a Gemini API key from: https://makersuite.google.com/app/apikey');
+    console.warn('      (Keys start with "AIza") and set GEMINI_API_KEY');
+    console.warn('   2. Use Vertex AI with VERTEX_AI_PROJECT_ID + GOOGLE_APPLICATION_CREDENTIALS');
+    console.warn('   3. Use Vertex AI with API key: VERTEX_AI_API_KEY + VERTEX_AI_PROJECT_ID');
   }
 } catch (error) {
   console.warn('⚠️ Gemini/Vertex AI initialization failed:', error.message);
@@ -246,29 +313,42 @@ Generate a helpful, context-aware response as Buzz. If the message is about even
         
         if (useApiKey) {
           // Google Generative AI API (API key authentication)
+          console.log('📤 Calling Gemini API with prompt length:', systemPrompt.length);
           result = await generativeModel.generateContent(systemPrompt);
+          console.log('✅ Received response from Gemini API');
+          
           const response = result.response;
           const buzzMessage = response.text();
+          console.log('📝 Response text length:', buzzMessage ? buzzMessage.length : 0);
+          
           if (buzzMessage && buzzMessage.trim()) {
+            console.log('✅ Returning AI-generated response');
             return buzzMessage.trim();
           } else {
-            console.warn('Gemini API returned empty response, using enhanced mock');
+            console.warn('⚠️ Gemini API returned empty response, using enhanced mock');
             return generateEnhancedMockResponse(userMessage, context, conversationHistory);
           }
-        } else {
-          // Vertex AI (service account authentication)
+        } else if (useVertexAI) {
+          // Vertex AI (service account or API key authentication)
+          console.log('📤 Calling Vertex AI with prompt length:', systemPrompt.length);
           result = await generativeModel.generateContent({
             contents: [{
               role: 'user',
               parts: [{ text: systemPrompt }]
             }]
           });
+          console.log('✅ Received response from Vertex AI');
 
           const response = result.response;
           const buzzMessage = response.candidates?.[0]?.content?.parts?.[0]?.text || 
             generateEnhancedMockResponse(userMessage, context, conversationHistory);
+          console.log('📝 Response text length:', buzzMessage ? buzzMessage.length : 0);
 
           return buzzMessage.trim();
+        } else {
+          // Fallback (shouldn't reach here)
+          console.warn('⚠️ No valid authentication method, using enhanced mock');
+          return generateEnhancedMockResponse(userMessage, context, conversationHistory);
         }
       } catch (aiError) {
         console.error('❌ Error calling Gemini/Vertex AI:', aiError.message);
