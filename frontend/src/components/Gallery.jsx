@@ -88,227 +88,233 @@ function Gallery({ hiveId, eventId, onClose }) {
   };
 
   return (
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
-        onClick={onClose}
-      >
+    <>
+      <AnimatePresence>
         <motion.div
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0.9, opacity: 0 }}
-          className="bg-white rounded-2xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col"
-          onClick={(e) => e.stopPropagation()}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
+          onClick={onClose}
         >
-          {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b">
-            <h2 className="text-2xl font-bold text-gray-900">
-              {eventId ? 'Event Gallery' : 'Hive Gallery'}
-            </h2>
-            <button
-              onClick={onClose}
-              className="p-2 hover:bg-gray-100 rounded-lg"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-
-          {/* Upload Area */}
-          <div className="p-6 border-b bg-gray-50">
-            <label className="flex items-center justify-center gap-2 px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 cursor-pointer">
-              <Upload className="w-5 h-5" />
-              {uploading ? 'Uploading...' : 'Upload Photo/Video'}
-              <input
-                type="file"
-                accept="image/*,video/*"
-                onChange={handleFileUpload}
-                className="hidden"
-                disabled={uploading}
-              />
-            </label>
-          </div>
-
-          {/* Gallery Grid */}
-          <div className="flex-1 overflow-y-auto p-6">
-            {isLoading ? (
-              <div className="flex items-center justify-center h-64">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
-              </div>
-            ) : !media || media.length === 0 ? (
-              <div className="text-center py-12">
-                <p className="text-gray-500">No media yet. Upload the first photo or video!</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {media.map((item) => (
-                  <motion.div
-                    key={item._id}
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="relative group cursor-pointer"
-                    onClick={() => setSelectedMedia(item)}
-                  >
-                    {item.fileType === 'image' || item.fileType === 'livephoto' ? (
-                      <img
-                        src={item.fileURL}
-                        alt={item.caption || 'Gallery item'}
-                        className="w-full h-48 object-cover rounded-lg"
-                      />
-                    ) : (
-                      <video
-                        src={item.fileURL}
-                        className="w-full h-48 object-cover rounded-lg"
-                        controls
-                      />
-                    )}
-                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 rounded-lg transition-opacity flex items-center justify-center">
-                      <p className="text-white opacity-0 group-hover:opacity-100 text-sm px-2 text-center">
-                        {item.caption || 'No caption'}
-                      </p>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Selected Media Modal */}
-          {selectedMedia && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4"
-              onClick={() => setSelectedMedia(null)}
-            >
-              <motion.div
-                initial={{ scale: 0.9 }}
-                animate={{ scale: 1 }}
-                className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden"
-                onClick={(e) => e.stopPropagation()}
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            className="bg-white rounded-2xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between p-6 border-b">
+              <h2 className="text-2xl font-bold text-gray-900">
+                {eventId ? 'Event Gallery' : 'Hive Gallery'}
+              </h2>
+              <button
+                onClick={onClose}
+                className="p-2 hover:bg-gray-100 rounded-lg"
               >
-                <div className="relative">
-                  {selectedMedia.fileType === 'image' || selectedMedia.fileType === 'livephoto' ? (
-                    <img
-                      src={selectedMedia.fileURL}
-                      alt={selectedMedia.caption}
-                      className="w-full max-h-[60vh] object-contain"
-                    />
-                  ) : (
-                    <video
-                      src={selectedMedia.fileURL}
-                      className="w-full max-h-[60vh]"
-                      controls
-                      autoPlay
-                    />
-                  )}
-                  <button
-                    onClick={() => setSelectedMedia(null)}
-                    className="absolute top-4 right-4 p-2 bg-black bg-opacity-50 text-white rounded-full hover:bg-opacity-75"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Upload Area */}
+            <div className="p-6 border-b bg-gray-50">
+              <label className="flex items-center justify-center gap-2 px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 cursor-pointer">
+                <Upload className="w-5 h-5" />
+                {uploading ? 'Uploading...' : 'Upload Photo/Video'}
+                <input
+                  type="file"
+                  accept="image/*,video/*"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                  disabled={uploading}
+                />
+              </label>
+            </div>
+
+            {/* Gallery Grid */}
+            <div className="flex-1 overflow-y-auto p-6">
+              {isLoading ? (
+                <div className="flex items-center justify-center h-64">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
                 </div>
-                
-                <div className="p-6">
-                  <div className="mb-4">
-                    <p className="text-gray-900 font-medium">{selectedMedia.caption}</p>
-                    <p className="text-sm text-gray-500 mt-1">
-                      By {selectedMedia.uploaderID?.name} • {format(new Date(selectedMedia.timestamp), 'MMM d, yyyy')}
-                    </p>
-                  </div>
-
-                  {/* Reviews */}
-                  <div className="mb-4">
-                    <h4 className="font-semibold text-gray-900 mb-2">Reviews</h4>
-                    {selectedMedia.reviews && selectedMedia.reviews.length > 0 ? (
-                      <div className="space-y-2">
-                        {selectedMedia.reviews.map((review, index) => (
-                          <div key={index} className="bg-gray-50 rounded-lg p-3">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="font-medium text-gray-900">{review.userID?.name}</span>
-                              <div className="flex">
-                                {[...Array(5)].map((_, i) => (
-                                  <Star
-                                    key={i}
-                                    className={`w-4 h-4 ${
-                                      i < review.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'
-                                    }`}
-                                  />
-                                ))}
-                              </div>
-                            </div>
-                            <p className="text-sm text-gray-700">{review.text}</p>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="text-gray-500 text-sm">No reviews yet</p>
-                    )}
-                  </div>
-
-                  {/* Add Review */}
-                  {showReviewForm === selectedMedia._id ? (
-                    <div className="space-y-2">
-                      <div className="flex gap-1">
-                        {[1, 2, 3, 4, 5].map((rating) => (
-                          <button
-                            key={rating}
-                            onClick={() => setReviewRating(rating)}
-                            className="p-1"
-                          >
-                            <Star
-                              className={`w-6 h-6 ${
-                                rating <= reviewRating ? 'text-yellow-400 fill-current' : 'text-gray-300'
-                              }`}
-                            />
-                          </button>
-                        ))}
-                      </div>
-                      <textarea
-                        value={reviewText}
-                        onChange={(e) => setReviewText(e.target.value)}
-                        placeholder="Write a review..."
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
-                        rows="3"
-                      />
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => handleSubmitReview(selectedMedia._id)}
-                          className="flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
-                        >
-                          <Send className="w-4 h-4" />
-                          Submit
-                        </button>
-                        <button
-                          onClick={() => {
-                            setShowReviewForm(null);
-                            setReviewText('');
-                            setReviewRating(5);
-                          }}
-                          className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={() => setShowReviewForm(selectedMedia._id)}
-                      className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+              ) : !media || media.length === 0 ? (
+                <div className="text-center py-12">
+                  <p className="text-gray-500">No media yet. Upload the first photo or video!</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {media.map((item) => (
+                    <motion.div
+                      key={item._id}
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="relative group cursor-pointer"
+                      onClick={() => setSelectedMedia(item)}
                     >
-                      Add Review
-                    </button>
-                  )}
+                      {item.fileType === 'image' || item.fileType === 'livephoto' ? (
+                        <img
+                          src={item.fileURL}
+                          alt={item.caption || 'Gallery item'}
+                          className="w-full h-48 object-cover rounded-lg"
+                        />
+                      ) : (
+                        <video
+                          src={item.fileURL}
+                          className="w-full h-48 object-cover rounded-lg"
+                          controls
+                        />
+                      )}
+                      <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 rounded-lg transition-opacity flex items-center justify-center">
+                        <p className="text-white opacity-0 group-hover:opacity-100 text-sm px-2 text-center">
+                          {item.caption || 'No caption'}
+                        </p>
+                      </div>
+                    </motion.div>
+                  ))}
                 </div>
-              </motion.div>
-            )}
+              )}
+            </div>
           </motion.div>
         </motion.div>
-      </motion.div>
-    </AnimatePresence>
+      </AnimatePresence>
+
+      {/* Selected Media Modal */}
+      <AnimatePresence>
+        {selectedMedia && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black bg-opacity-75 z-[60] flex items-center justify-center p-4"
+            onClick={() => setSelectedMedia(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.9 }}
+              className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="relative">
+                {selectedMedia.fileType === 'image' || selectedMedia.fileType === 'livephoto' ? (
+                  <img
+                    src={selectedMedia.fileURL}
+                    alt={selectedMedia.caption}
+                    className="w-full max-h-[60vh] object-contain"
+                  />
+                ) : (
+                  <video
+                    src={selectedMedia.fileURL}
+                    className="w-full max-h-[60vh]"
+                    controls
+                    autoPlay
+                  />
+                )}
+                <button
+                  onClick={() => setSelectedMedia(null)}
+                  className="absolute top-4 right-4 p-2 bg-black bg-opacity-50 text-white rounded-full hover:bg-opacity-75"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              
+              <div className="p-6">
+                <div className="mb-4">
+                  <p className="text-gray-900 font-medium">{selectedMedia.caption}</p>
+                  <p className="text-sm text-gray-500 mt-1">
+                    By {selectedMedia.uploaderID?.name} • {format(new Date(selectedMedia.timestamp), 'MMM d, yyyy')}
+                  </p>
+                </div>
+
+                {/* Reviews */}
+                <div className="mb-4">
+                  <h4 className="font-semibold text-gray-900 mb-2">Reviews</h4>
+                  {selectedMedia.reviews && selectedMedia.reviews.length > 0 ? (
+                    <div className="space-y-2">
+                      {selectedMedia.reviews.map((review, index) => (
+                        <div key={index} className="bg-gray-50 rounded-lg p-3">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-medium text-gray-900">{review.userID?.name}</span>
+                            <div className="flex">
+                              {[...Array(5)].map((_, i) => (
+                                <Star
+                                  key={i}
+                                  className={`w-4 h-4 ${
+                                    i < review.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'
+                                  }`}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                          <p className="text-sm text-gray-700">{review.text}</p>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-gray-500 text-sm">No reviews yet</p>
+                  )}
+                </div>
+
+                {/* Add Review */}
+                {showReviewForm === selectedMedia._id ? (
+                  <div className="space-y-2">
+                    <div className="flex gap-1">
+                      {[1, 2, 3, 4, 5].map((rating) => (
+                        <button
+                          key={rating}
+                          onClick={() => setReviewRating(rating)}
+                          className="p-1"
+                        >
+                          <Star
+                            className={`w-6 h-6 ${
+                              rating <= reviewRating ? 'text-yellow-400 fill-current' : 'text-gray-300'
+                            }`}
+                          />
+                        </button>
+                      ))}
+                    </div>
+                    <textarea
+                      value={reviewText}
+                      onChange={(e) => setReviewText(e.target.value)}
+                      placeholder="Write a review..."
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                      rows="3"
+                    />
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleSubmitReview(selectedMedia._id)}
+                        className="flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+                      >
+                        <Send className="w-4 h-4" />
+                        Submit
+                      </button>
+                      <button
+                        onClick={() => {
+                          setShowReviewForm(null);
+                          setReviewText('');
+                          setReviewRating(5);
+                        }}
+                        className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setShowReviewForm(selectedMedia._id)}
+                    className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                  >
+                    Add Review
+                  </button>
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 }
 

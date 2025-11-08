@@ -54,14 +54,26 @@ export const authenticateToken = async (req, res, next) => {
     initializeFirebase();
   }
 
+  // Check if Firebase is properly initialized
+  if (!admin.apps.length) {
+    console.error('Firebase Admin not initialized');
+    return res.status(500).json({ error: 'Server configuration error' });
+  }
+
   try {
     const authHeader = req.headers.authorization;
     
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      console.log('No authorization header found');
       return res.status(401).json({ error: 'No token provided' });
     }
 
     const token = authHeader.split(' ')[1];
+    if (!token) {
+      console.log('Token is empty');
+      return res.status(401).json({ error: 'Invalid token format' });
+    }
+
     const decodedToken = await admin.auth().verifyIdToken(token);
     
     req.user = {
@@ -71,7 +83,10 @@ export const authenticateToken = async (req, res, next) => {
     
     next();
   } catch (error) {
-    console.error('Authentication error:', error);
+    console.error('Authentication error:', error.message);
+    if (error.code === 'auth/id-token-expired') {
+      return res.status(401).json({ error: 'Token expired. Please sign in again.' });
+    }
     res.status(401).json({ error: 'Invalid token' });
   }
 };

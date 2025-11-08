@@ -22,7 +22,12 @@ router.get('/:id', authenticateToken, async (req, res) => {
 // Create user
 router.post('/', authenticateToken, async (req, res) => {
   try {
-    const { name, major, hobbies, resHall, hometown, birthday, profilePhoto, preferences } = req.body;
+    const { name, school, major, hobbies, resHall, hometown, birthday, profilePhoto, preferences } = req.body;
+    
+    // Validate required fields
+    if (!name) {
+      return res.status(400).json({ error: 'Name is required' });
+    }
     
     // Check if user already exists
     const existingUser = await User.findOne({ email: req.user.email });
@@ -33,19 +38,21 @@ router.post('/', authenticateToken, async (req, res) => {
     const user = new User({
       name,
       email: req.user.email,
-      major,
+      school: school || '',
+      major: major || '',
       hobbies: hobbies || [],
-      resHall,
-      hometown,
+      resHall: resHall || '',
+      hometown: hometown || '',
       birthday: birthday ? new Date(birthday) : null,
-      profilePhoto,
+      profilePhoto: profilePhoto || null,
       preferences: preferences || {}
     });
 
     await user.save();
     res.status(201).json(user);
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    console.error('Error creating user:', error);
+    res.status(400).json({ error: error.message || 'Failed to create user' });
   }
 });
 

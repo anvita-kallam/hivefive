@@ -15,8 +15,8 @@ const userSchema = new mongoose.Schema({
   },
   school: {
     type: String,
-    default: 'Georgia Tech',
-    required: true
+    default: '',
+    trim: true
   },
   major: {
     type: String,

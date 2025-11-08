@@ -11,6 +11,7 @@ function UserCreationPage() {
   const { user } = useAuthStore();
   const [formData, setFormData] = useState({
     name: '',
+    school: '',
     major: '',
     hobbies: [],
     resHall: '',
@@ -64,20 +65,53 @@ function UserCreationPage() {
     setError('');
 
     try {
-      let profilePhotoURL = null;
-
-      // Upload photo if selected
-      if (photoFile) {
-        const photoRef = ref(storage, `profile-photos/${user.uid}/${Date.now()}`);
-        await uploadBytes(photoRef, photoFile);
-        profilePhotoURL = await getDownloadURL(photoRef);
+      // Verify user is authenticated
+      if (!user || !user.uid) {
+        setError('You must be signed in to create a profile');
+        return;
       }
 
-      // Create user profile
+      // Get fresh auth token
+      const { auth } = await import('../config/firebase');
+      const currentUser = auth.currentUser;
+      if (!currentUser) {
+        setError('Session expired. Please sign in again.');
+        navigate('/login');
+        return;
+      }
+
+      let profilePhotoURL = null;
+
+      // Upload photo if selected (make it optional - don't fail if upload fails)
+      if (photoFile && currentUser.uid) {
+        try {
+          const photoRef = ref(storage, `profile-photos/${currentUser.uid}/${Date.now()}`);
+          await uploadBytes(photoRef, photoFile);
+          profilePhotoURL = await getDownloadURL(photoRef);
+        } catch (uploadError) {
+          console.warn('Photo upload failed, continuing without photo:', uploadError);
+          // Continue without photo - user can add it later
+        }
+      }
+
+      // Get fresh token for API call
+      const token = await currentUser.getIdToken(true); // Force token refresh
+
+      // Create user profile with explicit token
       const response = await api.post('/users', {
-        ...formData,
+        name: formData.name,
+        school: formData.school,
+        major: formData.major,
+        hobbies: formData.hobbies,
+        resHall: formData.resHall,
+        hometown: formData.hometown,
+        birthday: formData.birthday || null,
         profilePhoto: profilePhotoURL,
-        birthday: formData.birthday || null
+        preferences: {}
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
       });
 
       // Update auth store with full user data
@@ -85,7 +119,16 @@ function UserCreationPage() {
       
       navigate('/dashboard');
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to create profile');
+      console.error('Error creating profile:', err);
+      const errorMessage = err.response?.data?.error || err.message || 'Failed to create profile';
+      setError(errorMessage);
+      
+      // If unauthorized, redirect to login
+      if (err.response?.status === 401) {
+        setTimeout(() => {
+          navigate('/login');
+        }, 2000);
+      }
     } finally {
       setLoading(false);
     }
@@ -247,16 +290,17 @@ function UserCreationPage() {
               />
             </div>
 
-            {/* School (Fixed) */}
+            {/* School */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 School
               </label>
               <input
                 type="text"
-                value="Georgia Tech"
-                disabled
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500"
+                value={formData.school || ''}
+                onChange={(e) => setFormData({ ...formData, school: e.target.value })}
+                placeholder="Enter your school"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               />
             </div>
 

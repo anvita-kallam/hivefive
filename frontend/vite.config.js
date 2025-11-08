@@ -7,10 +7,16 @@ export default defineConfig({
     port: 3000,
     proxy: {
       '/api': {
-        target: 'http://localhost:5000',
+        target: 'http://localhost:5001',
         changeOrigin: true
       }
     }
+  },
+  optimizeDeps: {
+    include: ['@react-spring/web', 'react-tinder-card']
+  },
+  resolve: {
+    dedupe: ['@react-spring/web']
   }
 });
 
