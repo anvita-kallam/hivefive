@@ -262,14 +262,34 @@ function generateMockResponse(userMessage, context) {
  * (e.g., when an event is created)
  */
 export async function shouldTriggerBuzz(message, eventId = null) {
-  // Trigger Buzz for event-related messages
-  if (eventId || message.toLowerCase().includes('event') || message.toLowerCase().includes('plan')) {
+  if (!message || typeof message !== 'string') {
+    return false;
+  }
+  
+  const lowerMessage = message.toLowerCase().trim();
+  
+  // Always trigger if @buzz is mentioned
+  if (lowerMessage.includes('@buzz') || lowerMessage.includes('@ buzz')) {
     return true;
   }
   
-  // Trigger if @buzz is mentioned
-  if (message.toLowerCase().includes('@buzz')) {
+  // Trigger for event-related keywords
+  const eventKeywords = ['event', 'plan', 'suggest', 'idea', 'activity', 'hangout', 'meet', 'gather'];
+  if (eventKeywords.some(keyword => lowerMessage.includes(keyword))) {
     return true;
+  }
+  
+  // Trigger if eventId is provided (event was just created)
+  if (eventId) {
+    return true;
+  }
+  
+  // Trigger for questions (contains ?)
+  if (lowerMessage.includes('?')) {
+    // But not for very short messages
+    if (lowerMessage.length > 10) {
+      return true;
+    }
   }
   
   return false;
@@ -281,25 +301,47 @@ export async function shouldTriggerBuzz(message, eventId = null) {
 export async function generateEventFollowUp(eventId) {
   try {
     const event = await Event.findById(eventId)
-      .populate('hiveID')
       .populate('createdBy', 'name');
     
-    if (!event) return null;
+    if (!event) {
+      console.warn(`Event ${eventId} not found for Buzz follow-up`);
+      return null;
+    }
 
-    const context = await buildHiveContext(event.hiveID._id);
-    if (!context) return null;
+    // Get hive ID - can be ObjectId or populated object
+    const hiveId = event.hiveID?._id || event.hiveID;
+    if (!hiveId) {
+      console.warn(`Event ${eventId} has no hiveID`);
+      return null;
+    }
+
+    const context = await buildHiveContext(hiveId);
+    if (!context) {
+      console.warn(`Could not build context for hive ${hiveId}`);
+      return null;
+    }
 
     const eventTitle = event.title.toLowerCase();
+    const eventDesc = (event.description || '').toLowerCase();
     let followUp = null;
 
-    if (eventTitle.includes('dinner') || eventTitle.includes('lunch') || eventTitle.includes('brunch')) {
-      followUp = `Yum! 🍯 What kind of cuisine are you craving? I noticed the hive loved ${context.locationPreferences[0] || 'some great spots'} before - want to try there again or explore something new?`;
-    } else if (eventTitle.includes('game')) {
+    if (eventTitle.includes('dinner') || eventTitle.includes('lunch') || eventTitle.includes('brunch') || eventDesc.includes('dinner') || eventDesc.includes('lunch') || eventDesc.includes('brunch')) {
+      const location = context.locationPreferences.length > 0 ? context.locationPreferences[0] : 'some great spots';
+      followUp = `Yum! 🍯 What kind of cuisine are you craving? I noticed the hive loved ${location} before - want to try there again or explore something new?`;
+    } else if (eventTitle.includes('game') || eventDesc.includes('game')) {
       followUp = `Game night! 🎮 Would you prefer a casual night in or heading somewhere like Battle & Brew?`;
-    } else if (eventTitle.includes('study')) {
+    } else if (eventTitle.includes('study') || eventDesc.includes('study')) {
       followUp = `Study session! 📚 Want to meet at the library, a coffee shop, or somewhere else?`;
+    } else if (eventTitle.includes('coffee') || eventTitle.includes('cafe') || eventDesc.includes('coffee') || eventDesc.includes('cafe')) {
+      followUp = `Coffee time! ☕ Want to meet at your usual spot or try somewhere new?`;
     } else {
-      followUp = `Sounds fun! 🐝 Want help picking a time or location? I can suggest based on what the hive usually likes!`;
+      // Generic follow-up with context
+      if (context.preferredCategories.length > 0) {
+        const category = context.preferredCategories[0];
+        followUp = `Sounds fun! 🐝 Want help picking a time or location? The hive really enjoys ${category} - I can suggest something similar!`;
+      } else {
+        followUp = `Sounds fun! 🐝 Want help picking a time or location? I can suggest based on what the hive usually likes!`;
+      }
     }
 
     return followUp;

@@ -194,18 +194,23 @@ function BuzzChat({ hiveId }) {
 
 function MessageBubble({ message, currentUserId, onAddReaction }) {
   const isBuzz = message.isBuzzMessage;
-  const isCurrentUser = message.sender && message.sender._id?.toString() === currentUserId?.toString();
+  const isCurrentUser = !isBuzz && message.sender && message.sender._id?.toString() === currentUserId?.toString();
   const [showReactions, setShowReactions] = useState(false);
 
   // Handle reactions - can be Map or plain object
   let reactions = [];
-  if (message.reactions) {
+  if (message.reactions && typeof message.reactions === 'object') {
     if (message.reactions instanceof Map) {
       reactions = Array.from(message.reactions.entries());
-    } else if (typeof message.reactions === 'object') {
+    } else {
       reactions = Object.entries(message.reactions);
     }
   }
+  
+  // Filter out empty reaction arrays
+  reactions = reactions.filter(([emoji, userIds]) => 
+    Array.isArray(userIds) ? userIds.length > 0 : userIds
+  );
 
   return (
     <motion.div

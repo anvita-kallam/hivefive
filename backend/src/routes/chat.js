@@ -29,25 +29,36 @@ router.get('/:hiveId', authenticateToken, async (req, res) => {
     // Get chat messages (most recent first, limit to last 100)
     const limit = parseInt(req.query.limit) || 100;
     const messages = await Chat.find({ hiveId: req.params.hiveId })
-      .populate('sender', 'name profilePhoto email')
+      .populate({
+        path: 'sender',
+        select: 'name profilePhoto email',
+        options: { strictPopulate: false } // Allow null sender for Buzz messages
+      })
       .populate('mentions', 'name')
       .sort({ timestamp: -1 })
-      .limit(limit)
-      .lean(); // Use lean() for better performance
+      .limit(limit);
 
-    // Convert reactions Map to object for JSON response
+    // Convert to JSON and handle reactions Map
     const messagesWithReactions = messages.map(msg => {
-      if (msg.reactions instanceof Map) {
-        msg.reactions = Object.fromEntries(msg.reactions);
-      } else if (msg.reactions && typeof msg.reactions === 'object') {
-        // Already an object, but ensure arrays are properly formatted
-        const reactionsObj = {};
-        Object.entries(msg.reactions).forEach(([emoji, userIds]) => {
-          reactionsObj[emoji] = Array.isArray(userIds) ? userIds : [userIds];
-        });
-        msg.reactions = reactionsObj;
+      const msgObj = msg.toObject ? msg.toObject() : msg;
+      
+      // Convert reactions Map to object for JSON response
+      if (msgObj.reactions) {
+        if (msgObj.reactions instanceof Map) {
+          msgObj.reactions = Object.fromEntries(msgObj.reactions);
+        } else if (typeof msgObj.reactions === 'object') {
+          // Ensure arrays are properly formatted
+          const reactionsObj = {};
+          Object.entries(msgObj.reactions).forEach(([emoji, userIds]) => {
+            reactionsObj[emoji] = Array.isArray(userIds) ? userIds : [userIds];
+          });
+          msgObj.reactions = reactionsObj;
+        }
+      } else {
+        msgObj.reactions = {};
       }
-      return msg;
+      
+      return msgObj;
     });
 
     // Reverse to get chronological order

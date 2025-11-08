@@ -10,7 +10,11 @@ const chatMessageSchema = new mongoose.Schema({
   sender: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true
+    required: function() {
+      // Sender is required only if it's not a Buzz message
+      return !this.isBuzzMessage;
+    },
+    default: null
   },
   message: {
     type: String,
