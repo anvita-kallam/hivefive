@@ -1,7 +1,7 @@
-// Test MongoDB Connection
+// Test MongoDB Connection using Mongoose
 // Run with: node scripts/test-mongodb-connection.js
 
-import { MongoClient, ServerApiVersion } from 'mongodb';
+import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
@@ -12,73 +12,108 @@ const __dirname = dirname(__filename);
 // Load environment variables
 dotenv.config({ path: join(__dirname, '../.env') });
 
-const uri = process.env.MONGODB_URI || "mongodb+srv://kranvita007_db_user:Ga9tXmIA156MFaT2@hivefive.anukffg.mongodb.net/?appName=HiveFive";
+// Get connection string from environment or use default
+let mongoURI = process.env.MONGODB_URI || "mongodb+srv://kranvita007_db_user:Ga9tXmIA156MFaT2@hivefive.anukffg.mongodb.net/?appName=HiveFive";
 
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
-const client = new MongoClient(uri, {
-  serverApi: {
-    version: ServerApiVersion.v1,
-    strict: true,
-    deprecationErrors: true,
-  },
-  serverSelectionTimeoutMS: 30000,
-  socketTimeoutMS: 45000,
-  connectTimeoutMS: 30000,
-});
+// Add database name if not present (same logic as database.js)
+if (!mongoURI.includes('/hivefive') && !mongoURI.includes('/?')) {
+  if (mongoURI.includes('?')) {
+    mongoURI = mongoURI.replace('?', '/hivefive?');
+  } else {
+    mongoURI = mongoURI + '/hivefive';
+  }
+}
+
+// Ensure retryWrites and w are in the connection string
+if (!mongoURI.includes('retryWrites')) {
+  const separator = mongoURI.includes('?') ? '&' : '?';
+  mongoURI = mongoURI + `${separator}retryWrites=true&w=majority`;
+}
 
 async function testConnection() {
   try {
     console.log('🔄 Attempting to connect to MongoDB...');
-    console.log('Connection string:', uri.replace(/\/\/.*@/, '//***:***@'));
+    // Hide password in logs
+    const logURI = mongoURI.replace(/\/\/.*@/, '//***:***@');
+    console.log('Connection string:', logURI);
     
-    // Connect the client to the server
-    await client.connect();
+    // MongoDB connection options
+    const options = {
+      serverSelectionTimeoutMS: 30000,
+      socketTimeoutMS: 45000,
+      connectTimeoutMS: 30000,
+    };
     
-    // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
-    console.log("✅ Pinged your deployment. You successfully connected to MongoDB!");
+    // Connect using Mongoose
+    const conn = await mongoose.connect(mongoURI, options);
+    console.log("✅ Successfully connected to MongoDB!");
+    console.log(`Host: ${conn.connection.host}`);
+    console.log(`Database: ${conn.connection.name}`);
     
-    // Test database connection
-    const db = client.db("hivefive");
-    console.log("✅ Connected to database: hivefive");
+    // Test database operations
+    const db = conn.connection.db;
     
-    // Test collections
+    // List collections
     const collections = await db.listCollections().toArray();
-    console.log("✅ Available collections:", collections.map(c => c.name).join(', '));
+    console.log(`✅ Available collections (${collections.length}):`, collections.map(c => c.name).join(', '));
     
     // Test User collection
-    const users = db.collection("users");
-    const userCount = await users.countDocuments();
-    console.log(`✅ Users collection has ${userCount} documents`);
+    const User = mongoose.connection.collection('users');
+    const userCount = await User.countDocuments();
+    console.log(`✅ Users collection has ${userCount} document(s)`);
+    
+    // Test Hive collection
+    const Hive = mongoose.connection.collection('hives');
+    const hiveCount = await Hive.countDocuments();
+    console.log(`✅ Hives collection has ${hiveCount} document(s)`);
+    
+    // Test Event collection
+    const Event = mongoose.connection.collection('events');
+    const eventCount = await Event.countDocuments();
+    console.log(`✅ Events collection has ${eventCount} document(s)`);
+    
+    console.log("");
+    console.log("✅ MongoDB connection test successful!");
     
   } catch (error) {
+    console.error("");
     console.error("❌ Error connecting to MongoDB:");
     console.error("Error message:", error.message);
     console.error("Error name:", error.name);
     console.error("Error code:", error.code);
+    console.error("Error codeName:", error.codeName);
     
-    if (error.name === 'MongoServerSelectionError') {
-      console.error('');
-      console.error('🚨 CONNECTION FAILED!');
-      console.error('');
-      console.error('Common causes:');
-      console.error('1. MongoDB Atlas Network Access not configured');
-      console.error('   → Go to MongoDB Atlas → Network Access');
-      console.error('   → Add IP Address: 0.0.0.0/0 (Allow from anywhere)');
-      console.error('');
-      console.error('2. Connection string incorrect');
-      console.error('   → Verify username, password, and cluster name');
-      console.error('');
-      console.error('3. Database user credentials incorrect');
-      console.error('   → Check MongoDB Atlas → Database Access');
-      console.error('   → Verify user has read/write permissions');
+    if (error.name === 'MongoServerSelectionError' || error.name === 'MongoNetworkError') {
+      console.error("");
+      console.error("🚨 CONNECTION FAILED!");
+      console.error("");
+      console.error("Common causes:");
+      console.error("1. MongoDB Atlas Network Access not configured");
+      console.error("   → Go to MongoDB Atlas → Network Access");
+      console.error("   → Click 'Add IP Address'");
+      console.error("   → Click 'Allow Access from Anywhere'");
+      console.error("   → Enter: 0.0.0.0/0");
+      console.error("   → Click 'Confirm'");
+      console.error("   → Wait 1-2 minutes for changes to propagate");
+      console.error("");
+      console.error("2. Connection string incorrect");
+      console.error("   → Verify username: kranvita007_db_user");
+      console.error("   → Verify password: Ga9tXmIA156MFaT2");
+      console.error("   → Verify cluster: hivefive.anukffg.mongodb.net");
+      console.error("");
+      console.error("3. Database user credentials incorrect");
+      console.error("   → Check MongoDB Atlas → Database Access");
+      console.error("   → Find user: kranvita007_db_user");
+      console.error("   → Verify user has 'Read and write to any database' permissions");
+      console.error("   → If password is wrong, reset it and update Railway");
     }
     
     process.exit(1);
   } finally {
-    // Ensures that the client will close when you finish/error
-    await client.close();
+    // Close connection
+    await mongoose.connection.close();
     console.log("✅ Connection closed");
+    process.exit(0);
   }
 }
 
