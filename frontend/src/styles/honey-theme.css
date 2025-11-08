@@ -341,8 +341,11 @@
   overflow-x: hidden;
 }
 
-/* Ensure html and body also have the warm background */
-html, body {
+/* Ensure html and body also have the warm background - High specificity */
+html.honey-gradient-bg,
+html,
+body.honey-gradient-bg,
+body {
   background: linear-gradient(
     180deg,
     #FFFAE6 0%,
@@ -352,9 +355,9 @@ html, body {
     #FFE6A8 100%
   ) !important;
   background-color: #FFF5D6 !important;
-  margin: 0;
-  padding: 0;
-  min-height: 100vh;
+  margin: 0 !important;
+  padding: 0 !important;
+  min-height: 100vh !important;
 }
 
 /* Subtle Honeycomb Pattern Overlay */
