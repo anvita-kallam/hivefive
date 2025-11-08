@@ -9,6 +9,7 @@ import EventSwipe from '../components/EventSwipe';
 import Gallery from '../components/Gallery';
 import CreateEventModal from '../components/CreateEventModal';
 import EventReactions from '../components/EventReactions';
+import BuzzChat from '../components/BuzzChat';
 import { BeeDecor, BeeLogo } from '../components/BeeDecor.jsx';
 import { AnimatePresence } from 'framer-motion';
 
@@ -250,6 +251,8 @@ function HiveDashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
+            {/* Buzz Chat */}
+            <BuzzChat hiveId={hiveId} />
                 {/* Actions */}
                      <div className="honey-card p-6 mb-6">
                      <button

@@ -9,6 +9,7 @@ import mediaRoutes from './routes/media.js';
 import authRoutes from './routes/auth.js';
 import calendarRoutes from './routes/calendar.js';
 import userCalendarRoutes from './routes/userCalendar.js';
+import chatRoutes from './routes/chat.js';
 
 dotenv.config();
 
@@ -67,6 +68,7 @@ app.use('/api/events', eventRoutes);
 app.use('/api/media', mediaRoutes);
 app.use('/api/calendar', calendarRoutes);
 app.use('/api/user-calendar', userCalendarRoutes);
+app.use('/api/chat', chatRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

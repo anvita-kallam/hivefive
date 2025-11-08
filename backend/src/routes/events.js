@@ -108,6 +108,31 @@ router.post('/', authenticateToken, async (req, res) => {
     });
 
     await event.save();
+    
+    // Trigger Buzz follow-up message (async, don't wait for it)
+    try {
+      const { generateEventFollowUp } = await import('../services/buzzService.js');
+      const Chat = (await import('../models/Chat.js')).default;
+      const followUp = await generateEventFollowUp(event._id);
+      if (followUp) {
+        const buzzMessage = new Chat({
+          hiveId: hiveID,
+          sender: null,
+          message: followUp,
+          isBuzzMessage: true,
+          eventId: event._id,
+          metadata: {
+            type: 'event_followup',
+            eventTitle: event.title
+          }
+        });
+        await buzzMessage.save();
+      }
+    } catch (buzzError) {
+      console.warn('Failed to generate Buzz follow-up:', buzzError);
+      // Don't fail event creation if Buzz fails
+    }
+    
     res.status(201).json(event);
   } catch (error) {
     res.status(400).json({ error: error.message });
