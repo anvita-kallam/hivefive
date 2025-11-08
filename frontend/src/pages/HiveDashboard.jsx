@@ -205,8 +205,11 @@ function HiveDashboard() {
             </div>
 
             {/* Event Timeline */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Event Timeline</h2>
+            <div className="honey-card p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <Bee className="w-6 h-6 text-honey-brown bee-icon" />
+                <h2 className="text-xl font-bold honey-text text-honey-brown">Event Timeline</h2>
+              </div>
               <div className="space-y-4">
                 {events && events.length > 0 ? (
                   events.map((event) => (
@@ -214,38 +217,38 @@ function HiveDashboard() {
                       key={event._id}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="border-l-4 border-primary-500 pl-4 py-2"
+                      className="honey-card border-l-4 border-honey-brown pl-4 py-3 buzz-hover"
                     >
                       <div className="flex items-center justify-between mb-2">
-                        <h3 className="font-semibold text-gray-900">{event.title}</h3>
-                        <span className={`px-2 py-1 text-xs rounded-full ${
-                          event.status === 'confirmed' ? 'bg-green-100 text-green-800' :
-                          event.status === 'cancelled' ? 'bg-red-100 text-red-800' :
-                          'bg-yellow-100 text-yellow-800'
+                        <h3 className="font-bold honey-text text-honey-brown">{event.title}</h3>
+                        <span className={`px-2 py-1 text-xs rounded-full font-semibold border-2 ${
+                          event.status === 'confirmed' ? 'bg-green-100 text-green-800 border-green-300' :
+                          event.status === 'cancelled' ? 'bg-red-100 text-red-800 border-red-300' :
+                          'bg-honey-gold text-honey-brown border-honey-amber'
                         }`}>
                           {event.status}
                         </span>
                       </div>
                       {event.description && (
-                        <p className="text-sm text-gray-600 mb-2">{event.description}</p>
+                        <p className="text-sm text-honey-amber-dark mb-2 font-medium">{event.description}</p>
                       )}
-                      <div className="flex items-center gap-4 text-sm text-gray-500">
+                      <div className="flex items-center gap-4 text-sm text-honey-amber-dark font-medium">
                         {event.confirmedTime && (
                           <div className="flex items-center gap-1">
-                            <Calendar className="w-4 h-4" />
+                            <Calendar className="w-4 h-4 text-honey-brown" />
                             <span>{format(new Date(event.confirmedTime), 'MMM d, h:mm a')}</span>
                           </div>
                         )}
                         {event.location && (
                           <div className="flex items-center gap-1">
-                            <MapPin className="w-4 h-4" />
+                            <MapPin className="w-4 h-4 text-honey-brown" />
                             <span>{event.location.name || event.location.address}</span>
                           </div>
                         )}
                       </div>
                       <div className="flex items-center gap-2 mt-2">
-                        <Users className="w-4 h-4 text-gray-400" />
-                        <span className="text-sm text-gray-600">
+                        <Users className="w-4 h-4 text-honey-brown" />
+                        <span className="text-sm text-honey-brown font-semibold">
                           {event.acceptedBy?.length || 0} accepted, {event.declinedBy?.length || 0} declined
                         </span>
                       </div>
@@ -258,14 +261,14 @@ function HiveDashboard() {
                             return userId === currentUser._id?.toString();
                           }) ? (
                             <>
-                              <span className="text-sm text-green-600 font-medium flex items-center gap-1">
+                              <span className="text-sm text-green-600 font-bold flex items-center gap-1">
                                 <Check className="w-4 h-4" />
                                 You accepted
                               </span>
                               <button
                                 onClick={() => handleChangeSwipe(event, 'left')}
                                 disabled={changeSwipeMutation.isLoading}
-                                className="text-sm text-red-600 hover:text-red-700 disabled:opacity-50 underline"
+                                className="buzz-hover text-sm text-red-600 hover:text-red-700 disabled:opacity-50 font-semibold"
                               >
                                 Change to Decline
                               </button>
@@ -275,14 +278,14 @@ function HiveDashboard() {
                             return userId === currentUser._id?.toString();
                           }) ? (
                             <>
-                              <span className="text-sm text-red-600 font-medium flex items-center gap-1">
+                              <span className="text-sm text-red-600 font-bold flex items-center gap-1">
                                 <X className="w-4 h-4" />
                                 You declined
                               </span>
                               <button
                                 onClick={() => handleChangeSwipe(event, 'right')}
                                 disabled={changeSwipeMutation.isLoading}
-                                className="text-sm text-green-600 hover:text-green-700 disabled:opacity-50 underline"
+                                className="buzz-hover text-sm text-green-600 hover:text-green-700 disabled:opacity-50 font-semibold"
                               >
                                 Change to Accept
                               </button>
@@ -297,7 +300,7 @@ function HiveDashboard() {
                             setSelectedEvent(event);
                             setShowGallery(true);
                           }}
-                          className="text-sm text-primary-600 hover:text-primary-700"
+                          className="buzz-hover text-sm text-honey-brown hover:text-honey-amber-dark font-semibold"
                         >
                           View Media
                         </button>
@@ -305,7 +308,7 @@ function HiveDashboard() {
                     </motion.div>
                   ))
                 ) : (
-                  <p className="text-gray-500">No events yet. Create your first event!</p>
+                  <p className="text-honey-amber-dark font-semibold text-center py-8">No events yet. Create your first event!</p>
                 )}
               </div>
             </div>
@@ -313,20 +316,23 @@ function HiveDashboard() {
 
           {/* Sidebar - Members */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-md p-6 sticky top-4">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Members</h2>
+            <div className="honey-card p-6 sticky top-4">
+              <div className="flex items-center gap-3 mb-4">
+                <Users className="w-6 h-6 text-honey-brown" />
+                <h2 className="text-xl font-bold honey-text text-honey-brown">Members</h2>
+              </div>
               <div className="space-y-4">
                 {hive.members && hive.members.map((member) => (
-                  <div key={member._id} className="flex items-center gap-3">
+                  <div key={member._id} className="flex items-center gap-3 buzz-hover p-2 rounded-lg hover:bg-honey-light">
                     <img
                       src={member.profilePhoto || `https://ui-avatars.com/api/?name=${member.name}`}
                       alt={member.name}
-                      className="w-12 h-12 rounded-full object-cover"
+                      className="w-12 h-12 rounded-full object-cover border-2 border-honey-gold"
                     />
                     <div>
-                      <p className="font-medium text-gray-900">{member.name}</p>
+                      <p className="font-bold text-honey-brown">{member.name}</p>
                       {member.major && (
-                        <p className="text-sm text-gray-600">{member.major}</p>
+                        <p className="text-sm text-honey-amber-dark font-medium">{member.major}</p>
                       )}
                     </div>
                   </div>

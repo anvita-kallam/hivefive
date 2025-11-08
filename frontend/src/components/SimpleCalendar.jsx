@@ -145,18 +145,18 @@ function SimpleCalendar() {
       <div className="flex items-center justify-between mb-4">
         <button
           onClick={handlePreviousMonth}
-          className="p-2 hover:bg-gray-100 rounded-lg"
+          className="buzz-hover p-2 bg-honey-gold hover:bg-honey-amber rounded-lg border-2 border-honey-brown"
         >
-          <ChevronLeft className="w-5 h-5" />
+          <ChevronLeft className="w-5 h-5 text-honey-brown" />
         </button>
-        <h3 className="text-xl font-semibold text-gray-900">
+        <h3 className="text-xl font-bold honey-text text-honey-brown">
           {format(currentDate, 'MMMM yyyy')}
         </h3>
         <button
           onClick={handleNextMonth}
-          className="p-2 hover:bg-gray-100 rounded-lg"
+          className="buzz-hover p-2 bg-honey-gold hover:bg-honey-amber rounded-lg border-2 border-honey-brown"
         >
-          <ChevronRight className="w-5 h-5" />
+          <ChevronRight className="w-5 h-5 text-honey-brown" />
         </button>
       </div>
 
@@ -164,7 +164,7 @@ function SimpleCalendar() {
       <div className="grid grid-cols-7 gap-1">
         {/* Week day headers */}
         {weekDays.map(day => (
-          <div key={day} className="text-center text-sm font-medium text-gray-600 py-2">
+          <div key={day} className="text-center text-sm font-bold text-honey-brown py-2">
             {day}
           </div>
         ))}
@@ -180,21 +180,21 @@ function SimpleCalendar() {
               key={day.toISOString()}
               onClick={() => handleDayClick(day)}
               className={`
-                min-h-[80px] p-2 border border-gray-200 rounded-lg cursor-pointer
-                hover:bg-gray-50 transition-colors
-                ${isCurrentMonth ? 'bg-white' : 'bg-gray-50'}
-                ${isToday ? 'ring-2 ring-primary-500' : ''}
+                min-h-[80px] p-2 border-2 border-honey-gold rounded-lg cursor-pointer
+                buzz-hover transition-colors
+                ${isCurrentMonth ? 'bg-honey-light' : 'bg-honey-light bg-opacity-50'}
+                ${isToday ? 'ring-4 ring-honey-gold bg-honey-gold bg-opacity-30' : ''}
               `}
             >
-              <div className={`text-sm font-medium mb-1 ${isCurrentMonth ? 'text-gray-900' : 'text-gray-400'}`}>
+              <div className={`text-sm font-bold mb-1 ${isCurrentMonth ? 'text-honey-brown' : 'text-honey-amber-dark opacity-50'}`}>
                 {format(day, 'd')}
               </div>
               <div className="space-y-1">
                 {dayEvents.slice(0, 2).map(eventItem => (
                   <div
                     key={eventItem._id}
-                    className="text-xs px-2 py-1 rounded text-white truncate cursor-pointer hover:opacity-80"
-                    style={{ backgroundColor: eventItem.color || '#3B82F6' }}
+                    className="text-xs px-2 py-1 rounded text-white truncate cursor-pointer hover:opacity-80 font-semibold border border-white border-opacity-30"
+                    style={{ backgroundColor: eventItem.color || '#FFC30B' }}
                     onClick={(e) => {
                       e.stopPropagation();
                       handleEditEvent(eventItem, e);
@@ -205,7 +205,7 @@ function SimpleCalendar() {
                   </div>
                 ))}
                 {dayEvents.length > 2 && (
-                  <div className="text-xs text-gray-500">
+                  <div className="text-xs text-honey-amber-dark font-semibold">
                     +{dayEvents.length - 2} more
                   </div>
                 )}
@@ -311,23 +311,26 @@ function EventModal({ selectedDate, event, onClose, onSubmit, isLoading }) {
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="bg-white rounded-lg shadow-xl p-6 max-w-md w-full mx-4"
+        className="honey-card rounded-lg shadow-xl p-6 max-w-md w-full mx-4 border-4 border-honey-brown"
       >
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-xl font-bold text-gray-900">
-            {event ? 'Edit Event' : 'Add Event'}
-          </h3>
+          <div className="flex items-center gap-2">
+            <Bee className="w-5 h-5 text-honey-brown bee-icon" />
+            <h3 className="text-xl font-bold honey-text text-honey-brown">
+              {event ? 'Edit Event' : 'Add Event'}
+            </h3>
+          </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg"
+            className="buzz-hover p-2 bg-honey-gold hover:bg-honey-amber rounded-lg border-2 border-honey-brown"
           >
-            <X className="w-5 h-5" />
+            <X className="w-5 h-5 text-honey-brown" />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-bold text-honey-brown mb-1">
               Title *
             </label>
             <input
@@ -335,25 +338,25 @@ function EventModal({ selectedDate, event, onClose, onSubmit, isLoading }) {
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               required
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              className="w-full px-4 py-2 border-2 border-honey-gold rounded-lg focus:ring-2 focus:ring-honey-amber focus:border-honey-brown bg-honey-light"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-bold text-honey-brown mb-1">
               Description
             </label>
             <textarea
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               rows={3}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              className="w-full px-4 py-2 border-2 border-honey-gold rounded-lg focus:ring-2 focus:ring-honey-amber focus:border-honey-brown bg-honey-light"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-bold text-honey-brown mb-1">
                 Start Time *
               </label>
               <input
@@ -361,11 +364,11 @@ function EventModal({ selectedDate, event, onClose, onSubmit, isLoading }) {
                 value={formData.startTime}
                 onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                className="w-full px-4 py-2 border-2 border-honey-gold rounded-lg focus:ring-2 focus:ring-honey-amber focus:border-honey-brown bg-honey-light"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-bold text-honey-brown mb-1">
                 End Time *
               </label>
               <input
@@ -373,34 +376,34 @@ function EventModal({ selectedDate, event, onClose, onSubmit, isLoading }) {
                 value={formData.endTime}
                 onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                className="w-full px-4 py-2 border-2 border-honey-gold rounded-lg focus:ring-2 focus:ring-honey-amber focus:border-honey-brown bg-honey-light"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-bold text-honey-brown mb-1">
               Location
             </label>
             <input
               type="text"
               value={formData.location}
               onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              className="w-full px-4 py-2 border-2 border-honey-gold rounded-lg focus:ring-2 focus:ring-honey-amber focus:border-honey-brown bg-honey-light"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-bold text-honey-brown mb-1">
               Color
             </label>
             <div className="flex gap-2">
-              {['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'].map(color => (
+              {['#FFC30B', '#FF8C00', '#FFD700', '#10B981', '#EF4444', '#8B5CF6'].map(color => (
                 <button
                   key={color}
                   type="button"
                   onClick={() => setFormData({ ...formData, color })}
-                  className={`w-8 h-8 rounded-full ${formData.color === color ? 'ring-2 ring-gray-400' : ''}`}
+                  className={`w-8 h-8 rounded-full border-2 ${formData.color === color ? 'ring-2 ring-honey-brown border-honey-brown' : 'border-honey-gold'}`}
                   style={{ backgroundColor: color }}
                 />
               ))}
@@ -408,7 +411,7 @@ function EventModal({ selectedDate, event, onClose, onSubmit, isLoading }) {
                 type="color"
                 value={formData.color}
                 onChange={(e) => setFormData({ ...formData, color: e.target.value })}
-                className="w-8 h-8 rounded-full border border-gray-300 cursor-pointer"
+                className="w-8 h-8 rounded-full border-2 border-honey-gold cursor-pointer"
               />
             </div>
           </div>
@@ -419,9 +422,9 @@ function EventModal({ selectedDate, event, onClose, onSubmit, isLoading }) {
               id="allDay"
               checked={formData.allDay}
               onChange={(e) => setFormData({ ...formData, allDay: e.target.checked })}
-              className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+              className="w-4 h-4 text-honey-gold border-honey-gold rounded focus:ring-honey-amber"
             />
-            <label htmlFor="allDay" className="ml-2 text-sm text-gray-700">
+            <label htmlFor="allDay" className="ml-2 text-sm font-semibold text-honey-brown">
               All day event
             </label>
           </div>
@@ -430,14 +433,14 @@ function EventModal({ selectedDate, event, onClose, onSubmit, isLoading }) {
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+              className="buzz-hover flex-1 px-4 py-2 border-2 border-honey-brown text-honey-brown rounded-lg hover:bg-honey-light font-semibold"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isLoading}
-              className="flex-1 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+              className="honey-drop-button buzz-hover flex-1 disabled:bg-gray-400 disabled:cursor-not-allowed font-semibold"
             >
               {isLoading ? 'Saving...' : event ? 'Update' : 'Add Event'}
             </button>
