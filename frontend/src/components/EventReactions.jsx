@@ -10,9 +10,14 @@ function EventReactions({ event }) {
   }
 
   // Filter reactions that have media (photos/videos)
-  const reactionsWithMedia = reactions.filter(
-    log => log.reactionMediaId && (log.reactionMediaId.fileURL || (typeof log.reactionMediaId === 'object' && log.reactionMediaId.fileURL))
-  );
+  const reactionsWithMedia = reactions.filter(log => {
+    if (!log.reactionMediaId) return false;
+    // Handle both populated (object) and non-populated (ID) cases
+    if (typeof log.reactionMediaId === 'object' && log.reactionMediaId.fileURL) {
+      return true;
+    }
+    return false;
+  });
 
   if (reactionsWithMedia.length === 0) {
     return null;
@@ -51,7 +56,7 @@ function EventReactions({ event }) {
     <div className="mt-4">
       <h4 className="text-sm font-medium text-[#2D1B00] mb-3">Reactions</h4>
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-        {reactionsWithMedia.map((log, index) => {
+        {reactionsWithMedia.map((log) => {
           // Handle both populated and non-populated userID
           const user = typeof log.userID === 'object' ? log.userID : { _id: log.userID };
           // Handle both populated and non-populated reactionMediaId
@@ -60,10 +65,12 @@ function EventReactions({ event }) {
             : null;
           const emotion = media?.facialSentiment || log.emotionData;
           const isAccepted = log.swipeDirection === 'right';
+          const userId = typeof log.userID === 'object' ? log.userID?._id : log.userID;
+          const mediaId = typeof log.reactionMediaId === 'object' ? log.reactionMediaId?._id : log.reactionMediaId;
 
           return (
             <motion.div
-              key={index}
+              key={`reaction-${userId}-${mediaId || log.timestamp}`}
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               className="honey-card p-3 relative overflow-hidden"
