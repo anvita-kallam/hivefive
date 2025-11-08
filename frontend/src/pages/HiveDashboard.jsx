@@ -199,16 +199,16 @@ function HiveDashboard() {
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
                 {/* Actions */}
-                <div className="honey-card p-6 mb-6">
-                  <button
-                    onClick={() => setShowCreateEvent(true)}
-                    className="bg-[rgba(193,125,58,0.8)] hover:bg-[rgba(193,125,58,0.9)] text-[#2D1B00] border border-[#2D1B00]/20 backdrop-blur-sm w-16 h-16 rounded-full flex items-center justify-center mx-auto transition-colors shadow-lg"
-                    title="Create New Hive Event"
-                  >
-                    <Plus className="w-8 h-8" />
-                  </button>
-                  <p className="text-center mt-4 text-[#2D1B00] font-medium">Create New Hive Event</p>
-                </div>
+                     <div className="honey-card p-6 mb-6">
+                     <button
+                       onClick={() => setShowCreateEvent(true)}
+                       className="hexagon-button w-16 h-16 flex items-center justify-center mx-auto text-[#2D1B00] transition-colors"
+                       title="Create New Hive Event"
+                     >
+                       <Plus className="w-8 h-8" />
+                     </button>
+                     <p className="text-center mt-4 text-[#2D1B00] font-medium">Create New Hive Event</p>
+                   </div>
 
                 {/* Event Timeline */}
                 <div className="honey-card p-6">
@@ -223,18 +223,18 @@ function HiveDashboard() {
                       key={event._id}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
-                          className="bg-[rgba(245,230,211,0.5)] backdrop-blur-sm rounded-lg border-l-4 border-[#C17D3A] pl-4 py-3 mb-3 hover:bg-[rgba(245,230,211,0.6)] transition-colors"
+                          className="honey-card border-l-4 border-[#C17D3A] pl-4 py-3 mb-3"
                         >
-                          <div className="flex items-center justify-between mb-2">
-                            <h3 className="font-medium text-[#2D1B00]">{event.title}</h3>
-                            <span className={`px-2 py-1 text-xs rounded-full font-medium border ${
-                              event.status === 'confirmed' ? 'bg-green-100 text-green-800 border-green-300' :
-                              event.status === 'cancelled' ? 'bg-red-100 text-red-800 border-red-300' :
-                              'bg-[rgba(245,230,211,0.6)] text-[#2D1B00] border-[#2D1B00]/20'
-                            }`}>
-                              {event.status}
-                            </span>
-                          </div>
+                             <div className="flex items-center justify-between mb-2">
+                               <h3 className="font-medium text-[#2D1B00]">{event.title}</h3>
+                               <span className={`hexagon-badge px-3 py-1 text-xs font-medium ${
+                                 event.status === 'confirmed' ? 'bg-green-100 text-green-800' :
+                                 event.status === 'cancelled' ? 'bg-red-100 text-red-800' :
+                                 'text-[#2D1B00]'
+                               }`}>
+                                 {event.status}
+                               </span>
+                             </div>
                           {event.description && (
                             <p className="text-sm text-[#6B4E00] mb-2">{event.description}</p>
                           )}
@@ -327,23 +327,25 @@ function HiveDashboard() {
                   <Users className="w-5 h-5 text-[#2D1B00]" />
                   <h2 className="text-[#2D1B00] text-xl font-medium">Members</h2>
                 </div>
-                <div className="space-y-3">
-                  {hive.members && hive.members.map((member) => (
-                    <div key={member._id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-[rgba(245,230,211,0.6)] transition-colors">
-                      <img
-                        src={member.profilePhoto || `https://ui-avatars.com/api/?name=${member.name}`}
-                        alt={member.name}
-                        className="w-10 h-10 rounded-full object-cover border-2 border-[#D4A574]"
-                      />
-                      <div>
-                        <p className="font-medium text-[#2D1B00]">{member.name}</p>
-                        {member.major && (
-                          <p className="text-sm text-[#6B4E00]">{member.major}</p>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                     <div className="space-y-3">
+                       {hive.members && hive.members.map((member) => (
+                         <div key={member._id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-[rgba(245,230,211,0.6)] transition-colors">
+                           <div className="hexagon-avatar w-10 h-10 overflow-hidden flex-shrink-0">
+                             <img
+                               src={member.profilePhoto || `https://ui-avatars.com/api/?name=${member.name}`}
+                               alt={member.name}
+                               className="w-full h-full object-cover"
+                             />
+                           </div>
+                           <div>
+                             <p className="font-medium text-[#2D1B00]">{member.name}</p>
+                             {member.major && (
+                               <p className="text-sm text-[#6B4E00]">{member.major}</p>
+                             )}
+                           </div>
+                         </div>
+                       ))}
+                     </div>
               </div>
             </div>
           </div>
@@ -382,7 +384,13 @@ function HexagonIcon() {
       className="text-[#2D1B00]"
       style={{ color: '#2D1B00' }}
     >
-      <circle cx="10" cy="10" r="9" stroke="currentColor" strokeWidth="2" fill="none" />
+      <path
+        d="M 6 2 L 14 2 L 18 10 L 14 18 L 6 18 L 2 10 Z"
+        stroke="currentColor"
+        strokeWidth="2"
+        fill="none"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }

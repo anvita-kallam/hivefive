@@ -107,7 +107,7 @@ function Dashboard() {
                     key={event._id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="bg-[rgba(245,230,211,0.5)] backdrop-blur-sm rounded-lg p-4 border border-[#2D1B00]/20 shadow-md cursor-pointer hover:bg-[rgba(245,230,211,0.6)] transition-colors"
+                    className="honey-card p-4 cursor-pointer"
                     onClick={() => navigate(`/hive/${event.hiveID}`)}
                   >
                     <div className="flex items-start gap-3">
@@ -161,15 +161,15 @@ function Dashboard() {
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {hives.map((hive) => (
-                  <motion.div
-                    key={hive._id}
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="bg-[rgba(245,230,211,0.5)] backdrop-blur-sm rounded-lg p-4 border border-[#2D1B00]/20 shadow-md cursor-pointer hover:bg-[rgba(245,230,211,0.6)] transition-colors"
-                    onClick={() => navigate(`/hive/${hive._id}`)}
-                  >
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {hives.map((hive) => (
+                        <motion.div
+                          key={hive._id}
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          className="honey-card p-4 cursor-pointer"
+                          onClick={() => navigate(`/hive/${hive._id}`)}
+                        >
                     <h3 className="text-[#2D1B00] font-medium mb-2">{hive.name}</h3>
                     <div className="flex items-center gap-2 text-sm text-[#6B4E00] mb-3">
                       <Users className="w-4 h-4" />
@@ -188,17 +188,18 @@ function Dashboard() {
 
                     {/* Member Avatars */}
                     {hive.members && hive.members.length > 0 && (
-                      <div className="flex -space-x-2 mt-3">
+                      <div className="flex -space-x-1 mt-3">
                         {hive.members.slice(0, 5).map((member) => (
-                          <img
-                            key={member._id}
-                            src={member.profilePhoto || `https://ui-avatars.com/api/?name=${member.name}`}
-                            alt={member.name}
-                            className="w-6 h-6 rounded-full border-2 border-[#D4A574]"
-                          />
+                          <div key={member._id} className="hexagon-avatar w-6 h-6 overflow-hidden">
+                            <img
+                              src={member.profilePhoto || `https://ui-avatars.com/api/?name=${member.name}`}
+                              alt={member.name}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
                         ))}
                         {hive.members.length > 5 && (
-                          <div className="w-6 h-6 rounded-full border-2 border-[#D4A574] bg-[rgba(193,125,58,0.8)] flex items-center justify-center text-xs text-[#2D1B00] font-medium">
+                          <div className="hexagon-avatar w-6 h-6 bg-[rgba(193,125,58,0.8)] flex items-center justify-center text-xs text-[#2D1B00] font-medium">
                             +{hive.members.length - 5}
                           </div>
                         )}
@@ -226,7 +227,13 @@ function HexagonIcon() {
       className="text-[#2D1B00]"
       style={{ color: '#2D1B00' }}
     >
-      <circle cx="10" cy="10" r="9" stroke="currentColor" strokeWidth="2" fill="none" />
+      <path
+        d="M 6 2 L 14 2 L 18 10 L 14 18 L 6 18 L 2 10 Z"
+        stroke="currentColor"
+        strokeWidth="2"
+        fill="none"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }

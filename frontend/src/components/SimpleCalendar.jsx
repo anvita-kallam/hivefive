@@ -395,23 +395,23 @@ function EventModal({ selectedDate, event, onClose, onSubmit, isLoading }) {
                 <label className="block text-sm text-[#2D1B00] mb-1 font-medium">
                   Color
                 </label>
-                <div className="flex gap-2">
-                  {['#C17D3A', '#D4A574', '#E6C896', '#10B981', '#EF4444', '#8B5CF6'].map(color => (
-                    <button
-                      key={color}
-                      type="button"
-                      onClick={() => setFormData({ ...formData, color })}
-                      className={`w-8 h-8 rounded-full border-2 ${formData.color === color ? 'ring-2 ring-[#C17D3A] border-[#C17D3A]' : 'border-[#2D1B00]/20'}`}
-                      style={{ backgroundColor: color }}
-                    />
-                  ))}
-                  <input
-                    type="color"
-                    value={formData.color}
-                    onChange={(e) => setFormData({ ...formData, color: e.target.value })}
-                    className="w-8 h-8 rounded-full border-2 border-[#2D1B00]/20 cursor-pointer"
-                  />
-                </div>
+                         <div className="flex gap-2">
+                           {['#C17D3A', '#D4A574', '#E6C896', '#10B981', '#EF4444', '#8B5CF6'].map(color => (
+                             <button
+                               key={color}
+                               type="button"
+                               onClick={() => setFormData({ ...formData, color })}
+                               className={`hexagon-badge w-8 h-8 ${formData.color === color ? 'ring-2 ring-[#C17D3A]' : ''}`}
+                               style={{ backgroundColor: color }}
+                             />
+                           ))}
+                           <input
+                             type="color"
+                             value={formData.color}
+                             onChange={(e) => setFormData({ ...formData, color: e.target.value })}
+                             className="hexagon-badge w-8 h-8 cursor-pointer border-0"
+                           />
+                         </div>
               </div>
 
               <div className="flex items-center">
@@ -460,7 +460,13 @@ function HexagonIcon() {
       className="text-[#2D1B00]"
       style={{ color: '#2D1B00' }}
     >
-      <circle cx="10" cy="10" r="9" stroke="currentColor" strokeWidth="2" fill="none" />
+      <path
+        d="M 6 2 L 14 2 L 18 10 L 14 18 L 6 18 L 2 10 Z"
+        stroke="currentColor"
+        strokeWidth="2"
+        fill="none"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }

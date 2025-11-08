@@ -101,7 +101,13 @@ function HexagonIcon() {
       className="text-[#2D1B00]"
       style={{ color: '#2D1B00' }}
     >
-      <circle cx="10" cy="10" r="9" stroke="currentColor" strokeWidth="2" fill="none" />
+      <path
+        d="M 6 2 L 14 2 L 18 10 L 14 18 L 6 18 L 2 10 Z"
+        stroke="currentColor"
+        strokeWidth="2"
+        fill="none"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
