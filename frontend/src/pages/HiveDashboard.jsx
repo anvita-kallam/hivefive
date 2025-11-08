@@ -4,12 +4,13 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../config/api';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
-import { ArrowLeft, Calendar, MapPin, Users, Plus, LogOut as LeaveIcon, Check, X, Trash2 } from 'lucide-react';
+import { ArrowLeft, Calendar, MapPin, Users, Plus, LogOut as LeaveIcon, Check, X, Trash2, UserPlus } from 'lucide-react';
 import EventSwipe from '../components/EventSwipe';
 import Gallery from '../components/Gallery';
 import CreateEventModal from '../components/CreateEventModal';
 import EventReactions from '../components/EventReactions';
 import { BeeDecor, BeeLogo } from '../components/BeeDecor.jsx';
+import { AnimatePresence } from 'framer-motion';
 
 function HiveDashboard() {
   const { hiveId } = useParams();
@@ -17,6 +18,8 @@ function HiveDashboard() {
   const [showCreateEvent, setShowCreateEvent] = useState(false);
   const [showGallery, setShowGallery] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const [showAddMember, setShowAddMember] = useState(false);
+  const [memberEmail, setMemberEmail] = useState('');
 
   // All hooks must be called at the top, before any conditional returns
   const { data: hive, isLoading: hiveLoading } = useQuery({
@@ -132,6 +135,32 @@ function HiveDashboard() {
       eventId: event._id,
       direction: newDirection
     });
+  };
+
+  // Add member mutation
+  const addMemberMutation = useMutation({
+    mutationFn: async (email) => {
+      return api.post(`/hives/${hiveId}/members`, { email });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['hive', hiveId]);
+      queryClient.invalidateQueries(['hives']);
+      setMemberEmail('');
+      setShowAddMember(false);
+    },
+    onError: (error) => {
+      console.error('Error adding member:', error);
+      alert(error.response?.data?.error || 'Failed to add member');
+    }
+  });
+
+  const handleAddMember = () => {
+    const email = memberEmail.trim().toLowerCase();
+    if (!email || !email.includes('@')) {
+      alert('Please enter a valid email address');
+      return;
+    }
+    addMemberMutation.mutate(email);
   };
 
   // Early returns AFTER all hooks
@@ -376,14 +405,23 @@ function HiveDashboard() {
           {/* Sidebar - Members */}
           <div className="lg:col-span-1">
               <div className="honey-card p-6 sticky top-4">
-                <div className="flex items-center gap-3 mb-4">
-                  <Users className="w-5 h-5 text-[#2D1B00]" />
-                  <h2 className="text-[#2D1B00] text-xl font-medium">Members</h2>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <Users className="w-5 h-5 text-[#2D1B00]" />
+                    <h2 className="text-[#2D1B00] text-xl font-medium">Members</h2>
+                  </div>
+                  <button
+                    onClick={() => setShowAddMember(true)}
+                    className="p-2 text-[#C17D3A] hover:text-[#6B4E00] hover:bg-[rgba(245,230,211,0.6)] rounded-lg transition-colors"
+                    title="Add Member"
+                  >
+                    <UserPlus className="w-5 h-5" />
+                  </button>
                 </div>
                      <div className="space-y-3">
                        {hive.members && hive.members.map((member) => (
                          <div key={member._id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-[rgba(245,230,211,0.6)] transition-colors">
-                           <div className="hexagon-avatar w-10 h-10 overflow-hidden flex-shrink-0">
+                           <div className="w-10 h-10 overflow-hidden flex-shrink-0 rounded-full border-2 border-[#C17D3A]/30">
                              <img
                                src={member.profilePhoto || `https://ui-avatars.com/api/?name=${member.name}`}
                                alt={member.name}
@@ -422,6 +460,74 @@ function HiveDashboard() {
             }}
           />
         )}
+
+        {/* Add Member Modal */}
+        <AnimatePresence>
+          {showAddMember && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
+              onClick={() => setShowAddMember(false)}
+            >
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                className="honey-card rounded-lg shadow-xl p-6 max-w-md w-full mx-4"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-[#2D1B00] text-xl font-medium">Add Member</h3>
+                  <button
+                    onClick={() => setShowAddMember(false)}
+                    className="text-[#2D1B00] hover:text-[#6B4E00] transition-colors"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm text-[#2D1B00] mb-1 font-medium">
+                      Email Address
+                    </label>
+                    <input
+                      type="email"
+                      value={memberEmail}
+                      onChange={(e) => setMemberEmail(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && handleAddMember()}
+                      placeholder="user@example.com"
+                      className="w-full px-4 py-2 border border-[#2D1B00]/20 rounded-lg bg-[rgba(255,249,230,0.6)] text-[#2D1B00] focus:outline-none focus:ring-2 focus:ring-[#C17D3A]/50"
+                      autoFocus
+                    />
+                    <p className="mt-2 text-xs text-[#6B4E00]">
+                      The user must have a HiveFive account with this email.
+                    </p>
+                  </div>
+
+                  <div className="flex gap-4">
+                    <button
+                      type="button"
+                      onClick={() => setShowAddMember(false)}
+                      className="flex-1 px-4 py-2 border border-[#2D1B00]/20 text-[#2D1B00] rounded-lg hover:bg-[rgba(245,230,211,0.8)] font-medium transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleAddMember}
+                      disabled={addMemberMutation.isLoading || !memberEmail.trim()}
+                      className="flex-1 px-4 py-2 bg-[rgba(193,125,58,0.8)] hover:bg-[rgba(193,125,58,0.9)] text-[#2D1B00] border border-[#2D1B00]/20 backdrop-blur-sm rounded-lg font-medium transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                    >
+                      {addMemberMutation.isLoading ? 'Adding...' : 'Add Member'}
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     );
   }

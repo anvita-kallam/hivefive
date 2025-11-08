@@ -84,7 +84,7 @@ function EventReactions({ event, showTitle = true, size = 'small' }) {
             >
               {/* User info */}
               <div className="flex items-center gap-2 mb-2">
-                <div className={`hexagon-avatar ${isLarge ? 'w-10 h-10' : 'w-8 h-8'} overflow-hidden flex-shrink-0`}>
+                <div className={`${isLarge ? 'w-10 h-10' : 'w-8 h-8'} overflow-hidden flex-shrink-0 rounded-full border border-[#C17D3A]/30`}>
                   <img
                     src={user?.profilePhoto || `https://ui-avatars.com/api/?name=${user?.name || 'User'}`}
                     alt={user?.name || 'User'}

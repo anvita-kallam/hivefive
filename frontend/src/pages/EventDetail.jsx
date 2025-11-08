@@ -389,8 +389,8 @@ function EventDetail() {
                     {event.acceptedBy.map((member) => {
                       const memberData = typeof member === 'object' ? member : { _id: member };
                       return (
-                        <div key={memberData._id} className="flex items-center gap-2 p-2 rounded-lg hover:bg-[rgba(245,230,211,0.6)] transition-colors">
-                          <div className="hexagon-avatar w-8 h-8 overflow-hidden flex-shrink-0">
+                         <div key={memberData._id} className="flex items-center gap-2 p-2 rounded-lg hover:bg-[rgba(245,230,211,0.6)] transition-colors">
+                          <div className="w-8 h-8 overflow-hidden flex-shrink-0 rounded-full border border-[#C17D3A]/30">
                             <img
                               src={memberData.profilePhoto || `https://ui-avatars.com/api/?name=${memberData.name || 'User'}`}
                               alt={memberData.name || 'User'}
@@ -418,8 +418,8 @@ function EventDetail() {
                     {event.declinedBy.map((member) => {
                       const memberData = typeof member === 'object' ? member : { _id: member };
                       return (
-                        <div key={memberData._id} className="flex items-center gap-2 p-2 rounded-lg hover:bg-[rgba(245,230,211,0.6)] transition-colors">
-                          <div className="hexagon-avatar w-8 h-8 overflow-hidden flex-shrink-0">
+                         <div key={memberData._id} className="flex items-center gap-2 p-2 rounded-lg hover:bg-[rgba(245,230,211,0.6)] transition-colors">
+                          <div className="w-8 h-8 overflow-hidden flex-shrink-0 rounded-full border border-[#C17D3A]/30">
                             <img
                               src={memberData.profilePhoto || `https://ui-avatars.com/api/?name=${memberData.name || 'User'}`}
                               alt={memberData.name || 'User'}

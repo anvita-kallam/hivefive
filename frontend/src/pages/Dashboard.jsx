@@ -186,25 +186,25 @@ function Dashboard() {
                       </div>
                     )}
 
-                    {/* Member Avatars */}
-                    {hive.members && hive.members.length > 0 && (
-                      <div className="flex -space-x-1 mt-3">
-                        {hive.members.slice(0, 5).map((member) => (
-                          <div key={member._id} className="hexagon-avatar w-6 h-6 overflow-hidden">
-                            <img
-                              src={member.profilePhoto || `https://ui-avatars.com/api/?name=${member.name}`}
-                              alt={member.name}
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                        ))}
-                        {hive.members.length > 5 && (
-                          <div className="hexagon-avatar w-6 h-6 bg-[rgba(193,125,58,0.8)] flex items-center justify-center text-xs text-[#2D1B00] font-medium">
-                            +{hive.members.length - 5}
-                          </div>
-                        )}
-                      </div>
-                    )}
+                           {/* Member Avatars */}
+                           {hive.members && hive.members.length > 0 && (
+                             <div className="flex -space-x-1 mt-3">
+                               {hive.members.slice(0, 5).map((member) => (
+                                 <div key={member._id} className="w-6 h-6 overflow-hidden rounded-full border border-[#C17D3A]/30">
+                                   <img
+                                     src={member.profilePhoto || `https://ui-avatars.com/api/?name=${member.name}`}
+                                     alt={member.name}
+                                     className="w-full h-full object-cover"
+                                   />
+                                 </div>
+                               ))}
+                               {hive.members.length > 5 && (
+                                 <div className="w-6 h-6 bg-[rgba(193,125,58,0.8)] rounded-full border border-[#C17D3A]/30 flex items-center justify-center text-xs text-[#2D1B00] font-medium">
+                                   +{hive.members.length - 5}
+                                 </div>
+                               )}
+                             </div>
+                           )}
                   </motion.div>
                 ))}
               </div>
