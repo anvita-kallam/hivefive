@@ -18,8 +18,10 @@ try {
   // Option 1: Use Google Generative AI API with API key (simpler)
   if (process.env.GEMINI_API_KEY) {
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+    // Try gemini-1.5-flash first (most common), fallback to gemini-pro
+    const modelName = 'gemini-1.5-flash'; // Fast and efficient model available via API key
     generativeModel = genAI.getGenerativeModel({
-      model: 'gemini-2.0-flash-exp',
+      model: modelName,
       generationConfig: {
         maxOutputTokens: 1024,
         temperature: 0.7,
@@ -28,7 +30,7 @@ try {
       },
     });
     useApiKey = true;
-    console.log('✅ Gemini API initialized with API key (Gemini 2.0 Flash)');
+    console.log(`✅ Gemini API initialized with API key (${modelName})`);
   }
   // Option 2: Use Vertex AI with service account (production)
   else if (process.env.VERTEX_AI_PROJECT_ID && process.env.GOOGLE_APPLICATION_CREDENTIALS) {

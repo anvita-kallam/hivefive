@@ -12,6 +12,13 @@
    ```env
    GEMINI_API_KEY=AQ.Ab8RN6KtF6XGIBTK2hyksbQ9zmWe232Cx_MRyKq_gQ5VgUr_IQ
    ```
+   
+   **Note**: Make sure you create the `.env` file in the `backend/` directory, not in the root directory.
+   
+   You can manually create it or run:
+   ```bash
+   echo "GEMINI_API_KEY=AQ.Ab8RN6KtF6XGIBTK2hyksbQ9zmWe232Cx_MRyKq_gQ5VgUr_IQ" > backend/.env
+   ```
 
 3. **Restart your backend server**:
    ```bash
