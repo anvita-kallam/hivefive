@@ -1,108 +1,141 @@
-# HiveFive Quick Start Guide
+# Quick Start Guide - Backend Server
 
-Get HiveFive up and running in 5 minutes!
+## The Problem
 
-## Prerequisites
+You're seeing `ERR_CONNECTION_REFUSED` because the backend server is not running.
 
-- Node.js 18+ installed
-- Firebase project created (already done: `hivefive-4384c`)
-- MongoDB Atlas account (free tier works)
+## Solution: Start the Backend Server
 
-## Quick Setup
+### Step 1: Open a Terminal
 
-### 1. Install Dependencies
+Open a new terminal window/tab.
+
+### Step 2: Navigate to Backend Directory
 
 ```bash
-npm run install:all
+cd /Users/anvitakallam/Documents/HiveFive/backend
 ```
 
-### 2. Set Up Firebase
+### Step 3: Check Your .env File
 
-Follow the instructions in [FIREBASE_SETUP.md](./FIREBASE_SETUP.md) to:
-- Enable Google Authentication
-- Set up Firebase Storage with security rules
-- Download Firebase Admin SDK
-
-**Quick version:**
-1. Go to [Firebase Console](https://console.firebase.google.com/project/hivefive-4384c/authentication/users)
-2. Enable Google sign-in in Authentication
-3. Enable Storage and copy rules from `firebase-storage.rules`
-4. Download Admin SDK from Project Settings > Service Accounts
-5. Save it as `backend/firebase-admin-sdk.json`
-
-### 3. Set Up MongoDB
-
-1. Create a free cluster at [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
-2. Create a database user
-3. Whitelist your IP (or use `0.0.0.0/0` for development)
-4. Get your connection string
-
-### 4. Configure Environment Variables
-
-Create `backend/.env`:
+Make sure you have a `.env` file with at least:
 
 ```env
-PORT=5000
-NODE_ENV=development
-MONGODB_URI=your-mongodb-connection-string
+# Required: MongoDB Connection
+MONGODB_URI=your_mongodb_connection_string_here
+
+# Required: Firebase Admin SDK
 FIREBASE_ADMIN_SDK_PATH=./firebase-admin-sdk.json
-GOOGLE_CLIENT_ID=your-google-client-id
-GOOGLE_CLIENT_SECRET=your-google-client-secret
-GOOGLE_REDIRECT_URI=http://localhost:5000/api/calendar/callback
-VERTEX_AI_PROJECT_ID=your-gcp-project-id
-VERTEX_AI_LOCATION=us-central1
-JWT_SECRET=your-random-secret-key
+# OR
+# FIREBASE_ADMIN_SDK={"type":"service_account",...}
+
+# Optional: Gemini API Key (for Buzz chatbot)
+GEMINI_API_KEY=your_gemini_api_key_here
+
+# Server Port (optional, defaults to 5001)
+PORT=5001
 ```
 
-The frontend Firebase config is already set up in the code!
-
-### 5. Start the Application
+### Step 4: Start the Server
 
 ```bash
 npm run dev
 ```
 
-This starts both frontend (port 3000) and backend (port 5000).
+You should see:
+```
+Attempting to connect to MongoDB...
+✅ MongoDB connected successfully: ...
+Server is running on port 5001
+```
 
-### 6. Test the App
+### Step 5: Verify It's Running
 
-1. Open http://localhost:3000
-2. Click "Sign in with Georgia Tech"
-3. Sign in with your Google account
-4. Create your profile
-5. Create your first hive!
+In another terminal, test:
+```bash
+curl http://localhost:5001/api/health
+```
 
-## What's Next?
+You should get: `{"status":"ok","message":"HiveFive API is running"}`
 
-- Read [SETUP.md](./SETUP.md) for detailed setup instructions
-- Read [FIREBASE_SETUP.md](./FIREBASE_SETUP.md) for Firebase configuration
-- Read [PROJECT_STRUCTURE.md](./PROJECT_STRUCTURE.md) to understand the codebase
+## Common Issues
 
-## Troubleshooting
+### Issue 1: MONGODB_URI Not Set
 
-### Firebase Authentication Not Working
-- Make sure Google sign-in is enabled in Firebase Console
-- Check that `localhost` is in authorized domains
-- Verify Firebase config is correct
+**Error:** `MONGODB_URI environment variable is not set`
 
-### MongoDB Connection Failed
-- Check your connection string
-- Verify your IP is whitelisted
-- Check database user credentials
+**Fix:** Add your MongoDB connection string to `backend/.env`:
+```env
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/
+```
 
-### Backend Won't Start
-- Check that `backend/.env` exists and has all required variables
-- Verify Firebase Admin SDK file exists and path is correct
-- Check that port 5000 is available
+### Issue 2: MongoDB Connection Failed
 
-### Frontend Won't Start
-- Check that port 3000 is available
-- Verify all dependencies are installed: `cd frontend && npm install`
+**Error:** `MongoServerSelectionError`
+
+**Fix:**
+1. Check your MongoDB Atlas Network Access settings
+2. Add your IP address (or 0.0.0.0/0 for development)
+3. Verify your connection string is correct
+
+### Issue 3: Firebase Admin SDK Not Found
+
+**Error:** `Firebase Admin SDK not found`
+
+**Fix:**
+1. Make sure `firebase-admin-sdk.json` exists in `backend/` directory
+2. Or set `FIREBASE_ADMIN_SDK` environment variable with the JSON content
+
+### Issue 4: Port Already in Use
+
+**Error:** `Port 5001 is already in use`
+
+**Fix:**
+```bash
+# Find and kill the process
+lsof -ti:5001 | xargs kill -9
+
+# Or change the port in .env
+PORT=5002
+```
+
+## Running in Development
+
+For development with auto-restart:
+```bash
+npm run dev
+```
+
+For production:
+```bash
+npm start
+```
+
+## Keep Server Running
+
+The server needs to stay running while you use the frontend. Keep the terminal window open, or run it in the background using:
+
+**Using screen:**
+```bash
+screen -S backend
+npm run dev
+# Press Ctrl+A then D to detach
+```
+
+**Using PM2:**
+```bash
+npm install -g pm2
+pm2 start src/server.js --name hivefive-backend
+pm2 logs hivefive-backend
+```
+
+## Next Steps
+
+Once the server is running:
+1. The frontend should be able to connect
+2. You can test the API at http://localhost:5001/api/health
+3. Check server logs for any errors
 
 ## Need Help?
 
-- Check the detailed guides in the repository
-- Review Firebase Console for error logs
-- Check browser console for frontend errors
-- Check terminal for backend errors
-
+Check the server logs for specific error messages. The server will tell you exactly what's missing or misconfigured.
