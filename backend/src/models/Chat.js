@@ -56,5 +56,21 @@ const chatMessageSchema = new mongoose.Schema({
 chatMessageSchema.index({ hiveId: 1, timestamp: -1 });
 chatMessageSchema.index({ hiveId: 1, isBuzzMessage: 1 });
 
+// Compound unique index to prevent duplicate messages
+// Only prevents exact duplicates (same message, timestamp, sender within 1 second)
+chatMessageSchema.index(
+  { 
+    hiveId: 1, 
+    message: 1, 
+    sender: 1, 
+    timestamp: 1,
+    isBuzzMessage: 1
+  },
+  { 
+    unique: false, // Not strictly unique, but helps with queries
+    partialFilterExpression: { timestamp: { $exists: true } }
+  }
+);
+
 export default mongoose.model('Chat', chatMessageSchema);
 

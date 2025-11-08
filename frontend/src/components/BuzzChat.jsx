@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../config/api';
 import { useAuthStore } from '../store/authStore';
 import { format, formatDistanceToNow } from 'date-fns';
-import { Send, Smile, Sparkles } from 'lucide-react';
+import { Send, Smile, Sparkles, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const EMOJI_REACTIONS = ['👍', '❤️', '😂', '😮', '😢', '🔥', '🎉', '🐝'];
@@ -13,28 +13,43 @@ function BuzzChat({ hiveId }) {
   const queryClient = useQueryClient();
   const [message, setMessage] = useState('');
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
-  // Fetch chat messages
+  // Fetch chat messages with better deduplication
   const { data: messages = [], isLoading } = useQuery({
     queryKey: ['chat', hiveId],
     queryFn: async () => {
       const response = await api.get(`/chat/${hiveId}`);
       const messageList = response.data || [];
-      // Deduplicate messages by _id to prevent duplicates
+      
+      // Deduplicate messages by _id (string comparison)
       const seen = new Set();
-      return messageList.filter(msg => {
-        if (seen.has(msg._id)) {
+      const uniqueMessages = messageList.filter(msg => {
+        if (!msg._id) return false;
+        const id = typeof msg._id === 'string' ? msg._id : msg._id.toString();
+        if (seen.has(id)) {
           return false;
         }
-        seen.add(msg._id);
+        seen.add(id);
+        return true;
+      });
+      
+      // Also deduplicate by content + timestamp + sender as fallback
+      const contentSeen = new Set();
+      return uniqueMessages.filter(msg => {
+        const contentKey = `${msg.message}-${msg.timestamp}-${msg.sender?._id || 'buzz'}-${msg.isBuzzMessage}`;
+        if (contentSeen.has(contentKey)) {
+          return false;
+        }
+        contentSeen.add(contentKey);
         return true;
       });
     },
-    refetchInterval: 3000, // Poll every 3 seconds for new messages (reduced frequency)
+    refetchInterval: 3000, // Poll every 3 seconds for new messages
     enabled: !!hiveId,
-    staleTime: 2000 // Consider data stale after 2 seconds
+    staleTime: 1000 // Consider data stale after 1 second
   });
 
   // Send message mutation
@@ -77,6 +92,22 @@ function BuzzChat({ hiveId }) {
     }
   });
 
+  // Clear chat mutation
+  const clearChatMutation = useMutation({
+    mutationFn: async () => {
+      const response = await api.delete(`/chat/${hiveId}`);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['chat', hiveId]);
+      setShowClearConfirm(false);
+    },
+    onError: (error) => {
+      console.error('Error clearing chat:', error);
+      alert(error.response?.data?.error || 'Failed to clear chat');
+    }
+  });
+
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -110,13 +141,56 @@ function BuzzChat({ hiveId }) {
           <Sparkles className="w-5 h-5 text-[#C17D3A]" />
           <h3 className="text-[#2D1B00] font-medium text-lg">Buzz Chat</h3>
         </div>
-        <button
-          onClick={handleMentionBuzz}
-          className="text-sm text-[#C17D3A] hover:text-[#6B4E00] font-medium transition-colors"
-        >
-          @Buzz
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleMentionBuzz}
+            className="text-sm text-[#C17D3A] hover:text-[#6B4E00] font-medium transition-colors"
+          >
+            @Buzz
+          </button>
+          {messages.length > 0 && (
+            <button
+              onClick={() => setShowClearConfirm(true)}
+              className="p-1.5 text-[#6B4E00] hover:text-[#C17D3A] hover:bg-[rgba(193,125,58,0.1)] rounded transition-colors"
+              title="Clear chat"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          )}
+        </div>
       </div>
+
+      {/* Clear Chat Confirmation */}
+      <AnimatePresence>
+        {showClearConfirm && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="mb-4 p-3 bg-[rgba(245,230,211,0.8)] border border-[#C17D3A]/30 rounded-lg"
+          >
+            <p className="text-sm text-[#2D1B00] mb-2">
+              Are you sure you want to clear all messages? This cannot be undone.
+            </p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => clearChatMutation.mutate()}
+                disabled={clearChatMutation.isLoading}
+                className="px-3 py-1.5 bg-[#C17D3A] hover:bg-[#6B4E00] text-white text-sm rounded transition-colors disabled:opacity-50"
+              >
+                {clearChatMutation.isLoading ? 'Clearing...' : 'Clear Chat'}
+              </button>
+              <button
+                onClick={() => setShowClearConfirm(false)}
+                disabled={clearChatMutation.isLoading}
+                className="px-3 py-1.5 bg-[rgba(45,27,0,0.1)] hover:bg-[rgba(45,27,0,0.2)] text-[#2D1B00] text-sm rounded transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto space-y-3 mb-4 min-h-0">

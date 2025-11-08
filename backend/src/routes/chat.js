@@ -37,21 +37,34 @@ router.get('/:hiveId', authenticateToken, async (req, res) => {
       .populate('mentions', 'name')
       .sort({ timestamp: -1 })
       .limit(limit)
-      .lean(); // Use lean() for better performance and to avoid duplicate issues
+      .lean(); // Use lean() for better performance
 
-    // Deduplicate messages by _id (in case of any race conditions)
+    // Deduplicate messages by _id (convert to string for consistent comparison)
     const seen = new Set();
     const uniqueMessages = messages.filter(msg => {
-      const id = msg._id?.toString();
-      if (!id || seen.has(id)) {
+      if (!msg._id) return false;
+      const id = msg._id.toString();
+      if (seen.has(id)) {
         return false;
       }
       seen.add(id);
       return true;
     });
+    
+    // Additional deduplication by content + timestamp + sender (fallback)
+    const contentSeen = new Set();
+    const finalMessages = uniqueMessages.filter(msg => {
+      const senderId = msg.sender?._id?.toString() || (msg.isBuzzMessage ? 'buzz' : 'unknown');
+      const contentKey = `${msg.message}-${msg.timestamp}-${senderId}`;
+      if (contentSeen.has(contentKey)) {
+        return false;
+      }
+      contentSeen.add(contentKey);
+      return true;
+    });
 
     // Convert to JSON and handle reactions Map
-    const messagesWithReactions = uniqueMessages.map(msg => {
+    const messagesWithReactions = finalMessages.map(msg => {
       // Convert reactions Map to object for JSON response
       if (msg.reactions) {
         if (msg.reactions instanceof Map) {
@@ -253,6 +266,37 @@ router.post('/:hiveId/messages/:messageId/reactions', authenticateToken, async (
     res.json(messageObj);
   } catch (error) {
     console.error('Error adding reaction:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Clear all chat messages for a hive
+router.delete('/:hiveId', authenticateToken, async (req, res) => {
+  try {
+    const user = await User.findOne({ email: req.user.email });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const hive = await Hive.findById(req.params.hiveId);
+    if (!hive) {
+      return res.status(404).json({ error: 'Hive not found' });
+    }
+
+    // Check if user is a member of the hive
+    if (!hive.members.some(id => id.toString() === user._id.toString())) {
+      return res.status(403).json({ error: 'You are not a member of this hive' });
+    }
+
+    // Delete all chat messages for this hive
+    const result = await Chat.deleteMany({ hiveId: req.params.hiveId });
+    
+    res.json({ 
+      message: 'Chat cleared successfully',
+      deletedCount: result.deletedCount
+    });
+  } catch (error) {
+    console.error('Error clearing chat:', error);
     res.status(500).json({ error: error.message });
   }
 });
