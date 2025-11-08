@@ -357,7 +357,7 @@ function EventDetail() {
                   <Users className="w-5 h-5 text-[#2D1B00]" />
                   <h3 className="text-[#2D1B00] font-medium text-lg">Reaction Photos & Sentiment Analysis</h3>
                 </div>
-                <EventReactions event={event} showTitle={false} />
+                <EventReactions event={event} showTitle={false} size="large" />
               </motion.div>
             )}
           </div>
