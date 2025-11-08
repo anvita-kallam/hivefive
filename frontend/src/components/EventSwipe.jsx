@@ -299,8 +299,8 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
           eventId={event._id}
           showVideo={true}
           overlayContent={
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <div className="pointer-events-auto w-full max-w-2xl mx-auto px-4">
+            <div className="absolute inset-0 flex items-center justify-center z-30">
+              <div className="w-full max-w-3xl mx-auto px-4" style={{ height: '80%' }}>
                 <TinderCard
                   ref={swipeRef}
                   className="w-full h-full"

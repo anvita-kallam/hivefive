@@ -443,10 +443,8 @@ const ReactionRecorder = forwardRef(({
 
       {/* Overlay content (the swipe card) - positioned above video */}
       {overlayContent && (
-        <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
-          <div className="pointer-events-auto w-full h-full">
-            {overlayContent}
-          </div>
+        <div className="absolute inset-0 z-30">
+          {overlayContent}
         </div>
       )}
 
