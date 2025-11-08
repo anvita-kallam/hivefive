@@ -16,7 +16,11 @@
    - Sign up with GitHub
    - Click "New Project"
    - Import your repository
-   - Set Root Directory to `frontend`
+   - **IMPORTANT**: Click "Configure Project" → Set Root Directory to `frontend`
+   - Framework Preset: Vite (auto-detected)
+   - Build Command: `npm run build` (auto-detected)
+   - Output Directory: `dist` (auto-detected)
+   - Install Command: `npm install` (auto-detected)
    - Add environment variables (see below)
    - Click "Deploy"
 
