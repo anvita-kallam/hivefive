@@ -52,11 +52,22 @@ router.post('/', authenticateToken, async (req, res) => {
       memberIds.push(...members.map(m => m._id));
     }
 
+    // Validate and clean defaultLocation if provided
+    let cleanedSettings = settings || {};
+    if (cleanedSettings.defaultLocation) {
+      const coords = cleanedSettings.defaultLocation.coordinates;
+      // If coordinates are null or invalid, remove defaultLocation
+      if (!coords || !Array.isArray(coords) || coords.length !== 2 || 
+          coords.some(c => typeof c !== 'number')) {
+        delete cleanedSettings.defaultLocation;
+      }
+    }
+
     const hive = new Hive({
       name,
       members: memberIds,
       activityFrequency: activityFrequency || 'weekly',
-      settings: settings || {}
+      settings: cleanedSettings
     });
 
     await hive.save();

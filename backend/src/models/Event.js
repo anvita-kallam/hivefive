@@ -68,11 +68,20 @@ const eventSchema = new mongoose.Schema({
     type: {
       type: String,
       enum: ['Point'],
-      default: 'Point'
+      required: false
     },
     coordinates: {
       type: [Number], // [longitude, latitude]
-      default: null
+      required: false,
+      validate: {
+        validator: function(v) {
+          // If coordinates exist, must be array of 2 numbers
+          if (v === null || v === undefined) return true; // Allow null/undefined
+          return Array.isArray(v) && v.length === 2 && 
+                 typeof v[0] === 'number' && typeof v[1] === 'number';
+        },
+        message: 'Coordinates must be an array of 2 numbers [longitude, latitude]'
+      }
     },
     address: String,
     name: String
@@ -106,14 +115,35 @@ const eventSchema = new mongoose.Schema({
   }
 });
 
-// Index for geospatial queries
-eventSchema.index({ location: '2dsphere' });
-eventSchema.index({ hiveID: 1, status: 1 });
-
+// Pre-save hook to clean up invalid location data and update timestamp
 eventSchema.pre('save', function(next) {
+  // Validate and fix location data
+  if (this.location) {
+    const coords = this.location.coordinates;
+    if (!coords || !Array.isArray(coords) || coords.length !== 2 || 
+        coords.some(c => typeof c !== 'number')) {
+      // If coordinates are invalid, remove the location entirely
+      this.location = undefined;
+    } else {
+      // If coordinates are valid, ensure type field is set for GeoJSON
+      if (!this.location.type) {
+        this.location.type = 'Point';
+      }
+      // Ensure coordinates are in correct format [longitude, latitude]
+      if (Array.isArray(coords) && coords.length === 2) {
+        this.location.coordinates = [coords[0], coords[1]];
+      }
+    }
+  }
+  
+  // Update timestamp
   this.updatedAt = Date.now();
   next();
 });
+
+// Sparse index for geospatial queries (only indexes documents with valid location)
+eventSchema.index({ location: '2dsphere' }, { sparse: true });
+eventSchema.index({ hiveID: 1, status: 1 });
 
 export default mongoose.model('Event', eventSchema);
 

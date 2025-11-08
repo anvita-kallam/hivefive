@@ -28,22 +28,87 @@ function Gallery({ hiveId, eventId, onClose }) {
 
   const uploadMutation = useMutation({
     mutationFn: async ({ file, fileType, eventId, caption }) => {
-      // Upload to Firebase Storage
-      const fileRef = ref(storage, `hive-media/${hiveId}/${Date.now()}_${file.name}`);
-      await uploadBytes(fileRef, file);
-      const fileURL = await getDownloadURL(fileRef);
+      try {
+        // Verify user is authenticated
+        const { auth } = await import('../config/firebase');
+        const currentUser = auth.currentUser;
+        
+        if (!currentUser) {
+          throw new Error('You must be signed in to upload files. Please sign in and try again.');
+        }
 
-      // Upload metadata to backend
-      return api.post('/media', {
-        eventID: eventId,
-        fileURL,
-        fileType,
-        caption
-      });
+        // Get fresh auth token
+        const token = await currentUser.getIdToken(true);
+        console.log('Upload: User authenticated', { uid: currentUser.uid, email: currentUser.email });
+
+        // Upload to Firebase Storage with explicit metadata
+        const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+        const fileRef = ref(storage, `hive-media/${hiveId}/${Date.now()}_${sanitizedFileName}`);
+        
+        // Ensure content type is set correctly - Firebase Storage needs this
+        const contentType = file.type || (fileType === 'image' ? 'image/jpeg' : 'video/mp4');
+        console.log('Upload: File metadata', { 
+          fileName: file.name, 
+          contentType, 
+          size: file.size,
+          path: `hive-media/${hiveId}/${Date.now()}_${sanitizedFileName}`
+        });
+        
+        const metadata = {
+          contentType: contentType,
+          customMetadata: {
+            uploadedBy: currentUser.uid,
+            hiveId: hiveId,
+            eventId: eventId || 'none',
+            uploadedAt: new Date().toISOString()
+          }
+        };
+        
+        console.log('Upload: Starting upload...');
+        await uploadBytes(fileRef, file, metadata);
+        console.log('Upload: Upload successful, getting download URL...');
+        const fileURL = await getDownloadURL(fileRef);
+        console.log('Upload: Got download URL', fileURL);
+
+        // Upload metadata to backend
+        const backendResponse = await api.post('/media', {
+          eventID: eventId,
+          fileURL,
+          fileType,
+          caption
+        });
+        console.log('Upload: Backend metadata saved', backendResponse.data);
+        
+        return backendResponse;
+      } catch (uploadError) {
+        console.error('Firebase Storage upload error:', uploadError);
+        console.error('Error details:', {
+          code: uploadError.code,
+          message: uploadError.message,
+          stack: uploadError.stack
+        });
+        
+        // Provide more helpful error messages
+        if (uploadError.code === 'storage/unauthorized' || uploadError.code === 'storage/permission-denied') {
+          throw new Error('Upload failed: Permission denied. The Firebase Storage rules may not be deployed. Please check Firebase Console and deploy storage rules.');
+        } else if (uploadError.code === 'storage/quota-exceeded') {
+          throw new Error('Upload failed: Storage quota exceeded. Please free up space or upgrade your plan.');
+        } else if (uploadError.code === 'storage/invalid-format') {
+          throw new Error('Upload failed: Invalid file format. Please upload an image (jpg, png, etc.) or video (mp4, etc.).');
+        } else if (uploadError.code === 'auth/user-not-found' || uploadError.code === 'auth/requires-recent-login') {
+          throw new Error('Upload failed: Authentication expired. Please sign out and sign back in.');
+        }
+        throw new Error(uploadError.message || 'Failed to upload file. Please try again.');
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['media']);
       setUploading(false);
+    },
+    onError: (error) => {
+      console.error('Upload error:', error);
+      setUploading(false);
+      alert(error.message || 'Failed to upload file. Please try again.');
     }
   });
 

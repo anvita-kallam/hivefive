@@ -62,12 +62,28 @@ router.post('/', authenticateToken, async (req, res) => {
     // Generate event proposals using Hive Agent
     const proposedTimes = await generateEventProposals(hive, user);
 
+    // Validate and clean location data
+    let cleanedLocation = null;
+    if (location) {
+      const coords = location.coordinates;
+      if (coords && Array.isArray(coords) && coords.length === 2 && 
+          coords.every(c => typeof c === 'number')) {
+        // Ensure location has required GeoJSON structure
+        cleanedLocation = {
+          type: 'Point',
+          coordinates: [coords[0], coords[1]], // [longitude, latitude]
+          address: location.address || '',
+          name: location.name || ''
+        };
+      }
+    }
+
     const event = new Event({
       hiveID,
       title,
       description,
       proposedTimes,
-      location: location || null,
+      location: cleanedLocation,
       createdBy: user._id,
       status: 'proposed'
     });
@@ -169,6 +185,22 @@ router.put('/:id', authenticateToken, async (req, res) => {
       }
     }
 
+    // Validate and clean location if being updated
+    if (req.body.location) {
+      const coords = req.body.location.coordinates;
+      if (coords && Array.isArray(coords) && coords.length === 2 && 
+          coords.every(c => typeof c === 'number')) {
+        req.body.location = {
+          type: 'Point',
+          coordinates: [coords[0], coords[1]],
+          address: req.body.location.address || '',
+          name: req.body.location.name || ''
+        };
+      } else {
+        req.body.location = null;
+      }
+    }
+    
     Object.assign(event, req.body);
     await event.save();
     res.json(event);

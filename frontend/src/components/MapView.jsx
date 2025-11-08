@@ -1,8 +1,10 @@
 import { useMemo } from 'react';
-import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
-import { GOOGLE_MAPS_API_KEY, defaultMapOptions } from '../config/maps';
+import { GoogleMap, Marker } from '@react-google-maps/api';
+import { useGoogleMaps } from '../contexts/GoogleMapsContext';
+import { defaultMapOptions } from '../config/maps';
 
 const MapContainer = ({ location, markers = [], height = '400px', width = '100%' }) => {
+  const { isLoaded, loadError } = useGoogleMaps();
   const mapCenter = useMemo(() => {
     if (location?.coordinates) {
       return {
@@ -18,9 +20,20 @@ const MapContainer = ({ location, markers = [], height = '400px', width = '100%'
     center: mapCenter
   }), [mapCenter]);
 
+  if (loadError) {
+    return <div className="text-red-500">Error loading Google Maps: {loadError.message}</div>;
+  }
+
+  if (!isLoaded) {
+    return (
+      <div className="flex items-center justify-center" style={{ height, width }}>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+      </div>
+    );
+  }
+
   return (
-    <LoadScript googleMapsApiKey={GOOGLE_MAPS_API_KEY}>
-      <GoogleMap
+    <GoogleMap
         mapContainerStyle={{ height, width }}
         zoom={mapOptions.zoom}
         center={mapCenter}
@@ -49,8 +62,7 @@ const MapContainer = ({ location, markers = [], height = '400px', width = '100%'
             label={marker.label}
           />
         ))}
-      </GoogleMap>
-    </LoadScript>
+    </GoogleMap>
   );
 };
 

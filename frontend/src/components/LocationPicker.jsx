@@ -1,11 +1,11 @@
 import { useState, useRef } from 'react';
-import { GoogleMap, LoadScript, Autocomplete, Marker } from '@react-google-maps/api';
-import { GOOGLE_MAPS_API_KEY, defaultMapOptions } from '../config/maps';
+import { GoogleMap, Autocomplete, Marker } from '@react-google-maps/api';
+import { useGoogleMaps } from '../contexts/GoogleMapsContext';
+import { defaultMapOptions } from '../config/maps';
 import { MapPin } from 'lucide-react';
 
-const libraries = ['places'];
-
 function LocationPicker({ onLocationSelect, initialLocation = null }) {
+  const { isLoaded, loadError } = useGoogleMaps();
   const [selectedLocation, setSelectedLocation] = useState(initialLocation);
   const [mapCenter, setMapCenter] = useState(
     initialLocation?.coordinates 
@@ -13,6 +13,18 @@ function LocationPicker({ onLocationSelect, initialLocation = null }) {
       : defaultMapOptions.center
   );
   const autocompleteRef = useRef(null);
+
+  if (loadError) {
+    return <div className="text-red-500">Error loading Google Maps: {loadError.message}</div>;
+  }
+
+  if (!isLoaded) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+      </div>
+    );
+  }
 
   const onPlaceChanged = () => {
     if (autocompleteRef.current) {
@@ -47,8 +59,7 @@ function LocationPicker({ onLocationSelect, initialLocation = null }) {
   };
 
   return (
-    <LoadScript googleMapsApiKey={GOOGLE_MAPS_API_KEY} libraries={libraries}>
-      <div className="space-y-4">
+    <div className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Search Location
@@ -109,7 +120,6 @@ function LocationPicker({ onLocationSelect, initialLocation = null }) {
           </div>
         )}
       </div>
-    </LoadScript>
   );
 }
 

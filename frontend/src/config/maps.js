@@ -1,5 +1,14 @@
 // Google Maps API Configuration
-export const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "AIzaSyChjQubjJduS4Gcu3CAs42wZK-trub-pCM";
+// Require environment variable - no hardcoded fallback for security
+if (!import.meta.env.VITE_GOOGLE_MAPS_API_KEY) {
+  throw new Error(
+    'Missing required environment variable: VITE_GOOGLE_MAPS_API_KEY\n' +
+    'Please create a .env.local file in the frontend directory with VITE_GOOGLE_MAPS_API_KEY.\n' +
+    'See SETUP.md for details.'
+  );
+}
+
+export const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
 export const mapConfig = {
   center: {

@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import api from '../config/api';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
-import { ArrowLeft, Calendar, MapPin, Users, Plus, Image as ImageIcon } from 'lucide-react';
+import { ArrowLeft, Calendar, MapPin, Users, Plus } from 'lucide-react';
 import EventSwipe from '../components/EventSwipe';
 import Gallery from '../components/Gallery';
 import CreateEventModal from '../components/CreateEventModal';
@@ -12,17 +12,18 @@ import CreateEventModal from '../components/CreateEventModal';
 function HiveDashboard() {
   const { hiveId } = useParams();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const [showCreateEvent, setShowCreateEvent] = useState(false);
   const [showGallery, setShowGallery] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
 
+  // All hooks must be called at the top, before any conditional returns
   const { data: hive, isLoading: hiveLoading } = useQuery({
     queryKey: ['hive', hiveId],
     queryFn: async () => {
       const response = await api.get(`/hives/${hiveId}`);
       return response.data;
-    }
+    },
+    enabled: !!hiveId // Only run if hiveId exists
   });
 
   const { data: events, isLoading: eventsLoading } = useQuery({
@@ -30,7 +31,8 @@ function HiveDashboard() {
     queryFn: async () => {
       const response = await api.get(`/events/hive/${hiveId}`);
       return response.data;
-    }
+    },
+    enabled: !!hiveId // Only run if hiveId exists
   });
 
   const { data: media } = useQuery({
@@ -38,9 +40,20 @@ function HiveDashboard() {
     queryFn: async () => {
       const response = await api.get(`/media/hive/${hiveId}`);
       return response.data;
+    },
+    enabled: !!hiveId // Only run if hiveId exists
+  });
+
+  // Get current user - must be called before any early returns
+  const { data: currentUser } = useQuery({
+    queryKey: ['currentUser'],
+    queryFn: async () => {
+      const response = await api.get('/auth/me');
+      return response.data;
     }
   });
 
+  // Early returns AFTER all hooks
   if (hiveLoading || eventsLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -64,15 +77,6 @@ function HiveDashboard() {
       </div>
     );
   }
-
-  // Get pending events (not yet swiped by user)
-  const { data: currentUser } = useQuery({
-    queryKey: ['currentUser'],
-    queryFn: async () => {
-      const response = await api.get('/auth/me');
-      return response.data;
-    }
-  });
 
   const pendingEvents = events?.filter(event => {
     if (event.status !== 'proposed') return false;
@@ -119,22 +123,13 @@ function HiveDashboard() {
           <div className="lg:col-span-2 space-y-6">
             {/* Actions */}
             <div className="bg-white rounded-lg shadow-md p-6">
-              <div className="flex gap-4">
-                <button
-                  onClick={() => setShowCreateEvent(true)}
-                  className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
-                >
-                  <Plus className="w-5 h-5" />
-                  Create New Hive Event
-                </button>
-                <button
-                  onClick={() => setShowGallery(true)}
-                  className="flex items-center justify-center gap-2 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
-                >
-                  <ImageIcon className="w-5 h-5" />
-                  Gallery
-                </button>
-              </div>
+              <button
+                onClick={() => setShowCreateEvent(true)}
+                className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+              >
+                <Plus className="w-5 h-5" />
+                Create New Hive Event
+              </button>
             </div>
 
             {/* Event Timeline */}
