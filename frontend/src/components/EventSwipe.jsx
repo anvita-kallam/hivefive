@@ -196,17 +196,29 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
       fileSize: reaction?.file?.size,
       fileType: reaction?.file?.type,
       swipeDirection: reaction?.swipeDirection,
+      swipeDirectionType: typeof reaction?.swipeDirection,
       hasEmotion: !!reaction?.emotion,
-      reactionKeys: reaction ? Object.keys(reaction) : 'null'
+      reactionKeys: reaction ? Object.keys(reaction) : 'null',
+      fullReaction: reaction
     });
+    
+    // Validate and normalize swipeDirection
+    let swipeDirection = reaction?.swipeDirection;
+    if (!swipeDirection || (swipeDirection !== 'right' && swipeDirection !== 'left')) {
+      console.warn('⚠️ Invalid swipeDirection in reaction, defaulting to right:', swipeDirection);
+      swipeDirection = 'right';
+    }
+    
+    console.log('📋 Using swipeDirection:', swipeDirection, 'for action:', swipeDirection === 'right' ? 'ACCEPT' : 'DECLINE');
     
     // Validate that we have a file
     if (!reaction || !reaction.file) {
       console.error('❌ No file in reaction object:', reaction);
       // Still submit swipe without video
       const responseTime = Date.now() - startTime;
+      console.log('📤 Submitting swipe without video, direction:', swipeDirection);
       swipeMutation.mutate({
-        direction: reaction?.swipeDirection || 'right',
+        direction: swipeDirection, // Use normalized direction
         responseTime,
         emotionData: reaction?.emotion || null,
         reactionFile: null
@@ -250,14 +262,15 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
     
     // Submit swipe mutation - this will upload the video if available
     console.log('🚀 Submitting swipe mutation with reaction data...', {
-      direction: reaction.swipeDirection,
+      direction: swipeDirection,
+      directionAction: swipeDirection === 'right' ? 'ACCEPT' : 'DECLINE',
       responseTime,
       hasEmotion: !!reaction.emotion,
       hasFile: !!reactionFile
     });
     
     swipeMutation.mutate({
-      direction: reaction.swipeDirection,
+      direction: swipeDirection, // Use normalized direction
       responseTime,
       emotionData: reaction.emotion,
       reactionFile: reactionFile // Pass the file directly
@@ -292,10 +305,16 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
     setSwiped(true);
     setIsProcessing(true);
     
+    // Ensure direction is correctly mapped: 'right' = accept, 'left' = decline
+    // The button passes 'right' for Accept and 'left' for Decline
     const swipeDirection = direction === 'right' ? 'right' : 'left';
     const responseTime = Date.now() - startTime;
     
-    console.log('Button clicked, direction:', swipeDirection);
+    console.log('🔘 Button clicked:', {
+      buttonDirection: direction,
+      swipeDirection: swipeDirection,
+      buttonAction: direction === 'right' ? 'ACCEPT' : 'DECLINE'
+    });
     
     // If recording is active, stop it and wait for the video
     if (recorderRef.current) {
@@ -307,10 +326,10 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
       });
       
       if (isRecording) {
-        console.log('✅ Recording is active, stopping recording...');
+        console.log('✅ Recording is active, stopping recording with direction:', swipeDirection);
         try {
           // Stop recording - this will call handleReactionRecorded when done
-          // Don't close modal yet - wait for recording to finish
+          // Pass the swipeDirection so it's preserved in the callback
           recorderRef.current.stopRecording(swipeDirection);
           // handleReactionRecorded will handle the mutation and close the modal
           console.log('Recording stop requested, waiting for video to process...');
@@ -328,8 +347,9 @@ function EventSwipe({ event, onSwiped, fullScreen = false }) {
     
     // No recording or recording failed, submit swipe without video
     // Close modal after submitting (or it will close in onSuccess)
+    console.log('📤 Submitting swipe without video, direction:', swipeDirection);
     swipeMutation.mutate({
-      direction: swipeDirection,
+      direction: swipeDirection, // Make sure this is 'right' or 'left'
       responseTime,
       emotionData: null,
       reactionFile: null
