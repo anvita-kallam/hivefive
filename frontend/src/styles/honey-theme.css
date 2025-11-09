@@ -139,25 +139,7 @@
 }
 
 .honey-text::after {
-  content: '';
-  position: absolute;
-  bottom: -4px;
-  left: 0;
-  width: 100%;
-  height: 3px;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    #FFC30B,
-    #FFD700,
-    #FFC30B,
-    transparent
-  );
-  opacity: 0.7;
-  animation: honeyDrip 2s ease-in-out infinite;
-  transform-origin: bottom;
-  border-radius: 2px;
-  filter: blur(1px);
+  display: none;
 }
 
 /* Strong Honey Text for Headings */
@@ -186,25 +168,7 @@
 }
 
 .honey-text-strong::after {
-  content: '';
-  position: absolute;
-  bottom: -5px;
-  left: 0;
-  width: 100%;
-  height: 4px;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    #FFD700,
-    #FFC30B,
-    #FFD700,
-    transparent
-  );
-  opacity: 0.8;
-  animation: honeyDrip 1.5s ease-in-out infinite;
-  transform-origin: bottom;
-  border-radius: 2px;
-  filter: blur(1.5px);
+  display: none;
 }
 
 /* Subtle Honey Text for Body */
