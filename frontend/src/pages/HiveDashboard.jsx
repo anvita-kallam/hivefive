@@ -361,7 +361,7 @@ function HiveDashboard() {
                       key={event._id}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
-                          className="honey-card border-l-4 border-[#C17D3A] pl-4 py-3 mb-3 cursor-pointer hover:shadow-lg transition-shadow"
+                          className="honey-card border-l-4 honey-border-amber pl-4 py-3 mb-3 cursor-pointer hover:shadow-lg transition-shadow"
                           onClick={() => navigate(`/event/${event._id}`)}
                         >
                              <div className="flex items-center justify-between mb-2">

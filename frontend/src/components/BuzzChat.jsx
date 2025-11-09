@@ -210,7 +210,7 @@ function BuzzChat({ hiveId }) {
               <button
                 onClick={() => clearChatMutation.mutate()}
                 disabled={clearChatMutation.isLoading}
-                className="px-3 py-1.5 bg-[#C17D3A] hover:bg-[#6B4E00] text-white text-sm rounded transition-colors disabled:opacity-50"
+                className="px-3 py-1.5 honey-btn-primary text-white text-sm rounded transition-colors disabled:opacity-50"
               >
                 {clearChatMutation.isLoading ? 'Clearing...' : 'Clear Chat'}
               </button>
@@ -272,7 +272,7 @@ function BuzzChat({ hiveId }) {
         <button
           type="submit"
           disabled={!message.trim() || sendMessageMutation.isLoading}
-          className="px-4 py-2 bg-[rgba(193,125,58,0.8)] hover:bg-[rgba(193,125,58,0.9)] text-[#2D1B00] rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          className="px-4 py-2 honey-btn-primary rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
         >
           <Send className="w-4 h-4" />
           Send
@@ -338,7 +338,7 @@ function MessageBubble({ message, currentUserId, onAddReaction }) {
       {/* Avatar */}
       <div className="flex-shrink-0">
         {isBuzz ? (
-          <div className="w-8 h-8 rounded-full bg-[#C17D3A] flex items-center justify-center">
+          <div className="w-8 h-8 rounded-full honey-btn-primary flex items-center justify-center">
             <Sparkles className="w-5 h-5 text-white" />
           </div>
         ) : message.sender?.profilePhoto ? (
@@ -359,10 +359,10 @@ function MessageBubble({ message, currentUserId, onAddReaction }) {
         <div
           className={`inline-block max-w-[80%] rounded-lg px-4 py-2 ${
             isBuzz
-              ? 'bg-[rgba(193,125,58,0.2)] border border-[#C17D3A]/30'
+              ? 'honey-badge-amber border border-[#C17D3A]/30'
               : isCurrentUser
-              ? 'bg-[rgba(193,125,58,0.6)] text-[#2D1B00]'
-              : 'bg-[rgba(245,230,211,0.6)] text-[#2D1B00]'
+              ? 'honey-btn-accent text-[#2D1B00]'
+              : 'honey-btn-secondary text-[#2D1B00]'
           }`}
         >
           {/* Sender name */}
