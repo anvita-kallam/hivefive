@@ -138,7 +138,7 @@ function Dashboard() {
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <HexagonIcon />
-                <h2 className="honey-text-strong text-xl">My Hives</h2>
+                <h2 className="text-[#2D1B00] text-xl font-medium">My Hives</h2>
               </div>
               <button
                 onClick={() => navigate('/create-hive')}
@@ -170,7 +170,7 @@ function Dashboard() {
                           className="honey-card p-4 cursor-pointer"
                           onClick={() => navigate(`/hive/${hive._id}`)}
                         >
-                    <h3 className="honey-text text-lg mb-2">{hive.name}</h3>
+                    <h3 className="text-[#2D1B00] font-medium mb-2">{hive.name}</h3>
                     <div className="flex items-center gap-2 text-sm text-[#6B4E00] mb-3">
                       <Users className="w-4 h-4" />
                       <span>{hive.members?.length || 0} members</span>

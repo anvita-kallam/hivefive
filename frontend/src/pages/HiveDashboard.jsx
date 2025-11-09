@@ -322,7 +322,7 @@ function HiveDashboard() {
             <div className="honey-card p-6 mb-4">
               <div className="flex items-center gap-3 mb-4">
                 <HexagonIcon />
-                <h2 className="honey-text-strong text-xl">Pending Events</h2>
+                <h2 className="text-[#2D1B00] text-xl font-medium">Pending Events</h2>
               </div>
               <div className="flex gap-4 overflow-x-auto pb-4">
                 {pendingEvents.map((event) => (
@@ -352,7 +352,7 @@ function HiveDashboard() {
                 <div className="honey-card p-6">
                   <div className="flex items-center gap-3 mb-4">
                     <HexagonIcon />
-                    <h2 className="honey-text-strong text-xl">Event Timeline</h2>
+                    <h2 className="text-[#2D1B00] text-xl font-medium">Event Timeline</h2>
                   </div>
               <div className="space-y-4">
                 {events && events.length > 0 ? (
@@ -494,7 +494,7 @@ function HiveDashboard() {
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
                     <Users className="w-5 h-5 text-[#2D1B00]" />
-                    <h2 className="honey-text-strong text-xl">Members</h2>
+                    <h2 className="text-[#2D1B00] text-xl font-medium">Members</h2>
                   </div>
                   <button
                     onClick={() => setShowAddMember(true)}

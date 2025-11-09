@@ -227,17 +227,7 @@
   font-weight: 500;
 }
 
-/* Apply honey text to headings automatically */
-h1:not(.no-honey-text), 
-h2:not(.no-honey-text), 
-h3:not(.no-honey-text) {
-  @apply honey-text-strong;
-}
-
-/* Apply subtle honey to paragraphs */
-p:not(.no-honey-text) {
-  @apply honey-text-subtle;
-}
+/* Don't automatically apply honey text to all headings - only use classes explicitly */
 
 /* Override for specific cases where we need normal text */
 .text-white, .text-black, .no-honey-text {
