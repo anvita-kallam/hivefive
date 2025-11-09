@@ -152,7 +152,29 @@ function CreateEventModal({ hiveId, onClose }) {
               <button
                 type="submit"
                 disabled={loading}
-                className="flex-1 px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                className="flex-1 px-6 py-3 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{
+                  background: loading 
+                    ? '#D3D3D3' 
+                    : 'linear-gradient(135deg, #FFF8DC 0%, #FFEFD5 50%, #FFFACD 100%)',
+                  color: '#2D1B00',
+                  border: loading ? '1px solid #A0A0A0' : '2px solid rgba(255, 235, 180, 0.5)',
+                  boxShadow: loading 
+                    ? 'none' 
+                    : '0 4px 12px rgba(255, 235, 180, 0.3), 0 2px 6px rgba(255, 218, 185, 0.2)'
+                }}
+                onMouseEnter={(e) => {
+                  if (!loading) {
+                    e.currentTarget.style.background = 'linear-gradient(135deg, #FFFEF0 0%, #FFF8E1 50%, #FFFDE7 100%)';
+                    e.currentTarget.style.boxShadow = '0 6px 16px rgba(255, 235, 180, 0.4), 0 3px 8px rgba(255, 218, 185, 0.3)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!loading) {
+                    e.currentTarget.style.background = 'linear-gradient(135deg, #FFF8DC 0%, #FFEFD5 50%, #FFFACD 100%)';
+                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(255, 235, 180, 0.3), 0 2px 6px rgba(255, 218, 185, 0.2)';
+                  }
+                }}
               >
                 {loading ? 'Creating...' : 'Create Event'}
               </button>
