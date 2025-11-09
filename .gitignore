@@ -66,3 +66,41 @@ coverage/
 # Private deployment values (contains actual secrets)
 DEPLOYMENT_ENV_VALUES.local.md
 *.local.md
+
+# Temporary/outdated documentation
+DEPLOY_FIREBASE_STORAGE_RULES.md
+DEPLOY_STORAGE_RULES.md
+DEPLOY_STORAGE_RULES_NOW.md
+FIX_*.md
+START_APP.md
+START_SERVER.md
+UPDATE_ENV_NOW.md
+SECRETS_*.md
+API_KEY_FIX.md
+BUZZ_READY.md
+VERCEL_DEPLOYMENT_FIX.md
+VERCEL_ENV_VARIABLES.md
+SETUP_ENV.md
+
+# Temporary scripts
+clean-secrets.sh
+commit-changes.sh
+remove-secrets.py
+
+# Design files (separate project)
+Bee Themed UI Design/
+
+# Image files in root (should be in public/assets)
+*.png
+*.jpg
+*.jpeg
+*.gif
+!frontend/public/**/*.png
+!frontend/public/**/*.jpg
+!frontend/public/**/*.jpeg
+!frontend/public/**/*.gif
+
+# Service account keys (any JSON with credentials)
+*service-account*.json
+*admin-sdk*.json
+hivefive-*.json

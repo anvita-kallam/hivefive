@@ -119,7 +119,13 @@ HiveFive/
 - **[QUICK_START.md](./QUICK_START.md)** - Get up and running in 5 minutes
 - **[SETUP.md](./SETUP.md)** - Detailed setup instructions
 - **[FIREBASE_SETUP.md](./FIREBASE_SETUP.md)** - Complete Firebase configuration guide
+- **[MONGODB_SETUP.md](./MONGODB_SETUP.md)** - MongoDB Atlas setup guide
+- **[GEMINI_API_SETUP.md](./GEMINI_API_SETUP.md)** - Gemini API configuration
+- **[DEPLOYMENT.md](./DEPLOYMENT.md)** - Deployment guide for Vercel & Railway
 - **[PROJECT_STRUCTURE.md](./PROJECT_STRUCTURE.md)** - Codebase architecture overview
+- **[TECH_STACK.md](./TECH_STACK.md)** - Comprehensive tech stack documentation
+- **[BUZZ_CHATBOT_READY.md](./BUZZ_CHATBOT_READY.md)** - Buzz chatbot setup and features
+- **[API_KEY_SECURITY.md](./API_KEY_SECURITY.md)** - API key security best practices
 
 ## Repository
 
