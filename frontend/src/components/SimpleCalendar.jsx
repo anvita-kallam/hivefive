@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../config/api';
-import { Calendar, Plus, ChevronLeft, ChevronRight, X, Hexagon } from 'lucide-react';
+import { Calendar, Plus, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, startOfWeek, endOfWeek } from 'date-fns';
 
@@ -144,7 +144,6 @@ function SimpleCalendar() {
       <div className="honey-card p-4 mb-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <HexagonIcon />
             <Calendar className="w-5 h-5 text-[#2D1B00]" />
             <h2 className="text-[#2D1B00] text-xl font-medium">My Calendar</h2>
           </div>
@@ -492,28 +491,6 @@ function EventModal({ selectedDate, event, onClose, onSubmit, isLoading }) {
         </form>
       </motion.div>
     </div>
-  );
-}
-
-function HexagonIcon() {
-  return (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 20 20"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className="text-[#2D1B00]"
-      style={{ color: '#2D1B00' }}
-    >
-      <path
-        d="M 6 1 L 14 1 L 19 10 L 14 19 L 6 19 L 1 10 Z"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        fill="none"
-        strokeLinejoin="round"
-      />
-    </svg>
   );
 }
 
