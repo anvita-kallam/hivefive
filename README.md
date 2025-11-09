@@ -61,6 +61,6 @@ Through iteration, we learned that **everyday devices** (phones, headphones, wea
 
 ---
 
-> Built with: JavaScript, TypeScript, React, Node.js, Express.js, MongoDB, Mongoose, Firebase, Google Vertex AI, Google Gemini API, Google Maps API, Tailwind CSS, Framer Motion, Axios, Zustand, TanStack React Query, Vite, Vercel, Railway
+> "Built with: JavaScript, TypeScript, React, Node.js, Express.js, MongoDB, Mongoose, Firebase, Google Vertex AI, Google Gemini API, Google Maps API, Tailwind CSS, Framer Motion, Axios, Zustand, TanStack React Query, Vite, Vercel, Railway"
 
 > **“HiveFive turns ‘maybe later’ into ‘see you at 6:30.’”**
