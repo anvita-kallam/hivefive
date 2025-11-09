@@ -54,7 +54,7 @@ function Dashboard() {
       <FullScreenEventInvites />
 
       {/* Header */}
-      <header className="bg-[rgba(212,165,116,0.8)] backdrop-blur-md border-b border-[#2D1B00]/20 relative z-20 shadow-lg">
+      <header className="honey-header-warm backdrop-blur-md border-b border-[#2D1B00]/20 relative z-20 shadow-lg">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">

@@ -227,7 +227,7 @@ function HiveDashboard() {
       <BeeDecor />
 
       {/* Header */}
-      <header className="bg-[rgba(212,165,116,0.8)] backdrop-blur-md border-b border-[#2D1B00]/20 relative z-20 shadow-lg">
+      <header className="honey-header-warm backdrop-blur-md border-b border-[#2D1B00]/20 relative z-20 shadow-lg">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -609,7 +609,7 @@ function HiveDashboard() {
                     <button
                       onClick={handleAddMember}
                       disabled={addMemberMutation.isLoading || !memberEmail.trim()}
-                      className="flex-1 px-4 py-2 bg-[rgba(193,125,58,0.8)] hover:bg-[rgba(193,125,58,0.9)] text-[#2D1B00] border border-[#2D1B00]/20 backdrop-blur-sm rounded-lg font-medium transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                      className="flex-1 px-4 py-2 honey-btn-primary border backdrop-blur-sm rounded-lg font-medium transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
                     >
                       {addMemberMutation.isLoading ? 'Adding...' : 'Add Member'}
                     </button>

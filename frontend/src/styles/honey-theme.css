@@ -1,6 +1,6 @@
 /* Honey and Hive Theme Styles */
 
-/* Color Variables - Based on Figma Design */
+/* Color Variables - Based on Figma Design with More Variation */
 :root {
   --background: #D4A574;
   --foreground: #2D1B00;
@@ -14,12 +14,32 @@
   --muted-foreground: #6B4E00;
   --accent: #D9A566;
   --border: rgba(45, 27, 0, 0.2);
+  
+  /* Honey Color Palette - More Variation */
   --honey-gold: #FFC30B;
+  --honey-gold-light: #FFD700;
+  --honey-gold-dark: #E6B800;
   --honey-amber: #FF8C00;
+  --honey-amber-light: #FFA500;
+  --honey-amber-dark: #E67E00;
+  --honey-orange: #FF7F50;
+  --honey-orange-light: #FFA07A;
+  --honey-orange-dark: #E66F40;
   --honey-brown: #2D1B00;
+  --honey-brown-light: #4A2C2A;
+  --honey-brown-dark: #1A0F00;
   --honey-light: #F5E6D3;
+  --honey-light-warm: #FFF8DC;
+  --honey-light-cool: #F5F5DC;
   --honey-dark: #8B4513;
+  --honey-dark-light: #A0522D;
+  --honey-dark-dark: #654321;
   --honey-amber-dark: #C17D3A;
+  --honey-cream: #FFFACD;
+  --honey-yellow: #FFEB3B;
+  --honey-mustard: #FFC107;
+  --honey-caramel: #D2691E;
+  --honey-toffee: #B8860B;
 }
 
 /* Honey Drip Text Animation */
@@ -450,30 +470,47 @@ body {
   z-index: 0;
 }
 
-/* Glass Effect Card - Based on Figma Design */
+/* Glass Effect Card - Based on Figma Design with Color Variation */
 .honey-card {
-  background: rgba(245, 230, 211, 0.4);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 248, 220, 0.5) 0%,
+    rgba(255, 235, 180, 0.45) 25%,
+    rgba(255, 218, 185, 0.4) 50%,
+    rgba(255, 235, 180, 0.45) 75%,
+    rgba(255, 248, 220, 0.5) 100%
+  );
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(45, 27, 0, 0.2);
+  border: 1px solid rgba(212, 165, 116, 0.3);
   border-radius: 0.625rem;
   box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.12),
-    0 4px 16px rgba(0, 0, 0, 0.08),
-    0 2px 8px rgba(0, 0, 0, 0.06),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    0 8px 32px rgba(193, 125, 58, 0.15),
+    0 4px 16px rgba(139, 69, 19, 0.12),
+    0 2px 8px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    inset 0 -1px 0 rgba(193, 125, 58, 0.1);
   transition: all 0.3s ease;
   position: relative;
   z-index: 2;
 }
 
 .honey-card:hover {
-  background: rgba(245, 230, 211, 0.5);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 248, 220, 0.65) 0%,
+    rgba(255, 235, 180, 0.6) 25%,
+    rgba(255, 218, 185, 0.55) 50%,
+    rgba(255, 235, 180, 0.6) 75%,
+    rgba(255, 248, 220, 0.65) 100%
+  );
+  border-color: rgba(212, 165, 116, 0.5);
   box-shadow: 
-    0 12px 40px rgba(0, 0, 0, 0.15),
-    0 6px 20px rgba(0, 0, 0, 0.1),
-    0 4px 12px rgba(0, 0, 0, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    0 12px 40px rgba(193, 125, 58, 0.2),
+    0 6px 20px rgba(139, 69, 19, 0.15),
+    0 4px 12px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -1px 0 rgba(193, 125, 58, 0.15);
   transform: translateY(-2px);
 }
 
@@ -563,6 +600,124 @@ body {
     0 0 10px rgba(255, 195, 11, 0.5),
     0 0 20px rgba(255, 140, 0, 0.3),
     0 2px 4px rgba(74, 44, 42, 0.2);
+}
+
+/* Colorful Button Variations */
+.honey-btn-primary {
+  background: linear-gradient(135deg, #FFC30B 0%, #FF8C00 50%, #C17D3A 100%);
+  color: #2D1B00;
+  border: 1px solid rgba(193, 125, 58, 0.3);
+  box-shadow: 
+    0 4px 12px rgba(255, 195, 11, 0.3),
+    0 2px 6px rgba(193, 125, 58, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.honey-btn-primary:hover {
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #D4A574 100%);
+  box-shadow: 
+    0 6px 16px rgba(255, 195, 11, 0.4),
+    0 3px 8px rgba(193, 125, 58, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.honey-btn-secondary {
+  background: linear-gradient(135deg, #FFF8DC 0%, #FFE4B5 50%, #F5DEB3 100%);
+  color: #2D1B00;
+  border: 1px solid rgba(212, 165, 116, 0.4);
+  box-shadow: 
+    0 2px 8px rgba(212, 165, 116, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.honey-btn-secondary:hover {
+  background: linear-gradient(135deg, #FFFACD 0%, #FFE4B5 50%, #F5DEB3 100%);
+  box-shadow: 
+    0 4px 12px rgba(212, 165, 116, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.honey-btn-accent {
+  background: linear-gradient(135deg, #FF7F50 0%, #FF8C00 50%, #FFA500 100%);
+  color: #2D1B00;
+  border: 1px solid rgba(255, 140, 0, 0.3);
+  box-shadow: 
+    0 4px 12px rgba(255, 127, 80, 0.3),
+    0 2px 6px rgba(255, 140, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.honey-btn-accent:hover {
+  background: linear-gradient(135deg, #FFA07A 0%, #FFA500 50%, #FFB84D 100%);
+  box-shadow: 
+    0 6px 16px rgba(255, 127, 80, 0.4),
+    0 3px 8px rgba(255, 140, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+/* Colorful Badge Variations */
+.honey-badge-gold {
+  background: linear-gradient(135deg, #FFD700 0%, #FFC30B 100%);
+  color: #2D1B00;
+  box-shadow: 0 2px 6px rgba(255, 215, 0, 0.3);
+}
+
+.honey-badge-amber {
+  background: linear-gradient(135deg, #FFA500 0%, #FF8C00 100%);
+  color: #2D1B00;
+  box-shadow: 0 2px 6px rgba(255, 140, 0, 0.3);
+}
+
+.honey-badge-orange {
+  background: linear-gradient(135deg, #FF7F50 0%, #FF6347 100%);
+  color: #2D1B00;
+  box-shadow: 0 2px 6px rgba(255, 127, 80, 0.3);
+}
+
+.honey-badge-caramel {
+  background: linear-gradient(135deg, #D2691E 0%, #CD853F 100%);
+  color: #FFF8DC;
+  box-shadow: 0 2px 6px rgba(210, 105, 30, 0.3);
+}
+
+/* Colorful Border Variations */
+.honey-border-gold {
+  border-color: rgba(255, 195, 11, 0.4) !important;
+  border-width: 2px;
+}
+
+.honey-border-amber {
+  border-color: rgba(255, 140, 0, 0.4) !important;
+  border-width: 2px;
+}
+
+.honey-border-orange {
+  border-color: rgba(255, 127, 80, 0.4) !important;
+  border-width: 2px;
+}
+
+.honey-border-caramel {
+  border-color: rgba(210, 105, 30, 0.4) !important;
+  border-width: 2px;
+}
+
+/* Header Background Variations */
+.honey-header-warm {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 218, 185, 0.85) 0%,
+    rgba(255, 235, 180, 0.85) 50%,
+    rgba(255, 248, 220, 0.85) 100%
+  ) !important;
+}
+
+.honey-header-golden {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 215, 0, 0.2) 0%,
+    rgba(255, 195, 11, 0.25) 50%,
+    rgba(255, 140, 0, 0.2) 100%
+  ) !important;
 }
 
 /* Responsive Hexagon */
