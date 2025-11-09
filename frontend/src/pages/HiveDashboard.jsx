@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../config/api';
@@ -181,6 +181,13 @@ function HiveDashboard() {
     }
     addMemberMutation.mutate(email);
   };
+
+  // Initialize edited name when hive loads
+  useEffect(() => {
+    if (hive && !isEditingName) {
+      setEditedName(hive.name);
+    }
+  }, [hive, isEditingName]);
 
   // Early returns AFTER all hooks
   if (hiveLoading || eventsLoading) {
