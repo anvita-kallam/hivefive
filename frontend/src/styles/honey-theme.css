@@ -131,20 +131,23 @@
   }
 }
 
-/* Honey Text Effect with Glow and Shimmer */
+/* Honey Text Effect with Glow and Shimmer - More Brownish */
 .honey-text {
   position: relative;
   display: inline-block;
   background: linear-gradient(
     135deg,
-    #FFB84D 0%,
-    #FFC30B 15%,
-    #FFD700 30%,
-    #FFC30B 45%,
-    #FFB84D 60%,
-    #D4A574 75%,
-    #C17D3A 90%,
-    #8B4513 100%
+    #8B4513 0%,
+    #A0522D 10%,
+    #CD853F 20%,
+    #D2691E 30%,
+    #C17D3A 40%,
+    #D4A574 50%,
+    #C17D3A 60%,
+    #8B4513 70%,
+    #654321 80%,
+    #8B4513 90%,
+    #4A2C2A 100%
   );
   background-size: 200% auto;
   -webkit-background-clip: text;
@@ -153,9 +156,9 @@
   animation: honeyShimmer 4s ease-in-out infinite, honeyDripForm 3s ease-in-out infinite;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4))
           drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3))
-          drop-shadow(0 2px 4px rgba(255, 195, 11, 0.5)) 
-          drop-shadow(0 4px 8px rgba(255, 140, 0, 0.3))
-          drop-shadow(0 0 12px rgba(255, 215, 0, 0.4));
+          drop-shadow(0 2px 4px rgba(193, 125, 58, 0.6)) 
+          drop-shadow(0 4px 8px rgba(139, 69, 19, 0.4))
+          drop-shadow(0 0 12px rgba(210, 105, 30, 0.5));
   font-weight: 600;
   letter-spacing: 0.02em;
 }
@@ -164,18 +167,23 @@
   display: none;
 }
 
-/* Strong Honey Text for Headings */
+/* Strong Honey Text for Headings - More Brownish */
 .honey-text-strong {
   position: relative;
   display: inline-block;
   background: linear-gradient(
     135deg,
-    #FFD700 0%,
-    #FFC30B 20%,
-    #FFB84D 40%,
-    #FFC30B 60%,
-    #FFD700 80%,
-    #FFC30B 100%
+    #4A2C2A 0%,
+    #654321 10%,
+    #8B4513 20%,
+    #A0522D 30%,
+    #CD853F 40%,
+    #D2691E 50%,
+    #C17D3A 60%,
+    #D4A574 70%,
+    #C17D3A 80%,
+    #8B4513 90%,
+    #654321 100%
   );
   background-size: 300% auto;
   -webkit-background-clip: text;
@@ -184,9 +192,9 @@
   animation: honeyShimmer 3s ease-in-out infinite, honeyDripForm 2.5s ease-in-out infinite;
   filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.5))
           drop-shadow(0 6px 12px rgba(0, 0, 0, 0.4))
-          drop-shadow(0 3px 6px rgba(255, 195, 11, 0.6)) 
-          drop-shadow(0 6px 12px rgba(255, 140, 0, 0.4))
-          drop-shadow(0 0 16px rgba(255, 215, 0, 0.5));
+          drop-shadow(0 3px 6px rgba(193, 125, 58, 0.7)) 
+          drop-shadow(0 6px 12px rgba(139, 69, 19, 0.5))
+          drop-shadow(0 0 16px rgba(210, 105, 30, 0.6));
   font-weight: 700;
   letter-spacing: 0.03em;
 }
