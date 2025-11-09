@@ -131,7 +131,9 @@
   -webkit-text-fill-color: transparent;
   background-clip: text;
   animation: honeyShimmer 4s ease-in-out infinite, honeyDripForm 3s ease-in-out infinite;
-  filter: drop-shadow(0 2px 4px rgba(255, 195, 11, 0.5)) 
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4))
+          drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3))
+          drop-shadow(0 2px 4px rgba(255, 195, 11, 0.5)) 
           drop-shadow(0 4px 8px rgba(255, 140, 0, 0.3))
           drop-shadow(0 0 12px rgba(255, 215, 0, 0.4));
   font-weight: 600;
@@ -160,7 +162,9 @@
   -webkit-text-fill-color: transparent;
   background-clip: text;
   animation: honeyShimmer 3s ease-in-out infinite, honeyDripForm 2.5s ease-in-out infinite;
-  filter: drop-shadow(0 3px 6px rgba(255, 195, 11, 0.6)) 
+  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.5))
+          drop-shadow(0 6px 12px rgba(0, 0, 0, 0.4))
+          drop-shadow(0 3px 6px rgba(255, 195, 11, 0.6)) 
           drop-shadow(0 6px 12px rgba(255, 140, 0, 0.4))
           drop-shadow(0 0 16px rgba(255, 215, 0, 0.5));
   font-weight: 700;
