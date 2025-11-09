@@ -94,13 +94,47 @@ router.put('/:id', authenticateToken, async (req, res) => {
 
     // Verify user is a member
     const user = await User.findOne({ email: req.user.email });
-    if (!hive.members.includes(user._id)) {
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    
+    if (!hive.members.some(id => id.toString() === user._id.toString())) {
       return res.status(403).json({ error: 'Unauthorized' });
     }
 
-    Object.assign(hive, req.body);
+    // Validate and update allowed fields
+    const { name, activityFrequency, settings } = req.body;
+    
+    if (name !== undefined) {
+      if (!name || !name.trim()) {
+        return res.status(400).json({ error: 'Hive name cannot be empty' });
+      }
+      hive.name = name.trim();
+    }
+    
+    if (activityFrequency !== undefined) {
+      hive.activityFrequency = activityFrequency;
+    }
+    
+    if (settings !== undefined) {
+      // Validate and clean defaultLocation if provided
+      if (settings.defaultLocation) {
+        const coords = settings.defaultLocation.coordinates;
+        if (!coords || !Array.isArray(coords) || coords.length !== 2 || 
+            coords.some(c => typeof c !== 'number')) {
+          delete settings.defaultLocation;
+        }
+      }
+      hive.settings = { ...hive.settings, ...settings };
+    }
+
     await hive.save();
-    res.json(hive);
+    
+    // Populate members before returning
+    const populatedHive = await Hive.findById(hive._id)
+      .populate('members', 'name profilePhoto email major hobbies resHall');
+    
+    res.json(populatedHive);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }

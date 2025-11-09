@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../config/api';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
-import { ArrowLeft, Calendar, MapPin, Users, Plus, LogOut as LeaveIcon, Check, X, Trash2, UserPlus } from 'lucide-react';
+import { ArrowLeft, Calendar, MapPin, Users, Plus, LogOut as LeaveIcon, Check, X, Trash2, UserPlus, Edit2, Save } from 'lucide-react';
 import EventSwipe from '../components/EventSwipe';
 import Gallery from '../components/Gallery';
 import CreateEventModal from '../components/CreateEventModal';
@@ -21,6 +21,8 @@ function HiveDashboard() {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [showAddMember, setShowAddMember] = useState(false);
   const [memberEmail, setMemberEmail] = useState('');
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editedName, setEditedName] = useState('');
 
   // All hooks must be called at the top, before any conditional returns
   const { data: hive, isLoading: hiveLoading } = useQuery({
@@ -95,6 +97,22 @@ function HiveDashboard() {
     onError: (error) => {
       console.error('Error leaving hive:', error);
       alert(error.response?.data?.error || 'Failed to leave hive');
+    }
+  });
+
+  // Update hive name mutation
+  const updateHiveNameMutation = useMutation({
+    mutationFn: async (newName) => {
+      return api.put(`/hives/${hiveId}`, { name: newName });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['hive', hiveId]);
+      queryClient.invalidateQueries(['hives']);
+      setIsEditingName(false);
+    },
+    onError: (error) => {
+      console.error('Error updating hive name:', error);
+      alert(error.response?.data?.error || 'Failed to update hive name');
     }
   });
 
@@ -214,7 +232,67 @@ function HiveDashboard() {
               </button>
               <BeeLogo width={48} height={48} />
               <div>
-                <h1 className="text-[#2D1B00] text-xl font-medium">{hive.name}</h1>
+                <div className="flex items-center gap-2">
+                  {isEditingName ? (
+                    <div className="flex items-center gap-2 flex-1">
+                      <input
+                        type="text"
+                        value={editedName}
+                        onChange={(e) => setEditedName(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            if (editedName.trim()) {
+                              updateHiveNameMutation.mutate(editedName.trim());
+                            }
+                          } else if (e.key === 'Escape') {
+                            setIsEditingName(false);
+                            setEditedName(hive.name);
+                          }
+                        }}
+                        className="flex-1 px-3 py-1.5 bg-[rgba(255,249,230,0.8)] border border-[#C17D3A]/50 rounded-lg text-[#2D1B00] text-xl font-medium focus:outline-none focus:ring-2 focus:ring-[#C17D3A]"
+                        autoFocus
+                        disabled={updateHiveNameMutation.isLoading}
+                      />
+                      <button
+                        onClick={() => {
+                          if (editedName.trim()) {
+                            updateHiveNameMutation.mutate(editedName.trim());
+                          }
+                        }}
+                        disabled={!editedName.trim() || updateHiveNameMutation.isLoading}
+                        className="p-1.5 bg-[#C17D3A] hover:bg-[#6B4E00] text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        title="Save name"
+                      >
+                        <Save className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => {
+                          setIsEditingName(false);
+                          setEditedName(hive.name);
+                        }}
+                        disabled={updateHiveNameMutation.isLoading}
+                        className="p-1.5 bg-[rgba(45,27,0,0.1)] hover:bg-[rgba(45,27,0,0.2)] text-[#2D1B00] rounded-lg transition-colors"
+                        title="Cancel"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <h1 className="text-[#2D1B00] text-xl font-medium">{hive.name}</h1>
+                      <button
+                        onClick={() => {
+                          setEditedName(hive.name);
+                          setIsEditingName(true);
+                        }}
+                        className="p-1.5 text-[#6B4E00] hover:text-[#C17D3A] hover:bg-[rgba(193,125,58,0.1)] rounded-lg transition-colors"
+                        title="Edit hive name"
+                      >
+                        <Edit2 className="w-4 h-4" />
+                      </button>
+                    </>
+                  )}
+                </div>
                 <p className="text-sm text-[#6B4E00]">{hive.members?.length || 0} members</p>
               </div>
             </div>
