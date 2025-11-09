@@ -340,7 +340,7 @@ function HiveDashboard() {
                      <div className="honey-card p-6 mb-6">
                      <button
                        onClick={() => setShowCreateEvent(true)}
-                       className="hexagon-button w-16 h-16 flex items-center justify-center mx-auto text-[#2D1B00] transition-colors"
+                       className="hexagon-button-butter w-16 h-16 flex items-center justify-center mx-auto text-[#2D1B00] transition-colors"
                        title="Create New Hive Event"
                      >
                        <Plus className="w-8 h-8" />
