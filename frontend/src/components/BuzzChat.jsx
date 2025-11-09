@@ -172,20 +172,20 @@ function BuzzChat({ hiveId }) {
       {/* Header */}
       <div className="flex items-center justify-between mb-4 pb-3 border-b border-[#2D1B00]/20">
         <div className="flex items-center gap-2">
-          <Sparkles className="w-5 h-5 text-[#C17D3A]" />
+          <Sparkles className="w-5 h-5 text-[#8B6F47]" />
           <h3 className="text-[#2D1B00] font-medium text-lg">Buzz Chat</h3>
         </div>
         <div className="flex items-center gap-2">
           <button
             onClick={handleMentionBuzz}
-            className="text-sm text-[#C17D3A] hover:text-[#6B4E00] font-medium transition-colors"
+            className="text-sm text-[#6B5D47] hover:text-[#4A3E2F] font-medium transition-colors"
           >
             @Buzz
           </button>
           {messages.length > 0 && (
             <button
               onClick={() => setShowClearConfirm(true)}
-              className="p-1.5 text-[#6B4E00] hover:text-[#C17D3A] hover:bg-[rgba(193,125,58,0.1)] rounded transition-colors"
+              className="p-1.5 text-[#6B5D47] hover:text-[#4A3E2F] hover:bg-[rgba(107,93,71,0.1)] rounded transition-colors"
               title="Clear chat"
             >
               <Trash2 className="w-4 h-4" />
@@ -201,7 +201,7 @@ function BuzzChat({ hiveId }) {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="mb-4 p-3 bg-[rgba(245,230,211,0.8)] border border-[#C17D3A]/30 rounded-lg"
+            className="mb-4 p-3 bg-[rgba(245,230,211,0.8)] border border-[#8B6F47]/30 rounded-lg"
           >
             <p className="text-sm text-[#2D1B00] mb-2">
               Are you sure you want to clear all messages? This cannot be undone.
@@ -210,7 +210,7 @@ function BuzzChat({ hiveId }) {
               <button
                 onClick={() => clearChatMutation.mutate()}
                 disabled={clearChatMutation.isLoading}
-                className="px-3 py-1.5 honey-btn-primary text-white text-sm rounded transition-colors disabled:opacity-50"
+                className="px-3 py-1.5 bg-[rgba(139,111,71,0.8)] hover:bg-[rgba(139,111,71,0.9)] text-[#2D1B00] border border-[#2D1B00]/20 text-sm rounded transition-colors disabled:opacity-50"
               >
                 {clearChatMutation.isLoading ? 'Clearing...' : 'Clear Chat'}
               </button>
@@ -229,10 +229,10 @@ function BuzzChat({ hiveId }) {
       {/* Messages */}
       <div className="flex-1 overflow-y-auto space-y-3 mb-4 min-h-0">
         {isLoading ? (
-          <div className="text-center text-[#6B4E00] py-8">Loading messages...</div>
+          <div className="text-center text-[#6B5D47] py-8">Loading messages...</div>
         ) : messages.length === 0 ? (
-          <div className="text-center text-[#6B4E00] py-8">
-            <Sparkles className="w-12 h-12 mx-auto mb-2 text-[#C17D3A] opacity-50" />
+          <div className="text-center text-[#6B5D47] py-8">
+            <Sparkles className="w-12 h-12 mx-auto mb-2 text-[#8B6F47] opacity-50" />
             <p>No messages yet. Start the conversation!</p>
             <p className="text-sm mt-2">Try mentioning @Buzz to get help with event planning 🐝</p>
           </div>
@@ -258,13 +258,13 @@ function BuzzChat({ hiveId }) {
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             placeholder="Type a message... (mention @Buzz for help)"
-            className="w-full px-4 py-2 border border-[#2D1B00]/20 rounded-lg bg-[rgba(255,249,230,0.6)] text-[#2D1B00] focus:outline-none focus:ring-2 focus:ring-[#C17D3A]/50"
+            className="w-full px-4 py-2 border border-[#2D1B00]/20 rounded-lg bg-[rgba(255,249,230,0.6)] text-[#2D1B00] focus:outline-none focus:ring-2 focus:ring-[#8B6F47]/50"
             disabled={sendMessageMutation.isLoading}
           />
           <button
             type="button"
             onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-            className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-[#6B4E00] hover:text-[#2D1B00] transition-colors"
+            className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-[#6B5D47] hover:text-[#4A3E2F] transition-colors"
           >
             <Smile className="w-5 h-5" />
           </button>
@@ -272,7 +272,7 @@ function BuzzChat({ hiveId }) {
         <button
           type="submit"
           disabled={!message.trim() || sendMessageMutation.isLoading}
-          className="px-4 py-2 honey-btn-primary rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          className="px-4 py-2 bg-[rgba(139,111,71,0.8)] hover:bg-[rgba(139,111,71,0.9)] text-[#2D1B00] border border-[#2D1B00]/20 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
         >
           <Send className="w-4 h-4" />
           Send
@@ -338,17 +338,17 @@ function MessageBubble({ message, currentUserId, onAddReaction }) {
       {/* Avatar */}
       <div className="flex-shrink-0">
         {isBuzz ? (
-          <div className="w-8 h-8 rounded-full honey-btn-primary flex items-center justify-center">
-            <Sparkles className="w-5 h-5 text-white" />
+          <div className="w-8 h-8 rounded-full bg-[rgba(139,111,71,0.8)] flex items-center justify-center">
+            <Sparkles className="w-5 h-5 text-[#F5E6D3]" />
           </div>
         ) : message.sender?.profilePhoto ? (
           <img
             src={message.sender.profilePhoto}
             alt={message.sender.name}
-            className="w-8 h-8 rounded-full object-cover border-2 border-[#C17D3A]/30"
+            className="w-8 h-8 rounded-full object-cover border-2 border-[#8B6F47]/30"
           />
         ) : (
-          <div className="w-8 h-8 rounded-full bg-[#C17D3A]/30 flex items-center justify-center text-[#2D1B00] text-sm font-medium">
+          <div className="w-8 h-8 rounded-full bg-[#8B6F47]/30 flex items-center justify-center text-[#2D1B00] text-sm font-medium">
             {message.sender?.name?.[0] || 'U'}
           </div>
         )}
@@ -359,15 +359,15 @@ function MessageBubble({ message, currentUserId, onAddReaction }) {
         <div
           className={`inline-block max-w-[80%] rounded-lg px-4 py-2 ${
             isBuzz
-              ? 'honey-badge-amber border border-[#C17D3A]/30'
+              ? 'bg-[rgba(218,200,172,0.7)] border border-[#8B6F47]/30 text-[#2D1B00]'
               : isCurrentUser
-              ? 'honey-btn-accent text-[#2D1B00]'
-              : 'honey-btn-secondary text-[#2D1B00]'
+              ? 'bg-[rgba(230,218,195,0.7)] border border-[#8B6F47]/20 text-[#2D1B00]'
+              : 'bg-[rgba(245,235,220,0.6)] border border-[#8B6F47]/20 text-[#2D1B00]'
           }`}
         >
           {/* Sender name */}
           {!isCurrentUser && (
-            <div className="text-xs font-medium text-[#6B4E00] mb-1">
+            <div className="text-xs font-medium text-[#5A4A3A] mb-1">
               {isBuzz ? 'Buzz 🐝' : message.sender?.name || 'Unknown'}
             </div>
           )}
@@ -376,7 +376,7 @@ function MessageBubble({ message, currentUserId, onAddReaction }) {
           <p className="text-sm whitespace-pre-wrap break-words">{message.message}</p>
 
           {/* Timestamp */}
-          <div className="text-xs text-[#6B4E00] opacity-70 mt-1">
+          <div className="text-xs text-[#6B5D47] opacity-70 mt-1">
             {formatDistanceToNow(new Date(message.timestamp), { addSuffix: true })}
           </div>
 
@@ -390,7 +390,7 @@ function MessageBubble({ message, currentUserId, onAddReaction }) {
                   className="px-2 py-1 bg-white/50 rounded-full text-xs hover:bg-white/70 transition-colors flex items-center gap-1"
                 >
                   <span>{emoji}</span>
-                  <span className="text-[#6B4E00]">{userIds.length}</span>
+                  <span className="text-[#5A4A3A]">{userIds.length}</span>
                 </button>
               ))}
             </div>
@@ -400,7 +400,7 @@ function MessageBubble({ message, currentUserId, onAddReaction }) {
         {/* Reaction button */}
         <button
           onClick={() => setShowReactions(!showReactions)}
-          className="text-xs text-[#6B4E00] hover:text-[#2D1B00] mt-1 transition-colors"
+          className="text-xs text-[#6B5D47] hover:text-[#4A3E2F] mt-1 transition-colors"
         >
           {reactions.length > 0 ? 'Add reaction' : 'React'}
         </button>
