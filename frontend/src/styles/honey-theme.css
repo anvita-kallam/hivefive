@@ -107,44 +107,44 @@
   }
 }
 
-/* Flying Bee Animation - Path 1 (Top to Bottom, Left to Right) */
+/* Flying Bee Animation - Path 1 (Top-Left to Bottom-Right) */
 @keyframes flyPath1 {
   0% {
-    transform: translate(-100px, -100px) rotate(-45deg);
+    transform: translate(0vw, 0vh) rotate(-45deg);
     opacity: 0;
   }
-  10% {
+  5% {
     opacity: 1;
   }
   50% {
-    transform: translate(calc(50vw - 50px), calc(50vh - 50px)) rotate(0deg);
+    transform: translate(50vw, 50vh) rotate(0deg);
   }
-  90% {
+  95% {
     opacity: 1;
   }
   100% {
-    transform: translate(calc(100vw + 100px), calc(100vh + 100px)) rotate(45deg);
+    transform: translate(100vw, 100vh) rotate(45deg);
     opacity: 0;
   }
 }
 
-/* Flying Bee Animation - Path 2 (Bottom to Top, Right to Left) */
+/* Flying Bee Animation - Path 2 (Bottom-Right to Top-Left) */
 @keyframes flyPath2 {
   0% {
-    transform: translate(calc(100vw + 100px), calc(100vh + 100px)) rotate(225deg);
+    transform: translate(100vw, 100vh) rotate(225deg);
     opacity: 0;
   }
-  10% {
+  5% {
     opacity: 1;
   }
   50% {
-    transform: translate(calc(50vw - 50px), calc(50vh - 50px)) rotate(180deg);
+    transform: translate(50vw, 50vh) rotate(180deg);
   }
-  90% {
+  95% {
     opacity: 1;
   }
   100% {
-    transform: translate(-100px, -100px) rotate(135deg);
+    transform: translate(0vw, 0vh) rotate(135deg);
     opacity: 0;
   }
 }
@@ -152,26 +152,26 @@
 /* Flying Bee Animation - Path 3 (Left to Right, Curved) */
 @keyframes flyPath3 {
   0% {
-    transform: translate(-100px, calc(30vh)) rotate(-30deg);
+    transform: translate(-50px, 25vh) rotate(-30deg);
     opacity: 0;
   }
-  10% {
+  5% {
     opacity: 1;
   }
   25% {
-    transform: translate(calc(25vw), calc(20vh)) rotate(0deg);
+    transform: translate(25vw, 15vh) rotate(0deg);
   }
   50% {
-    transform: translate(calc(50vw), calc(40vh)) rotate(30deg);
+    transform: translate(50vw, 35vh) rotate(30deg);
   }
   75% {
-    transform: translate(calc(75vw), calc(30vh)) rotate(0deg);
+    transform: translate(75vw, 25vh) rotate(0deg);
   }
-  90% {
+  95% {
     opacity: 1;
   }
   100% {
-    transform: translate(calc(100vw + 100px), calc(50vh)) rotate(30deg);
+    transform: translate(calc(100vw + 50px), 40vh) rotate(30deg);
     opacity: 0;
   }
 }
@@ -179,26 +179,26 @@
 /* Flying Bee Animation - Path 4 (Right to Left, Curved) */
 @keyframes flyPath4 {
   0% {
-    transform: translate(calc(100vw + 100px), calc(70vh)) rotate(210deg);
+    transform: translate(calc(100vw + 50px), 75vh) rotate(210deg);
     opacity: 0;
   }
-  10% {
+  5% {
     opacity: 1;
   }
   25% {
-    transform: translate(calc(75vw), calc(80vh)) rotate(180deg);
+    transform: translate(75vw, 85vh) rotate(180deg);
   }
   50% {
-    transform: translate(calc(50vw), calc(60vh)) rotate(150deg);
+    transform: translate(50vw, 65vh) rotate(150deg);
   }
   75% {
-    transform: translate(calc(25vw), calc(70vh)) rotate(180deg);
+    transform: translate(25vw, 75vh) rotate(180deg);
   }
-  90% {
+  95% {
     opacity: 1;
   }
   100% {
-    transform: translate(-100px, calc(50vh)) rotate(150deg);
+    transform: translate(-50px, 55vh) rotate(150deg);
     opacity: 0;
   }
 }
@@ -206,20 +206,20 @@
 /* Flying Bee Animation - Path 5 (Diagonal Top-Left to Bottom-Right) */
 @keyframes flyPath5 {
   0% {
-    transform: translate(calc(-100px), calc(-100px)) rotate(-45deg);
+    transform: translate(-50px, -50px) rotate(-45deg);
     opacity: 0;
   }
-  10% {
+  5% {
     opacity: 1;
   }
   50% {
-    transform: translate(calc(50vw), calc(50vh)) rotate(0deg);
+    transform: translate(50vw, 50vh) rotate(0deg);
   }
-  90% {
+  95% {
     opacity: 1;
   }
   100% {
-    transform: translate(calc(100vw + 100px), calc(100vh + 100px)) rotate(45deg);
+    transform: translate(calc(100vw + 50px), calc(100vh + 50px)) rotate(45deg);
     opacity: 0;
   }
 }
@@ -227,20 +227,20 @@
 /* Flying Bee Animation - Path 6 (Diagonal Bottom-Right to Top-Left) */
 @keyframes flyPath6 {
   0% {
-    transform: translate(calc(100vw + 100px), calc(100vh + 100px)) rotate(225deg);
+    transform: translate(calc(100vw + 50px), calc(100vh + 50px)) rotate(225deg);
     opacity: 0;
   }
-  10% {
+  5% {
     opacity: 1;
   }
   50% {
-    transform: translate(calc(50vw), calc(50vh)) rotate(180deg);
+    transform: translate(50vw, 50vh) rotate(180deg);
   }
-  90% {
+  95% {
     opacity: 1;
   }
   100% {
-    transform: translate(calc(-100px), calc(-100px)) rotate(135deg);
+    transform: translate(-50px, -50px) rotate(135deg);
     opacity: 0;
   }
 }
@@ -313,20 +313,20 @@
 /* Flying Bee Animation - Path 7 (Horizontal Top) */
 @keyframes flyPath7 {
   0% {
-    transform: translate(-100px, calc(10vh)) rotate(-90deg);
+    transform: translate(-50px, 5vh) rotate(-90deg);
     opacity: 0;
   }
-  10% {
+  5% {
     opacity: 1;
   }
   50% {
-    transform: translate(calc(50vw), calc(10vh)) rotate(-90deg);
+    transform: translate(50vw, 5vh) rotate(-90deg);
   }
-  90% {
+  95% {
     opacity: 1;
   }
   100% {
-    transform: translate(calc(100vw + 100px), calc(10vh)) rotate(-90deg);
+    transform: translate(calc(100vw + 50px), 5vh) rotate(-90deg);
     opacity: 0;
   }
 }
@@ -334,20 +334,20 @@
 /* Flying Bee Animation - Path 8 (Horizontal Bottom) */
 @keyframes flyPath8 {
   0% {
-    transform: translate(calc(100vw + 100px), calc(90vh)) rotate(90deg);
+    transform: translate(calc(100vw + 50px), 95vh) rotate(90deg);
     opacity: 0;
   }
-  10% {
+  5% {
     opacity: 1;
   }
   50% {
-    transform: translate(calc(50vw), calc(90vh)) rotate(90deg);
+    transform: translate(50vw, 95vh) rotate(90deg);
   }
-  90% {
+  95% {
     opacity: 1;
   }
   100% {
-    transform: translate(-100px, calc(90vh)) rotate(90deg);
+    transform: translate(-50px, 95vh) rotate(90deg);
     opacity: 0;
   }
 }
@@ -355,20 +355,20 @@
 /* Flying Bee Animation - Path 9 (Vertical Left) */
 @keyframes flyPath9 {
   0% {
-    transform: translate(calc(10vw), -100px) rotate(0deg);
+    transform: translate(5vw, -50px) rotate(0deg);
     opacity: 0;
   }
-  10% {
+  5% {
     opacity: 1;
   }
   50% {
-    transform: translate(calc(10vw), calc(50vh)) rotate(0deg);
+    transform: translate(5vw, 50vh) rotate(0deg);
   }
-  90% {
+  95% {
     opacity: 1;
   }
   100% {
-    transform: translate(calc(10vw), calc(100vh + 100px)) rotate(0deg);
+    transform: translate(5vw, calc(100vh + 50px)) rotate(0deg);
     opacity: 0;
   }
 }
@@ -376,20 +376,20 @@
 /* Flying Bee Animation - Path 10 (Vertical Right) */
 @keyframes flyPath10 {
   0% {
-    transform: translate(calc(90vw), calc(100vh + 100px)) rotate(180deg);
+    transform: translate(95vw, calc(100vh + 50px)) rotate(180deg);
     opacity: 0;
   }
-  10% {
+  5% {
     opacity: 1;
   }
   50% {
-    transform: translate(calc(90vw), calc(50vh)) rotate(180deg);
+    transform: translate(95vw, 50vh) rotate(180deg);
   }
-  90% {
+  95% {
     opacity: 1;
   }
   100% {
-    transform: translate(calc(90vw), -100px) rotate(180deg);
+    transform: translate(95vw, -50px) rotate(180deg);
     opacity: 0;
   }
 }
@@ -397,26 +397,26 @@
 /* Flying Bee Animation - Path 11 (S-Shaped Curve) */
 @keyframes flyPath11 {
   0% {
-    transform: translate(-100px, calc(20vh)) rotate(-45deg);
+    transform: translate(-50px, 15vh) rotate(-45deg);
     opacity: 0;
   }
-  10% {
+  5% {
     opacity: 1;
   }
   25% {
-    transform: translate(calc(25vw), calc(30vh)) rotate(0deg);
+    transform: translate(25vw, 25vh) rotate(0deg);
   }
   50% {
-    transform: translate(calc(50vw), calc(20vh)) rotate(45deg);
+    transform: translate(50vw, 15vh) rotate(45deg);
   }
   75% {
-    transform: translate(calc(75vw), calc(30vh)) rotate(0deg);
+    transform: translate(75vw, 25vh) rotate(0deg);
   }
-  90% {
+  95% {
     opacity: 1;
   }
   100% {
-    transform: translate(calc(100vw + 100px), calc(20vh)) rotate(45deg);
+    transform: translate(calc(100vw + 50px), 15vh) rotate(45deg);
     opacity: 0;
   }
 }
@@ -424,23 +424,23 @@
 /* Flying Bee Animation - Path 12 (Zigzag) */
 @keyframes flyPath12 {
   0% {
-    transform: translate(-100px, calc(60vh)) rotate(-30deg);
+    transform: translate(-50px, 65vh) rotate(-30deg);
     opacity: 0;
   }
-  10% {
+  5% {
     opacity: 1;
   }
   33% {
-    transform: translate(calc(33vw), calc(40vh)) rotate(30deg);
+    transform: translate(33vw, 45vh) rotate(30deg);
   }
   66% {
-    transform: translate(calc(66vw), calc(60vh)) rotate(-30deg);
+    transform: translate(66vw, 65vh) rotate(-30deg);
   }
-  90% {
+  95% {
     opacity: 1;
   }
   100% {
-    transform: translate(calc(100vw + 100px), calc(40vh)) rotate(30deg);
+    transform: translate(calc(100vw + 50px), 45vh) rotate(30deg);
     opacity: 0;
   }
 }
@@ -448,23 +448,23 @@
 /* Flying Bee Animation - Path 13 (Circular Arc Top) */
 @keyframes flyPath13 {
   0% {
-    transform: translate(calc(20vw), -100px) rotate(-60deg);
+    transform: translate(15vw, -50px) rotate(-60deg);
     opacity: 0;
   }
-  10% {
+  5% {
     opacity: 1;
   }
   33% {
-    transform: translate(calc(50vw), calc(15vh)) rotate(0deg);
+    transform: translate(50vw, 10vh) rotate(0deg);
   }
   66% {
-    transform: translate(calc(80vw), calc(5vh)) rotate(60deg);
+    transform: translate(85vw, 2vh) rotate(60deg);
   }
-  90% {
+  95% {
     opacity: 1;
   }
   100% {
-    transform: translate(calc(100vw + 100px), calc(10vh)) rotate(90deg);
+    transform: translate(calc(100vw + 50px), 8vh) rotate(90deg);
     opacity: 0;
   }
 }
@@ -472,23 +472,23 @@
 /* Flying Bee Animation - Path 14 (Circular Arc Bottom) */
 @keyframes flyPath14 {
   0% {
-    transform: translate(calc(80vw), calc(100vh + 100px)) rotate(240deg);
+    transform: translate(85vw, calc(100vh + 50px)) rotate(240deg);
     opacity: 0;
   }
-  10% {
+  5% {
     opacity: 1;
   }
   33% {
-    transform: translate(calc(50vw), calc(85vh)) rotate(180deg);
+    transform: translate(50vw, 90vh) rotate(180deg);
   }
   66% {
-    transform: translate(calc(20vw), calc(95vh)) rotate(120deg);
+    transform: translate(15vw, 98vh) rotate(120deg);
   }
-  90% {
+  95% {
     opacity: 1;
   }
   100% {
-    transform: translate(-100px, calc(90vh)) rotate(90deg);
+    transform: translate(-50px, 92vh) rotate(90deg);
     opacity: 0;
   }
 }
@@ -496,20 +496,20 @@
 /* Flying Bee Animation - Path 15 (Quick Diagonal) */
 @keyframes flyPath15 {
   0% {
-    transform: translate(calc(-100px), calc(70vh)) rotate(-60deg);
+    transform: translate(-50px, 80vh) rotate(-60deg);
     opacity: 0;
   }
-  10% {
+  5% {
     opacity: 1;
   }
   50% {
-    transform: translate(calc(50vw), calc(30vh)) rotate(0deg);
+    transform: translate(50vw, 20vh) rotate(0deg);
   }
-  90% {
+  95% {
     opacity: 1;
   }
   100% {
-    transform: translate(calc(100vw + 100px), calc(-100px)) rotate(60deg);
+    transform: translate(calc(100vw + 50px), -50px) rotate(60deg);
     opacity: 0;
   }
 }
@@ -517,26 +517,26 @@
 /* Flying Bee Animation - Path 16 (Slow Wide Arc) */
 @keyframes flyPath16 {
   0% {
-    transform: translate(calc(100vw + 100px), calc(40vh)) rotate(120deg);
+    transform: translate(calc(100vw + 50px), 35vh) rotate(120deg);
     opacity: 0;
   }
-  10% {
+  5% {
     opacity: 1;
   }
   25% {
-    transform: translate(calc(75vw), calc(60vh)) rotate(90deg);
+    transform: translate(75vw, 55vh) rotate(90deg);
   }
   50% {
-    transform: translate(calc(50vw), calc(70vh)) rotate(60deg);
+    transform: translate(50vw, 70vh) rotate(60deg);
   }
   75% {
-    transform: translate(calc(25vw), calc(60vh)) rotate(30deg);
+    transform: translate(25vw, 55vh) rotate(30deg);
   }
-  90% {
+  95% {
     opacity: 1;
   }
   100% {
-    transform: translate(-100px, calc(40vh)) rotate(0deg);
+    transform: translate(-50px, 35vh) rotate(0deg);
     opacity: 0;
   }
 }
@@ -544,20 +544,20 @@
 /* Flying Bee Animation - Path 17 (Middle Horizontal) */
 @keyframes flyPath17 {
   0% {
-    transform: translate(-100px, calc(50vh)) rotate(-90deg);
+    transform: translate(-50px, 50vh) rotate(-90deg);
     opacity: 0;
   }
-  10% {
+  5% {
     opacity: 1;
   }
   50% {
-    transform: translate(calc(50vw), calc(50vh)) rotate(-90deg);
+    transform: translate(50vw, 50vh) rotate(-90deg);
   }
-  90% {
+  95% {
     opacity: 1;
   }
   100% {
-    transform: translate(calc(100vw + 100px), calc(50vh)) rotate(-90deg);
+    transform: translate(calc(100vw + 50px), 50vh) rotate(-90deg);
     opacity: 0;
   }
 }
@@ -565,20 +565,20 @@
 /* Flying Bee Animation - Path 18 (Middle Vertical) */
 @keyframes flyPath18 {
   0% {
-    transform: translate(calc(50vw), -100px) rotate(0deg);
+    transform: translate(50vw, -50px) rotate(0deg);
     opacity: 0;
   }
-  10% {
+  5% {
     opacity: 1;
   }
   50% {
-    transform: translate(calc(50vw), calc(50vh)) rotate(0deg);
+    transform: translate(50vw, 50vh) rotate(0deg);
   }
-  90% {
+  95% {
     opacity: 1;
   }
   100% {
-    transform: translate(calc(50vw), calc(100vh + 100px)) rotate(0deg);
+    transform: translate(50vw, calc(100vh + 50px)) rotate(0deg);
     opacity: 0;
   }
 }
@@ -586,26 +586,26 @@
 /* Flying Bee Animation - Path 19 (Quarter Circle) */
 @keyframes flyPath19 {
   0% {
-    transform: translate(calc(15vw), calc(15vh)) rotate(-135deg);
+    transform: translate(10vw, 10vh) rotate(-135deg);
     opacity: 0;
   }
-  10% {
+  5% {
     opacity: 1;
   }
   25% {
-    transform: translate(calc(30vw), calc(25vh)) rotate(-90deg);
+    transform: translate(30vw, 20vh) rotate(-90deg);
   }
   50% {
-    transform: translate(calc(50vw), calc(40vh)) rotate(-45deg);
+    transform: translate(50vw, 40vh) rotate(-45deg);
   }
   75% {
-    transform: translate(calc(70vw), calc(60vh)) rotate(0deg);
+    transform: translate(70vw, 65vh) rotate(0deg);
   }
-  90% {
+  95% {
     opacity: 1;
   }
   100% {
-    transform: translate(calc(85vw), calc(85vh)) rotate(45deg);
+    transform: translate(90vw, 90vh) rotate(45deg);
     opacity: 0;
   }
 }
@@ -613,26 +613,26 @@
 /* Flying Bee Animation - Path 20 (Reverse Quarter Circle) */
 @keyframes flyPath20 {
   0% {
-    transform: translate(calc(85vw), calc(85vh)) rotate(225deg);
+    transform: translate(90vw, 90vh) rotate(225deg);
     opacity: 0;
   }
-  10% {
+  5% {
     opacity: 1;
   }
   25% {
-    transform: translate(calc(70vw), calc(75vh)) rotate(180deg);
+    transform: translate(70vw, 80vh) rotate(180deg);
   }
   50% {
-    transform: translate(calc(50vw), calc(60vh)) rotate(135deg);
+    transform: translate(50vw, 60vh) rotate(135deg);
   }
   75% {
-    transform: translate(calc(30vw), calc(45vh)) rotate(90deg);
+    transform: translate(30vw, 40vh) rotate(90deg);
   }
-  90% {
+  95% {
     opacity: 1;
   }
   100% {
-    transform: translate(calc(15vw), calc(25vh)) rotate(45deg);
+    transform: translate(10vw, 20vh) rotate(45deg);
     opacity: 0;
   }
 }
