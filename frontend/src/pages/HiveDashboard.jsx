@@ -286,7 +286,7 @@ function HiveDashboard() {
                     </div>
                   ) : (
                     <>
-                      <h1 className="text-[#2D1B00] text-xl font-medium">{hive.name}</h1>
+                      <h1 className="honey-text-strong text-xl">{hive.name}</h1>
                       <button
                         onClick={() => {
                           setEditedName(hive.name);
@@ -300,7 +300,7 @@ function HiveDashboard() {
                     </>
                   )}
                 </div>
-                <p className="text-sm text-[#6B4E00]">{hive.members?.length || 0} members</p>
+                <p className="honey-text-subtle text-sm">{hive.members?.length || 0} members</p>
               </div>
             </div>
             <button

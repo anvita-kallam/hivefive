@@ -101,30 +101,41 @@
   }
 }
 
-/* Honey Text Effect with Glow */
+/* Honey Shimmer Animation */
+@keyframes honeyShimmer {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+/* Honey Text Effect with Glow and Shimmer */
 .honey-text {
-  color: var(--honey-brown);
-  font-weight: 700;
-  text-shadow: 
-    0 2px 4px rgba(255, 195, 11, 0.4),
-    0 4px 8px rgba(255, 140, 0, 0.3),
-    0 1px 2px rgba(74, 44, 42, 0.2),
-    0 0 10px rgba(255, 215, 0, 0.2);
   position: relative;
   display: inline-block;
   background: linear-gradient(
     135deg,
-    #4A2C2A 0%,
-    #8B4513 25%,
-    #D2691E 50%,
-    #8B4513 75%,
-    #4A2C2A 100%
+    #FFB84D 0%,
+    #FFC30B 15%,
+    #FFD700 30%,
+    #FFC30B 45%,
+    #FFB84D 60%,
+    #D4A574 75%,
+    #C17D3A 90%,
+    #8B4513 100%
   );
+  background-size: 200% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  animation: honeyDripForm 3s ease-in-out infinite;
-  filter: drop-shadow(0 2px 4px rgba(255, 195, 11, 0.3));
+  animation: honeyShimmer 4s ease-in-out infinite, honeyDripForm 3s ease-in-out infinite;
+  filter: drop-shadow(0 2px 4px rgba(255, 195, 11, 0.5)) 
+          drop-shadow(0 4px 8px rgba(255, 140, 0, 0.3))
+          drop-shadow(0 0 12px rgba(255, 215, 0, 0.4));
+  font-weight: 600;
+  letter-spacing: 0.02em;
 }
 
 .honey-text::after {
@@ -133,16 +144,111 @@
   bottom: -4px;
   left: 0;
   width: 100%;
-  height: 2px;
+  height: 3px;
   background: linear-gradient(
     90deg,
     transparent,
-    var(--honey-gold),
+    #FFC30B,
+    #FFD700,
+    #FFC30B,
     transparent
   );
-  opacity: 0.6;
+  opacity: 0.7;
   animation: honeyDrip 2s ease-in-out infinite;
   transform-origin: bottom;
+  border-radius: 2px;
+  filter: blur(1px);
+}
+
+/* Strong Honey Text for Headings */
+.honey-text-strong {
+  position: relative;
+  display: inline-block;
+  background: linear-gradient(
+    135deg,
+    #FFD700 0%,
+    #FFC30B 20%,
+    #FFB84D 40%,
+    #FFC30B 60%,
+    #FFD700 80%,
+    #FFC30B 100%
+  );
+  background-size: 300% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: honeyShimmer 3s ease-in-out infinite, honeyDripForm 2.5s ease-in-out infinite;
+  filter: drop-shadow(0 3px 6px rgba(255, 195, 11, 0.6)) 
+          drop-shadow(0 6px 12px rgba(255, 140, 0, 0.4))
+          drop-shadow(0 0 16px rgba(255, 215, 0, 0.5));
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.honey-text-strong::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    #FFD700,
+    #FFC30B,
+    #FFD700,
+    transparent
+  );
+  opacity: 0.8;
+  animation: honeyDrip 1.5s ease-in-out infinite;
+  transform-origin: bottom;
+  border-radius: 2px;
+  filter: blur(1.5px);
+}
+
+/* Subtle Honey Text for Body */
+.honey-text-subtle {
+  color: #8B4513;
+  text-shadow: 
+    0 1px 3px rgba(255, 195, 11, 0.3),
+    0 2px 6px rgba(212, 165, 116, 0.2);
+  font-weight: 400;
+}
+
+/* Honey Glow Text */
+.honey-text-glow {
+  color: #FFC30B;
+  text-shadow: 
+    0 0 10px rgba(255, 195, 11, 0.6),
+    0 0 20px rgba(255, 140, 0, 0.4),
+    0 2px 4px rgba(139, 69, 19, 0.3),
+    0 0 30px rgba(255, 215, 0, 0.3);
+  font-weight: 500;
+}
+
+/* Apply honey text to headings automatically */
+h1:not(.no-honey-text), 
+h2:not(.no-honey-text), 
+h3:not(.no-honey-text) {
+  @apply honey-text-strong;
+}
+
+/* Apply subtle honey to paragraphs */
+p:not(.no-honey-text) {
+  @apply honey-text-subtle;
+}
+
+/* Override for specific cases where we need normal text */
+.text-white, .text-black, .no-honey-text {
+  -webkit-text-fill-color: initial !important;
+  background: none !important;
+  animation: none !important;
+  filter: none !important;
+}
+
+.text-white::after, .text-black::after, .no-honey-text::after {
+  display: none !important;
 }
 
 /* Honeycomb Container */
