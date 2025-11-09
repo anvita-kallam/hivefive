@@ -39,18 +39,22 @@ router.post('/', authenticateToken, async (req, res) => {
     const { name, school, major, hobbies, resHall, hometown, birthday, profilePhoto, preferences } = req.body;
     
     // Validate required fields
-    if (!name) {
+    if (!name || !name.trim()) {
       return res.status(400).json({ error: 'Name is required' });
     }
     
     // Check if user already exists
     const existingUser = await User.findOne({ email: req.user.email });
     if (existingUser) {
-      return res.status(400).json({ error: 'User already exists' });
+      // Return 200 with existing user instead of 400, as this is not really an error
+      return res.status(200).json({ 
+        user: existingUser,
+        message: 'User already exists'
+      });
     }
 
     const user = new User({
-      name,
+      name: name.trim(),
       email: req.user.email,
       school: school || '',
       major: major || '',
@@ -66,7 +70,10 @@ router.post('/', authenticateToken, async (req, res) => {
     res.status(201).json(user);
   } catch (error) {
     console.error('Error creating user:', error);
-    res.status(400).json({ error: error.message || 'Failed to create user' });
+    res.status(400).json({ 
+      error: error.message || 'Failed to create user',
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 });
 

@@ -114,12 +114,34 @@ function UserCreationPage() {
         }
       });
 
+      // Handle response - can be user object directly or { user, message } if user already exists
+      const userData = response.data.user || response.data;
+      
       // Update auth store with full user data
-      useAuthStore.getState().setUser(response.data);
+      useAuthStore.getState().setUser(userData);
+      
+      // If user already exists, show message but still navigate
+      if (response.data.message) {
+        console.log(response.data.message);
+      }
       
       navigate('/dashboard');
     } catch (err) {
       console.error('Error creating profile:', err);
+      
+      // Handle 400 errors - user might already exist
+      if (err.response?.status === 400 && err.response?.data?.error?.includes('already exists')) {
+        // User already exists, try to fetch user data and navigate
+        try {
+          const userResponse = await api.get('/auth/me');
+          useAuthStore.getState().setUser(userResponse.data);
+          navigate('/dashboard');
+          return;
+        } catch (fetchError) {
+          console.error('Error fetching existing user:', fetchError);
+        }
+      }
+      
       const errorMessage = err.response?.data?.error || err.message || 'Failed to create profile';
       setError(errorMessage);
       

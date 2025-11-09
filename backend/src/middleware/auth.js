@@ -101,21 +101,30 @@ export const authenticateToken = async (req, res, next) => {
 
   // Check if Firebase is properly initialized
   if (!admin.apps.length) {
-    console.error('Firebase Admin not initialized');
-    return res.status(500).json({ error: 'Server configuration error' });
+    console.error('❌ Firebase Admin not initialized');
+    console.error('Available env vars:', {
+      hasFirebaseAdminSDK: !!process.env.FIREBASE_ADMIN_SDK,
+      hasFirebaseAdminSDKPath: !!process.env.FIREBASE_ADMIN_SDK_PATH,
+      hasGoogleAppCredentials: !!process.env.GOOGLE_APPLICATION_CREDENTIALS,
+      nodeEnv: process.env.NODE_ENV
+    });
+    return res.status(500).json({ 
+      error: 'Server configuration error: Firebase Admin not initialized',
+      details: 'Please check server logs for Firebase Admin initialization errors'
+    });
   }
 
   try {
     const authHeader = req.headers.authorization;
     
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      console.log('No authorization header found');
+      console.log('⚠️ No authorization header found');
       return res.status(401).json({ error: 'No token provided' });
     }
 
     const token = authHeader.split(' ')[1];
     if (!token) {
-      console.log('Token is empty');
+      console.log('⚠️ Token is empty');
       return res.status(401).json({ error: 'Invalid token format' });
     }
 
@@ -128,10 +137,23 @@ export const authenticateToken = async (req, res, next) => {
     
     next();
   } catch (error) {
-    console.error('Authentication error:', error.message);
+    console.error('❌ Authentication error:', {
+      message: error.message,
+      code: error.code,
+      stack: error.stack
+    });
+    
     if (error.code === 'auth/id-token-expired') {
       return res.status(401).json({ error: 'Token expired. Please sign in again.' });
     }
-    res.status(401).json({ error: 'Invalid token' });
+    
+    if (error.code === 'auth/argument-error') {
+      return res.status(401).json({ error: 'Invalid token format' });
+    }
+    
+    return res.status(401).json({ 
+      error: 'Invalid token',
+      details: error.message 
+    });
   }
 };

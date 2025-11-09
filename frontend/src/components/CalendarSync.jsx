@@ -33,15 +33,54 @@ function CalendarSync() {
         `width=${width},height=${height},left=${left},top=${top}`
       );
 
-      // Listen for callback (in production, this would be handled server-side)
-      const checkInterval = setInterval(() => {
-        if (authWindow.closed) {
-          clearInterval(checkInterval);
+      // Use postMessage instead of checking window.closed to avoid COOP errors
+      // Also set a timeout to handle the case where the window is closed manually
+      const messageHandler = (event) => {
+        // Verify origin for security
+        if (event.origin !== window.location.origin) {
+          return;
+        }
+        
+        if (event.data === 'calendar-auth-success' || event.data === 'calendar-auth-closed') {
+          window.removeEventListener('message', messageHandler);
+          if (authWindow) {
+            try {
+              authWindow.close();
+            } catch (e) {
+              // Ignore errors when closing window
+            }
+          }
           setConnecting(false);
           // Refresh user data to check if calendar is connected
           window.location.reload();
         }
+      };
+
+      window.addEventListener('message', messageHandler);
+
+      // Fallback: Check if window was closed after a delay (with error handling)
+      const checkInterval = setInterval(() => {
+        try {
+          if (authWindow && authWindow.closed) {
+            clearInterval(checkInterval);
+            window.removeEventListener('message', messageHandler);
+            setConnecting(false);
+            // Refresh user data to check if calendar is connected
+            window.location.reload();
+          }
+        } catch (e) {
+          // COOP policy blocks access to window.closed, so we ignore the error
+          // and rely on postMessage instead
+          clearInterval(checkInterval);
+        }
       }, 1000);
+
+      // Cleanup after 10 minutes
+      setTimeout(() => {
+        clearInterval(checkInterval);
+        window.removeEventListener('message', messageHandler);
+        setConnecting(false);
+      }, 600000);
     } catch (error) {
       console.error('Error connecting calendar:', error);
       setConnecting(false);

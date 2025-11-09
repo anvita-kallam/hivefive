@@ -17,7 +17,11 @@ router.get('/', authenticateToken, async (req, res) => {
       .populate('members', 'name profilePhoto email');
     res.json(hives);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error fetching hives:', error);
+    res.status(500).json({ 
+      error: error.message || 'Failed to fetch hives',
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 });
 

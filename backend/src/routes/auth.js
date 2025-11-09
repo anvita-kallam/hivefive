@@ -13,7 +13,11 @@ router.get('/me', authenticateToken, async (req, res) => {
     }
     res.json(user);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error fetching user:', error);
+    res.status(500).json({ 
+      error: error.message || 'Failed to fetch user',
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 });
 
