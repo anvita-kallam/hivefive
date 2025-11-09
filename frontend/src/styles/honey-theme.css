@@ -131,33 +131,14 @@
   }
 }
 
-/* Honey Text Effect with Glow and Shimmer - More Brownish */
+/* Honey Text Effect - Dark Brown, No Gradient */
 .honey-text {
-  position: relative;
-  display: inline-block;
-  background: linear-gradient(
-    135deg,
-    #8B4513 0%,
-    #A0522D 10%,
-    #CD853F 20%,
-    #D2691E 30%,
-    #C17D3A 40%,
-    #D4A574 50%,
-    #C17D3A 60%,
-    #8B4513 70%,
-    #654321 80%,
-    #8B4513 90%,
-    #4A2C2A 100%
-  );
-  background-size: 200% auto;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4))
-          drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3))
-          drop-shadow(0 2px 4px rgba(193, 125, 58, 0.6)) 
-          drop-shadow(0 4px 8px rgba(139, 69, 19, 0.4))
-          drop-shadow(0 0 12px rgba(210, 105, 30, 0.5));
+  color: #4A2C2A;
+  text-shadow: 
+    0 2px 4px rgba(0, 0, 0, 0.4),
+    0 4px 8px rgba(0, 0, 0, 0.3),
+    0 2px 4px rgba(74, 44, 42, 0.5),
+    0 0 12px rgba(74, 44, 42, 0.3);
   font-weight: 600;
   letter-spacing: 0.02em;
 }
@@ -166,33 +147,14 @@
   display: none;
 }
 
-/* Strong Honey Text for Headings - More Brownish */
+/* Strong Honey Text for Headings - Dark Brown, No Gradient */
 .honey-text-strong {
-  position: relative;
-  display: inline-block;
-  background: linear-gradient(
-    135deg,
-    #4A2C2A 0%,
-    #654321 10%,
-    #8B4513 20%,
-    #A0522D 30%,
-    #CD853F 40%,
-    #D2691E 50%,
-    #C17D3A 60%,
-    #D4A574 70%,
-    #C17D3A 80%,
-    #8B4513 90%,
-    #654321 100%
-  );
-  background-size: 300% auto;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.5))
-          drop-shadow(0 6px 12px rgba(0, 0, 0, 0.4))
-          drop-shadow(0 3px 6px rgba(193, 125, 58, 0.7)) 
-          drop-shadow(0 6px 12px rgba(139, 69, 19, 0.5))
-          drop-shadow(0 0 16px rgba(210, 105, 30, 0.6));
+  color: #2D1B00;
+  text-shadow: 
+    0 3px 6px rgba(0, 0, 0, 0.5),
+    0 6px 12px rgba(0, 0, 0, 0.4),
+    0 3px 6px rgba(45, 27, 0, 0.6),
+    0 0 16px rgba(45, 27, 0, 0.4);
   font-weight: 700;
   letter-spacing: 0.03em;
 }
