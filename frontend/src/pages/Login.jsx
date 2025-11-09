@@ -42,8 +42,28 @@ function Login() {
   };
 
   return (
-    <div className="min-h-screen honey-gradient-bg flex items-center justify-center p-4">
-      <div className="max-w-md w-full honey-card rounded-2xl shadow-xl p-8">
+    <div className="min-h-screen honey-gradient-bg flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Flying Bees */}
+      <div className="flying-bee flying-bee-1">
+        <img src="/cute-bee.png" alt="Flying bee" />
+      </div>
+      <div className="flying-bee flying-bee-2">
+        <img src="/cute-bee.png" alt="Flying bee" />
+      </div>
+      <div className="flying-bee flying-bee-3">
+        <img src="/cute-bee.png" alt="Flying bee" />
+      </div>
+      <div className="flying-bee flying-bee-4">
+        <img src="/cute-bee.png" alt="Flying bee" />
+      </div>
+      <div className="flying-bee flying-bee-5">
+        <img src="/cute-bee.png" alt="Flying bee" />
+      </div>
+      <div className="flying-bee flying-bee-6">
+        <img src="/cute-bee.png" alt="Flying bee" />
+      </div>
+
+      <div className="max-w-md w-full honey-card rounded-2xl shadow-xl p-8 relative z-10">
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-4">
             <BeeLogo width={64} height={64} />
