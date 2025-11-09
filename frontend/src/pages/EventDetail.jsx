@@ -11,6 +11,7 @@ import { useAuthStore } from '../store/authStore';
 import MapContainer from '../components/MapView';
 import EventReactions from '../components/EventReactions';
 import Gallery from '../components/Gallery';
+import SentimentGraph from '../components/SentimentGraph';
 import { BeeDecor, BeeLogo } from '../components/BeeDecor.jsx';
 
 function EventDetail() {
@@ -493,6 +494,17 @@ function EventDetail() {
                     </div>
                   ))}
                 </div>
+              </motion.div>
+            )}
+
+            {/* Sentiment Graph */}
+            {media && media.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.25 }}
+              >
+                <SentimentGraph media={media} />
               </motion.div>
             )}
 
