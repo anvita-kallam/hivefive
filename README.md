@@ -1,137 +1,64 @@
-# HiveFive — AI-Driven Social Graph for Real-World Connection
+# 🐝 HiveFive
 
-HiveFive is a spatially-aware social networking app that helps students form intelligent micro-communities called hives — small, close-knit groups that automatically plan hangouts, track engagement, and evolve through an LLM-powered Hive Agent.
+**HiveFive** is a **React** web application powered by **Google Firebase** (authentication + real-time database) and **MongoDB** that helps student friend groups form social groups called **“hives”**, chat, and quickly decide on plans.
 
-## Features
+---
 
-- **User Profiles**: Create personalized profiles with photos, major, hobbies, and residence hall
-- **Hive Communities**: Join and create hives — small, close-knit groups
-- **AI-Powered Event Planning**: Hive Agent analyzes availability and proposes optimal event times
-- **Swipe-Based Event Acceptance**: Tinder-style interaction for event proposals
-- **Google Calendar Integration**: Sync with Google Calendar for availability checking
-- **Event Gallery**: Upload and share photos/videos from events with AI-powered sentiment analysis
-- **Engagement Tracking**: Track swipe behavior, response times, and emotional engagement
+## 🚀 Overview
 
-## Tech Stack
+We built HiveFive to solve a familiar problem: event planning that stalls due to **busy schedules, indecision, bad timing, and distance**. HiveFive captures the right context at the right moment — helping users move from “maybe later” to **“see you at 6:30.”**
 
-### Frontend
-- React.js (Vite)
-- Tailwind CSS
-- Framer Motion
-- React Router DOM
-- Firebase Auth
-- Zustand
-- Axios + React Query
-- react-tinder-card
-- Google Maps JS SDK
+---
 
-### Backend
-- Node.js + Express
-- MongoDB Atlas
-- Google Calendar API
-- Vertex AI (Vision & Agent Engine)
-- Firebase Admin SDK
+## ✨ Key Features
 
-## Getting Started
+- **Personalized Profiles** – Include interests, majors, visibility controls, and consent flags.  
+- **LLM-Powered Hive Chatbot ("Buzz")** – Each hive has its own intelligent assistant that follows up on event invites (e.g., asking cuisine preferences for dinner plans).  
+- **Real-Time Messaging** – Firebase-based live chat and event discussions.  
+- **Facial-Response Visuals** – Interactive feedback (based on design-specified facial cues) to visualize engagement when viewing invites.  
+- **Hive Photo Gallery** – Tracks participation and memories from past events.  
+- **Swipe-to-Decide Flow** – Users make fast yes/no decisions for invites.  
+- **Geospatial and Sensor-Enhanced Insights** – Combines location data and AirPods head-movement tracking to analyze reactions and group engagement trends.  
 
-### Quick Start
+---
 
-**🚀 For a quick setup, see [QUICK_START.md](./QUICK_START.md)**
+## 🧠 Data and Intelligence
 
-### Prerequisites
-- Node.js 18+ and npm
-- MongoDB Atlas account
-- Firebase project (already created: `hivefive-4384c`)
-- Google Cloud Project with Vertex AI enabled
-- Google Calendar API credentials
+HiveFive collects **labeled behavioral data** — capturing whether users accept or decline invites — allowing binary classification of social trends.  
+By combining geospatial context, user preferences, and post-event feedback, HiveFive creates **data-driven insights** for smarter, more dynamic social networks.
 
-### Installation
+---
 
-1. Clone the repository
-2. Install dependencies:
-   ```bash
-   npm run install:all
-   ```
+## ⚙️ Tech Stack
 
-3. Set up Firebase:
-   - **📖 Follow the detailed guide: [FIREBASE_SETUP.md](./FIREBASE_SETUP.md)**
-   - Enable Google Authentication in Firebase Console
-   - Set up Firebase Storage with security rules from `firebase-storage.rules`
-   - Download Firebase Admin SDK and save as `backend/firebase-admin-sdk.json`
+- **Frontend:** React.js (Vite, Hooks, and Component-based UI)  
+- **Backend:** Node.js + Express.js  
+- **Database:** MongoDB (Atlas)  
+- **Authentication & Realtime:** Firebase Auth + Firebase Realtime Database  
+- **AI/ML:** Google Vertex AI + Gemini API  
+- **Storage:** Firebase Storage  
+- **Deployment:** Vercel (Frontend) + Railway (Backend)  
+- **APIs:** Google Maps JavaScript API for geolocation and distance estimation  
 
-4. Set up environment variables:
-   - Create `backend/.env` with your MongoDB URI and other credentials
-   - Frontend Firebase config is already set up in the code!
+---
 
-5. Start development servers:
-   ```bash
-   npm run dev
-   ```
+## 🧩 Challenges & Lessons
 
-### Environment Variables
+Our biggest challenges were **product design and ethics**, not just engineering.  
+We wanted HiveFive to respect:
+- **Feasibility** – accounting for free/busy times, distance, and price  
+- **Group Dynamics** – balancing enthusiasm and hesitation  
+- **User Control** – minimizing permission fatigue and ensuring transparency  
 
-#### Backend (.env)
-- `MONGODB_URI`: MongoDB Atlas connection string
-- `PORT`: Backend server port (default: 5000)
-- `FIREBASE_ADMIN_SDK_PATH`: Path to Firebase Admin SDK JSON
-- `GOOGLE_CLIENT_ID`: Google OAuth Client ID
-- `GOOGLE_CLIENT_SECRET`: Google OAuth Client Secret
-- `GOOGLE_REDIRECT_URI`: OAuth redirect URI
-- `VERTEX_AI_PROJECT_ID`: Google Cloud Project ID
-- `VERTEX_AI_LOCATION`: Vertex AI location (e.g., us-central1)
-- `JWT_SECRET`: Secret for JWT tokens
+On the technical side, we tackled:
+- Integrating Firebase real-time events with MongoDB schemas  
+- Maintaining accurate visibility and consent rules  
+- Handling secure photo uploads and metadata  
+- Making the LLM’s conversational flow feel **helpful, not spammy**  
+- Filtering **noisy or missing sensor data**
 
-#### Frontend (.env)
-- `VITE_FIREBASE_API_KEY`: Firebase API key
-- `VITE_FIREBASE_AUTH_DOMAIN`: Firebase Auth domain
-- `VITE_FIREBASE_PROJECT_ID`: Firebase project ID
-- `VITE_FIREBASE_STORAGE_BUCKET`: Firebase storage bucket
-- `VITE_FIREBASE_MESSAGING_SENDER_ID`: Firebase messaging sender ID
-- `VITE_FIREBASE_APP_ID`: Firebase app ID
-- `VITE_API_BASE_URL`: Backend API URL (default: http://localhost:5000/api)
-- `VITE_GOOGLE_MAPS_API_KEY`: Google Maps API key
+Through iteration, we learned that **everyday devices** (phones, headphones, wearables) can power new forms of social intelligence when used responsibly and ethically.
 
-## Project Structure
+---
 
-```
-HiveFive/
-├── frontend/          # React frontend application
-│   ├── src/
-│   │   ├── components/
-│   │   ├── pages/
-│   │   ├── store/
-│   │   ├── services/
-│   │   └── utils/
-│   └── package.json
-├── backend/           # Express backend API
-│   ├── src/
-│   │   ├── models/
-│   │   ├── routes/
-│   │   ├── controllers/
-│   │   ├── middleware/
-│   │   └── services/
-│   └── package.json
-└── README.md
-```
-
-## Documentation
-
-- **[QUICK_START.md](./QUICK_START.md)** - Get up and running in 5 minutes
-- **[SETUP.md](./SETUP.md)** - Detailed setup instructions
-- **[FIREBASE_SETUP.md](./FIREBASE_SETUP.md)** - Complete Firebase configuration guide
-- **[MONGODB_SETUP.md](./MONGODB_SETUP.md)** - MongoDB Atlas setup guide
-- **[GEMINI_API_SETUP.md](./GEMINI_API_SETUP.md)** - Gemini API configuration
-- **[DEPLOYMENT.md](./DEPLOYMENT.md)** - Deployment guide for Vercel & Railway
-- **[PROJECT_STRUCTURE.md](./PROJECT_STRUCTURE.md)** - Codebase architecture overview
-- **[TECH_STACK.md](./TECH_STACK.md)** - Comprehensive tech stack documentation
-- **[BUZZ_CHATBOT_READY.md](./BUZZ_CHATBOT_READY.md)** - Buzz chatbot setup and features
-- **[API_KEY_SECURITY.md](./API_KEY_SECURITY.md)** - API key security best practices
-
-## Repository
-
-🔗 **GitHub**: [https://github.com/anvita-kallam/hivefive](https://github.com/anvita-kallam/hivefive)
-
-## License
-
-ISC
-
+> **“HiveFive turns ‘maybe later’ into ‘see you at 6:30.’”**
