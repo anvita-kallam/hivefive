@@ -511,6 +511,7 @@ function EventDetail() {
             {/* Reaction Photos with Sentiment Analysis */}
             {reactionMedia && reactionMedia.length > 0 && (
               <motion.div
+                id="reaction-photos-section"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
