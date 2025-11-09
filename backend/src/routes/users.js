@@ -53,15 +53,35 @@ router.post('/', authenticateToken, async (req, res) => {
       });
     }
 
+    // Validate email format
+    if (!req.user.email || !req.user.email.includes('@')) {
+      return res.status(400).json({ error: 'Invalid email address' });
+    }
+
+    // Parse birthday safely
+    let parsedBirthday = null;
+    if (birthday) {
+      try {
+        parsedBirthday = new Date(birthday);
+        // Check if date is valid
+        if (isNaN(parsedBirthday.getTime())) {
+          parsedBirthday = null;
+        }
+      } catch (dateError) {
+        console.warn('Invalid birthday date:', birthday);
+        parsedBirthday = null;
+      }
+    }
+
     const user = new User({
       name: name.trim(),
-      email: req.user.email,
+      email: req.user.email.toLowerCase().trim(),
       school: school || '',
       major: major || '',
-      hobbies: hobbies || [],
+      hobbies: Array.isArray(hobbies) ? hobbies : [],
       resHall: resHall || '',
       hometown: hometown || '',
-      birthday: birthday ? new Date(birthday) : null,
+      birthday: parsedBirthday,
       profilePhoto: profilePhoto || null,
       preferences: preferences || {}
     });
@@ -70,6 +90,28 @@ router.post('/', authenticateToken, async (req, res) => {
     res.status(201).json(user);
   } catch (error) {
     console.error('Error creating user:', error);
+    
+    // Handle Mongoose validation errors
+    if (error.name === 'ValidationError') {
+      const validationErrors = Object.values(error.errors).map(err => err.message).join(', ');
+      return res.status(400).json({ 
+        error: `Validation error: ${validationErrors}`,
+        details: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
+    }
+    
+    // Handle duplicate key error (email already exists)
+    if (error.code === 11000) {
+      // This shouldn't happen since we check first, but handle it anyway
+      const existingUser = await User.findOne({ email: req.user.email });
+      if (existingUser) {
+        return res.status(200).json({ 
+          user: existingUser,
+          message: 'User already exists'
+        });
+      }
+    }
+    
     res.status(400).json({ 
       error: error.message || 'Failed to create user',
       details: process.env.NODE_ENV === 'development' ? error.stack : undefined

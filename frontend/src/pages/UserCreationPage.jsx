@@ -128,18 +128,29 @@ function UserCreationPage() {
       navigate('/dashboard');
     } catch (err) {
       console.error('Error creating profile:', err);
+      console.error('Error response:', err.response?.data);
       
-      // Handle 400 errors - user might already exist
-      if (err.response?.status === 400 && err.response?.data?.error?.includes('already exists')) {
-        // User already exists, try to fetch user data and navigate
-        try {
-          const userResponse = await api.get('/auth/me');
-          useAuthStore.getState().setUser(userResponse.data);
-          navigate('/dashboard');
-          return;
-        } catch (fetchError) {
-          console.error('Error fetching existing user:', fetchError);
+      // Handle 400 errors - check for specific error types
+      if (err.response?.status === 400) {
+        const errorData = err.response.data;
+        
+        // User might already exist (shouldn't happen with new code, but handle legacy)
+        if (errorData?.error?.includes('already exists') || errorData?.error?.includes('duplicate')) {
+          // User already exists, try to fetch user data and navigate
+          try {
+            const userResponse = await api.get('/auth/me');
+            useAuthStore.getState().setUser(userResponse.data);
+            navigate('/dashboard');
+            return;
+          } catch (fetchError) {
+            console.error('Error fetching existing user:', fetchError);
+          }
         }
+        
+        // Validation errors - show the specific error
+        const errorMessage = errorData?.error || errorData?.message || err.message || 'Failed to create profile';
+        setError(errorMessage);
+        return;
       }
       
       const errorMessage = err.response?.data?.error || err.message || 'Failed to create profile';
