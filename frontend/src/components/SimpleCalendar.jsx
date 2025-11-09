@@ -81,6 +81,27 @@ function SimpleCalendar() {
     });
   };
 
+  // Helper function to convert hex color to RGB and calculate brightness
+  const getColorBrightness = (hexColor) => {
+    // Remove # if present
+    const hex = hexColor.replace('#', '');
+    
+    // Parse RGB values
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+    
+    // Calculate brightness using relative luminance formula
+    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+    return brightness;
+  };
+
+  // Helper function to get text color based on background
+  const getTextColor = (backgroundColor) => {
+    const brightness = getColorBrightness(backgroundColor);
+    return brightness > 128 ? '#2D1B00' : '#FFFFFF';
+  };
+
   const handlePreviousMonth = () => {
     setCurrentDate(subMonths(currentDate, 1));
   };
@@ -120,8 +141,8 @@ function SimpleCalendar() {
   const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
   return (
-      <div className="honey-card p-6 mb-6">
-        <div className="flex items-center justify-between mb-6">
+      <div className="honey-card p-4 mb-6">
+        <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <HexagonIcon />
             <Calendar className="w-5 h-5 text-[#2D1B00]" />
@@ -141,7 +162,7 @@ function SimpleCalendar() {
         </div>
 
       {/* Calendar Header */}
-        <div className="mb-4 flex items-center justify-center gap-4">
+        <div className="mb-3 flex items-center justify-center gap-4">
           <button
             onClick={handlePreviousMonth}
             className="text-[#2D1B00] hover:text-[#6B4E00] transition-colors"
@@ -163,7 +184,7 @@ function SimpleCalendar() {
       <div className="grid grid-cols-7 gap-1">
         {/* Week day headers */}
         {weekDays.map(day => (
-          <div key={day} className="text-center text-[#2D1B00] py-2 text-sm font-medium">
+          <div key={day} className="text-center text-[#2D1B00] py-1 text-xs font-medium">
             {day}
           </div>
         ))}
@@ -179,34 +200,45 @@ function SimpleCalendar() {
                   key={day.toISOString()}
                   onClick={() => handleDayClick(day)}
                   className={`
-                    min-h-[80px] p-2 rounded-lg border cursor-pointer backdrop-blur-sm transition-colors
+                    min-h-[60px] p-1.5 rounded-lg border cursor-pointer backdrop-blur-sm transition-colors
                     ${isCurrentMonth 
-                      ? dayEvents.length > 0
-                        ? 'bg-[rgba(245,230,211,0.6)] border-[#C17D3A] border-2 shadow-md'
+                      ? isToday
+                        ? 'bg-[rgba(255,195,11,0.3)] border-[#C17D3A] border-2'
+                        : dayEvents.length > 0
+                        ? 'bg-[rgba(245,230,211,0.6)] border-[#C17D3A] border-2'
                         : 'bg-[rgba(245,230,211,0.5)] border-[#2D1B00]/20'
                       : 'bg-[rgba(230,200,150,0.3)] border-[#2D1B00]/10 opacity-50'
                     }
                   `}
                 >
-                  <div className={`text-[#2D1B00] text-sm mb-1 ${!isCurrentMonth ? 'opacity-50' : ''}`}>
+                  <div className={`text-[#2D1B00] text-xs font-medium mb-0.5 ${!isCurrentMonth ? 'opacity-50' : isToday ? 'font-bold' : ''}`}>
                     {format(day, 'd')}
                   </div>
-                  <div className="space-y-1">
-                    {dayEvents.slice(0, 2).map(eventItem => (
-                      <div
-                        key={eventItem._id}
-                        className="bg-[rgba(193,125,58,0.8)] backdrop-blur-sm text-[#2D1B00] text-xs px-2 py-1 rounded cursor-pointer hover:opacity-80"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleEditEvent(eventItem, e);
-                        }}
-                        title={`${eventItem.title} - Click to edit`}
-                      >
-                        {format(new Date(eventItem.startTime), 'h:mm a')} - {eventItem.title}
-                      </div>
-                    ))}
+                  <div className="space-y-0.5">
+                    {dayEvents.slice(0, 2).map(eventItem => {
+                      const eventColor = eventItem.color || '#C17D3A';
+                      const textColor = getTextColor(eventColor);
+                      
+                      return (
+                        <div
+                          key={eventItem._id}
+                          className="backdrop-blur-sm text-xs px-1.5 py-0.5 rounded cursor-pointer hover:opacity-90 transition-opacity font-medium truncate border border-black/10"
+                          style={{ 
+                            backgroundColor: eventColor,
+                            color: textColor
+                          }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEditEvent(eventItem, e);
+                          }}
+                          title={`${eventItem.title} - Click to edit`}
+                        >
+                          {format(new Date(eventItem.startTime), 'h:mm a')} {eventItem.title}
+                        </div>
+                      );
+                    })}
                     {dayEvents.length > 2 && (
-                      <div className="text-xs text-[#6B4E00]">
+                      <div className="text-xs text-[#6B4E00] font-medium">
                         +{dayEvents.length - 2} more
                       </div>
                     )}
@@ -252,7 +284,7 @@ function EventModal({ selectedDate, event, onClose, onSubmit, isLoading }) {
         startTime: format(new Date(event.startTime), "yyyy-MM-dd'T'HH:mm"),
         endTime: format(new Date(event.endTime), "yyyy-MM-dd'T'HH:mm"),
         location: event.location || '',
-        color: event.color || '#C17D3A',
+        color: event.color || '#3B82F6',
         allDay: event.allDay || false
       };
     }
@@ -263,7 +295,7 @@ function EventModal({ selectedDate, event, onClose, onSubmit, isLoading }) {
         startTime: format(createDateWithHours(new Date(selectedDate), 9), "yyyy-MM-dd'T'HH:mm"),
         endTime: format(createDateWithHours(new Date(selectedDate), 10), "yyyy-MM-dd'T'HH:mm"),
         location: '',
-        color: '#C17D3A',
+        color: '#3B82F6',
         allDay: false
       };
     }
@@ -273,7 +305,7 @@ function EventModal({ selectedDate, event, onClose, onSubmit, isLoading }) {
       startTime: '',
       endTime: '',
       location: '',
-      color: '#FFC30B',
+      color: '#3B82F6',
       allDay: false
     };
   };
@@ -395,21 +427,35 @@ function EventModal({ selectedDate, event, onClose, onSubmit, isLoading }) {
                 <label className="block text-sm text-[#2D1B00] mb-1 font-medium">
                   Color
                 </label>
-                         <div className="flex gap-2">
-                           {['#C17D3A', '#D4A574', '#E6C896', '#10B981', '#EF4444', '#8B5CF6'].map(color => (
+                         <div className="flex gap-2 flex-wrap">
+                           {[
+                             '#FFC30B', // Bright yellow
+                             '#FF8C00', // Orange
+                             '#C17D3A', // Brown
+                             '#10B981', // Green
+                             '#3B82F6', // Blue
+                             '#8B5CF6', // Purple
+                             '#EF4444', // Red
+                             '#EC4899'  // Pink
+                           ].map(color => (
                              <button
                                key={color}
                                type="button"
                                onClick={() => setFormData({ ...formData, color })}
-                               className={`hexagon-badge w-8 h-8 ${formData.color === color ? 'ring-2 ring-[#C17D3A]' : ''}`}
+                               className={`w-10 h-10 rounded-lg border-2 transition-all ${
+                                 formData.color === color 
+                                   ? 'ring-2 ring-[#2D1B00] ring-offset-2 scale-110' 
+                                   : 'border-[#2D1B00]/30 hover:border-[#2D1B00]/60'
+                               }`}
                                style={{ backgroundColor: color }}
+                               title={color}
                              />
                            ))}
                            <input
                              type="color"
                              value={formData.color}
                              onChange={(e) => setFormData({ ...formData, color: e.target.value })}
-                             className="hexagon-badge w-8 h-8 cursor-pointer border-0"
+                             className="w-10 h-10 rounded-lg cursor-pointer border-2 border-[#2D1B00]/30 hover:border-[#2D1B00]/60"
                            />
                          </div>
               </div>
