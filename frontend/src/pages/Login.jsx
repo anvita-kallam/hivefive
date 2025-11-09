@@ -49,7 +49,7 @@ function Login() {
             <BeeLogo width={64} height={64} />
             <h1 className="honey-text-strong text-4xl mb-2">HiveFive</h1>
           </div>
-          <p className="honey-text-subtle">AI-Driven Social Graph for Real-World Connection</p>
+          <p className="honey-text-subtle">connect with your swarm!</p>
         </div>
         
         <div className="space-y-4">
